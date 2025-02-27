@@ -130,6 +130,7 @@ def add_destination():
                                         trip_text=trip_text,
                                         free_text=free_text,
                                         position=new_position,
+
                                         user_id=current_user.id)
         db.session.add(new_destination)
         db.session.commit()
