@@ -115,8 +115,7 @@ def add_destination():
         new_position = (highest_position + 1) if highest_position is not None else 1
 
 
-        new_destination = Destination(  name=name,
-                                        title=title,
+        new_destination = Destination(  title=title,
                                         country=country,
                                         img_link=img_link,
                                         duration=duration,
