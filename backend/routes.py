@@ -1,19 +1,20 @@
 from flask import request, render_template, redirect, url_for, flash, jsonify
-from flask_login import LoginManager, login_required, current_user
-from werkzeug.security import generate_password_hash
+from flask_login import LoginManager, login_required, current_user, login_user, logout_user
+from werkzeug.security import generate_password_hash, check_password_hash
 
 from models import User, Destination, Activity
-from app import app, db
-
-
-login_manager = LoginManager()
-login_manager.init_app(app)
+from app import app, db, login_manager
 
 
 # Benutzer laden
 @login_manager.user_loader
 def load_user(user_id):
     return User.query.get(int(user_id))
+
+@app.route('/')
+def home():
+    return "Backend ist aktiv!"  # oder eine andere Antwort
+
 
 @app.route('/dashboard')
 @login_required
@@ -54,7 +55,7 @@ def register():
             return redirect("/register")
 
         # Passwort verschlüsseln
-        hashed_password = generate_password_hash(password, method='sha256')
+        hashed_password = generate_password_hash(password, method='pbkdf2:sha256')
         new_user = User(username=username, email=email, password=hashed_password)
 
         db.session.add(new_user)
@@ -64,11 +65,36 @@ def register():
 
     return render_template('register.html')
 
+@app.route('/login', methods=['GET', 'POST'])
+def login():
+    if current_user.is_authenticated:  # Wenn der Benutzer bereits eingeloggt ist
+        return redirect(url_for('dashboard'))
+
+    if request.method == 'POST':
+        username = request.form['username']
+        password = request.form['password']
+
+        user = User.query.filter_by(username=username).first()
+        if user and check_password_hash(user.password, password):
+            login_user(user)  # Hier wird der Benutzer eingeloggt
+            return redirect(url_for('dashboard'))  # Nach erfolgreichem Login zur Dashboard-Seite umleiten
+
+        flash('Login fehlgeschlagen. Überprüfe deinen Benutzernamen und dein Passwort.', 'danger')
+        return redirect(url_for('login'))
+
+    return render_template('login.html')
+
+@app.route('/logout')
+@login_required
+def logout():
+    logout_user()  # Benutzer ausloggen
+    flash("Erfolgreich abgemeldet.", "success")
+    return redirect(url_for('home'))
+
 @app.route('/add_destination', methods=['GET', 'POST'])
 @login_required
 def add_destination():
     if request.method == 'POST':
-        name = request.form['name']
         title = request.form['title']
         country = request.form['country']
         img_link = request.form['img_link']

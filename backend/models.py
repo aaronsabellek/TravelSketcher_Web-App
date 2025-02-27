@@ -1,5 +1,6 @@
-from flask_login import UserMixin
 from app import db
+from flask_login import UserMixin
+# from flask_sqlalchemy import SQLAlchemy
 
 # Model für User
 class User(UserMixin, db.Model):
@@ -7,7 +8,7 @@ class User(UserMixin, db.Model):
     username = db.Column(db.String(20), unique=True, nullable=False)
     email = db.Column(db.String(50), unique=True, nullable=False)  # Hinzufügen der E-Mail-Adresse
     password = db.Column(db.String(50), nullable=False)
-    img_link = db.Column(db.String(200))
+    img_link = db.Column(db.String(200), nullable=True)
 
     # Beziehung zu Reisezielen
     destinations = db.relationship('Destination', backref='owner', lazy=True)
@@ -58,6 +59,9 @@ class Activity(db.Model):
     trip_price = db.Column(db.String(50), nullable=True)
     trip_text = db.Column(db.String(500), nullable=True)
     free_text = db.Column(db.String(500), nullable=True)
+
+    # ForeignKey, um auf den User zu verweisen
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
 
     destination_id = db.Column(db.Integer, db.ForeignKey('destination.id'), nullable=False)
 
