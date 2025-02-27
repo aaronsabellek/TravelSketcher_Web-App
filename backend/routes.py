@@ -179,6 +179,7 @@ def add_activity():
     trip_text = data.get('trip_text')
     free_text = data.get('free_text')
 
+    user_id = data.get('user_id')
     destination_id = data.get('destination_id')
 
     # Überprüfen, ob die Destination existiert
@@ -200,6 +201,8 @@ def add_activity():
                             trip_price=trip_price,
                             trip_text=trip_text,
                             free_text=free_text,
+
+                            user_id=user_id,
                             destination_id=destination_id)
     db.session.add(new_activity)
     db.session.commit()
