@@ -134,3 +134,65 @@ def reorder_destinations():
 
     db.session.commit()
     return jsonify({'success': True})
+
+@app.route('/add_activity', methods=['POST'])
+def add_activity():
+    data = request.get_json()
+
+    title = data.get('title')
+    country = data.get('country')
+    duration = data.get('duration')
+    price = data.get('price')
+    activity_text = data.get('activity_text')
+    number = data.get('number')
+    status = data.get('status')
+    web_link = data.get('web_link')
+    img_link = data.get('img_link')
+    tags = data.get('tags')
+    trip_duration = data.get('trip_duration')
+    trip_price = data.get('trip_price')
+    trip_text = data.get('trip_text')
+    free_text = data.get('free_text')
+
+    destination_id = data.get('destination_id')
+
+    # Überprüfen, ob die Destination existiert
+    destination = Destination.query.get(destination_id)
+    if not destination:
+        return jsonify({'error': 'Destination not found'}), 404
+
+    new_activity = Activity(title=title,
+                            country=country,
+                            duration=duration,
+                            price=price,
+                            activity_text=activity_text,
+                            number=number,
+                            status=status,
+                            web_link=web_link,
+                            img_link=img_link,
+                            tags=tags,
+                            trip_duration=trip_duration,
+                            trip_price=trip_price,
+                            trip_text=trip_text,
+                            free_text=free_text,
+                            destination_id=destination_id)
+    db.session.add(new_activity)
+    db.session.commit()
+
+    return jsonify({'message': 'Activity added successfully!', 'activity': {
+        'id': new_activity.id,
+        'name': new_activity.name,
+        'description': new_activity.description,
+        'destination_id': new_activity.destination_id
+    }})
+
+@app.route('/get_activities/<int:destination_id>', methods=['GET'])
+def get_activities(destination_id):
+    destination = Destination.query.get(destination_id)
+    if not destination:
+        return jsonify({'error': 'Destination not found'}), 404
+
+    activities = Activity.query.filter_by(destination_id=destination_id).all()
+    activities_list = [{'id': act.id, 'name': act.name, 'description': act.description} for act in activities]
+
+    return jsonify({'destination': destination.name, 'activities': activities_list})

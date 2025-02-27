@@ -37,9 +37,10 @@ class Destination(db.Model):
     free_text = db.Column(db.String(500), nullable=True)
 
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    activities = db.relationship('Activity', backref='destination', lazy=True)
 
     def __repr__(self):
-        return f'<Destination {self.name} (Position: {self.position})>'
+        return f'<Destination {self.title} (Position: {self.position})>'
 
 class Activity(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -61,4 +62,4 @@ class Activity(db.Model):
     destination_id = db.Column(db.Integer, db.ForeignKey('destination.id'), nullable=False)
 
     def __repr__(self):
-        return f'<Activity {self.name}>'
+        return f'<Activity {self.title} for Destination {self.destination_id}>'
