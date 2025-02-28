@@ -135,53 +135,78 @@ def add_destination():
         db.session.add(new_destination)
         db.session.commit()
 
+        flash('Destination added successfully!', 'success')
         return redirect(url_for('dashboard'))
 
     return render_template('add_destination.html')
 
+@app.route('/get_destinations', methods=['GET'])
+@login_required
+def get_destinations():
+    destinations = Destination.query.filter_by(user_id=current_user.id).all()
+    return jsonify([{
+        'id': d.id,
+        'title': d.title,
+        'country': d.country,
+        'img_link': d.img_link,
+        'duration': d.duration,
+        'tags': d.tags,
+        'status': d.status,
+        'months': d.months,
+        'accomodation_link': d.accomodation_link,
+        'accomodation_price': d.accomodation_price,
+        'accomodation_text': d.accomodation_text,
+        'trip_duration': d.trip_duration,
+        'trip_price': d.trip_price,
+        'trip_text': d.trip_text
+    } for d in destinations])
+
 @app.route('/reorder_destinations', methods=['POST'])
 @login_required
 def reorder_destinations():
-    """
-    Erwartet eine JSON-Liste mit Destination-IDs in der gewünschten Reihenfolge.
-    Aktualisiert die Positionen entsprechend.
-    """
     data = request.get_json()
-    new_order = data.get('new_order')  # Erwartet eine Liste mit Destination-IDs in neuer Reihenfolge
+    new_order = data.get("destinations")  # Liste von Destination-IDs in neuer Reihenfolge
 
     if not new_order:
-        return jsonify({'error': 'Invalid data'}), 400
+        return jsonify({"error": "Die Liste der Destination-IDs fehlt"}), 400
 
-    # Reiseziele in neuer Reihenfolge aktualisieren
-    for index, destination_id in enumerate(new_order, start=1):
-        destination = Destination.query.filter_by(id=destination_id, user_id=current_user.id).first()
-        if destination:
-            destination.position = index
+    # Hole alle Destinationen des aktuellen Nutzers
+    destinations = Destination.query.filter_by(user_id=current_user.id).all()
+
+    # Erstelle ein Dictionary für schnelleren Zugriff
+    destination_dict = {destination.id: destination for destination in destinations}
+
+    # Überprüfe, ob alle angegebenen Destination-IDs existieren
+    if set(new_order) != set(destination_dict.keys()):
+        return jsonify({"error": "Ungültige oder fehlende Destination-IDs"}), 400
+
+    # Aktualisiere die Reihenfolge
+    for index, destination_id in enumerate(new_order):
+        destination_dict[destination_id].number = index  # Neue Reihenfolge setzen
 
     db.session.commit()
-    return jsonify({'success': True})
+    return jsonify({"message": "Destinations erfolgreich umsortiert!"}), 200
 
 @app.route('/add_activity', methods=['POST'])
 def add_activity():
-    data = request.get_json()
+    # Formulardaten holen
+    title = request.form.get('title')
+    country = request.form.get('country')
+    duration = request.form.get('duration')
+    price = request.form.get('price')
+    activity_text = request.form.get('activity_text')
+    number = request.form.get('number')
+    status = request.form.get('status')
+    web_link = request.form.get('web_link')
+    img_link = request.form.get('img_link')
+    tags = request.form.get('tags')
+    trip_duration = request.form.get('trip_duration')
+    trip_price = request.form.get('trip_price')
+    trip_text = request.form.get('trip_text')
+    free_text = request.form.get('free_text')
 
-    title = data.get('title')
-    country = data.get('country')
-    duration = data.get('duration')
-    price = data.get('price')
-    activity_text = data.get('activity_text')
-    number = data.get('number')
-    status = data.get('status')
-    web_link = data.get('web_link')
-    img_link = data.get('img_link')
-    tags = data.get('tags')
-    trip_duration = data.get('trip_duration')
-    trip_price = data.get('trip_price')
-    trip_text = data.get('trip_text')
-    free_text = data.get('free_text')
-
-    user_id = data.get('user_id')
-    destination_id = data.get('destination_id')
+    user_id = request.form.get('user_id')
+    destination_id = request.form.get('destination_id')
 
     # Überprüfen, ob die Destination existiert
     destination = Destination.query.get(destination_id)
@@ -202,16 +227,28 @@ def add_activity():
                             trip_price=trip_price,
                             trip_text=trip_text,
                             free_text=free_text,
-
                             user_id=user_id,
                             destination_id=destination_id)
+
     db.session.add(new_activity)
     db.session.commit()
 
     return jsonify({'message': 'Activity added successfully!', 'activity': {
         'id': new_activity.id,
-        'name': new_activity.name,
-        'description': new_activity.description,
+        'title': new_activity.title,
+        'country': new_activity.country,
+        'duration': new_activity.duration,
+        'price': new_activity.price,
+        'activity_text': new_activity.activity_text,
+        'number': new_activity.number,
+        'status': new_activity.status,
+        'web_link': new_activity.web_link,
+        'img_link': new_activity.img_link,
+        'tags': new_activity.tags,
+        'trip_duration': new_activity.trip_duration,
+        'trip_price': new_activity.trip_price,
+        'trip_text': new_activity.trip_text,
+        'free_text': new_activity.free_text,
         'destination_id': new_activity.destination_id
     }})
 
@@ -222,6 +259,49 @@ def get_activities(destination_id):
         return jsonify({'error': 'Destination not found'}), 404
 
     activities = Activity.query.filter_by(destination_id=destination_id).all()
-    activities_list = [{'id': act.id, 'name': act.name, 'description': act.description} for act in activities]
+    activities_list = [{
+        'id': act.id,
+        'title': act.title,
+        'country': act.country,
+        'duration': act.duration,
+        'price': act.price,
+        'activity_text': act.activity_text,
+        'number': act.number,
+        'status': act.status,
+        'web_link': act.web_link,
+        'img_link': act.img_link,
+        'tags': act.tags,
+        'trip_duration': act.trip_duration,
+        'trip_price': act.trip_price,
+        'trip_text': act.trip_text,
+        'free_text': act.free_text
+                        } for act in activities]
 
     return jsonify({'destination': destination.name, 'activities': activities_list})
+
+@app.route('/reorder_activities', methods=['POST'])
+@login_required
+def reorder_activities():
+    # Formulardaten holen
+    destination_id = request.form.get("destination_id")
+    new_order = request.form.getlist("activities[]")  # Liste von Activity-IDs in neuer Reihenfolge
+
+    if not destination_id or not new_order:
+        return jsonify({"error": "Destination ID und Activities-Liste sind erforderlich"}), 400
+
+    # Hole alle Activities für die Destination und den Nutzer
+    activities = Activity.query.filter_by(destination_id=destination_id, user_id=current_user.id).all()
+
+    # Erstelle ein Dictionary mit den vorhandenen Activities für eine schnelle Zuordnung
+    activity_dict = {activity.id: activity for activity in activities}
+
+    # Überprüfe, ob alle angegebenen Activity-IDs existieren
+    if set(map(int, new_order)) != set(activity_dict.keys()):
+        return jsonify({"error": "Ungültige oder fehlende Activity-IDs"}), 400
+
+    # Aktualisiere die Reihenfolge
+    for index, activity_id in enumerate(new_order):
+        activity_dict[int(activity_id)].number = index  # Neue Reihenfolge setzen
+
+    db.session.commit()
+    return jsonify({"message": "Activities erfolgreich umsortiert!"}), 200
