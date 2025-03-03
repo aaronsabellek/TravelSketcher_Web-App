@@ -10,7 +10,7 @@ CORS(app)
 
 app.secret_key = 'your_secret_key'
 
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///users.db'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///database.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 db = SQLAlchemy()
@@ -26,5 +26,4 @@ from routes import *
 
 
 if __name__ == '__main__':
-    db.create_all()  # Initialisiert die DB
     app.run(debug=True)

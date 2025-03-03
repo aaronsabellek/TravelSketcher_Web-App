@@ -13,7 +13,7 @@ def load_user(user_id):
 
 @app.route('/')
 def home():
-    return "Backend ist aktiv!"  # oder eine andere Antwort
+    return "Backend ist aktiv!"
 
 
 @app.route('/dashboard')
@@ -27,7 +27,7 @@ def register():
     if request.method == 'POST':
 
         username = request.form['username']
-        email = request.form['email']  # E-Mail hinzufügen
+        email = request.form.get['email']
         password = request.form['password']
 
         # Überprüfen, ob der Benutzername oder die E-Mail bereits existieren
@@ -67,7 +67,7 @@ def register():
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
-    if current_user.is_authenticated:  # Wenn der Benutzer bereits eingeloggt ist
+    if current_user.is_authenticated:
         return redirect(url_for('dashboard'))
 
     if request.method == 'POST':
@@ -76,8 +76,8 @@ def login():
 
         user = User.query.filter_by(username=username).first()
         if user and check_password_hash(user.password, password):
-            login_user(user)  # Hier wird der Benutzer eingeloggt
-            return redirect(url_for('dashboard'))  # Nach erfolgreichem Login zur Dashboard-Seite umleiten
+            login_user(user)
+            return redirect(url_for('dashboard'))
 
         flash('Login fehlgeschlagen. Überprüfe deinen Benutzernamen und dein Passwort.', 'danger')
         return redirect(url_for('login'))
@@ -87,7 +87,7 @@ def login():
 @app.route('/logout')
 @login_required
 def logout():
-    logout_user()  # Benutzer ausloggen
+    logout_user()
     flash("Erfolgreich abgemeldet.", "success")
     return redirect(url_for('home'))
 
@@ -95,20 +95,22 @@ def logout():
 @login_required
 def add_destination():
     if request.method == 'POST':
+
         title = request.form['title']
-        country = request.form['country']
-        img_link = request.form['img_link']
-        duration = request.form['duration']
-        tags = request.form['tags']
-        status= request.form['status']
-        months = request.form['month']
-        accomodation_link = request.form['accomodation_link']
-        accomodation_price = request.form['accomodation_price']
-        accomodation_text = request.form['accomodation_text']
-        trip_duration = request.form['trip_duration']
-        trip_price = request.form['trip_price']
-        trip_text = request.form['trip_text']
-        free_text = request.form['free_text']
+
+        country = request.form.get('country')
+        img_link = request.form.get('img_link')
+        duration = request.form.get('duration')
+        tags = request.form.get('tags')
+        status= request.form.get('status')
+        months = request.form.get('months')
+        accomodation_link = request.form.get('accomodation_link')
+        accomodation_price = request.form.get('accomodation_price')
+        accomodation_text = request.form.get('accomodation_text')
+        trip_duration = request.form.get('trip_duration')
+        trip_price = request.form.get('trip_price')
+        trip_text = request.form.get('trip_text')
+        free_text = request.form.get('free_text')
 
         # Set position number
         highest_position = db.session.query(db.func.max(Destination.position)).filter_by(user_id=current_user.id).scalar()
@@ -132,6 +134,7 @@ def add_destination():
                                         position=new_position,
 
                                         user_id=current_user.id)
+
         db.session.add(new_destination)
         db.session.commit()
 
@@ -144,6 +147,11 @@ def add_destination():
 @login_required
 def get_destinations():
     destinations = Destination.query.filter_by(user_id=current_user.id).all()
+    print(f"Anzahl gefundener Destinationen: {len(destinations)}")
+
+    if not destinations:
+        return jsonify([])
+
     return jsonify([{
         'id': d.id,
         'title': d.title,
@@ -158,14 +166,15 @@ def get_destinations():
         'accomodation_text': d.accomodation_text,
         'trip_duration': d.trip_duration,
         'trip_price': d.trip_price,
-        'trip_text': d.trip_text
+        'trip_text': d.trip_text,
+        'position': d.position
     } for d in destinations])
 
 @app.route('/reorder_destinations', methods=['POST'])
 @login_required
 def reorder_destinations():
     data = request.get_json()
-    new_order = data.get("destinations")  # Liste von Destination-IDs in neuer Reihenfolge
+    new_order = data.get("destinations")
 
     if not new_order:
         return jsonify({"error": "Die Liste der Destination-IDs fehlt"}), 400
@@ -182,7 +191,7 @@ def reorder_destinations():
 
     # Aktualisiere die Reihenfolge
     for index, destination_id in enumerate(new_order):
-        destination_dict[destination_id].number = index  # Neue Reihenfolge setzen
+        destination_dict[destination_id].number = index
 
     db.session.commit()
     return jsonify({"message": "Destinations erfolgreich umsortiert!"}), 200
@@ -195,7 +204,6 @@ def add_activity():
     duration = request.form.get('duration')
     price = request.form.get('price')
     activity_text = request.form.get('activity_text')
-    number = request.form.get('number')
     status = request.form.get('status')
     web_link = request.form.get('web_link')
     img_link = request.form.get('img_link')
@@ -213,12 +221,15 @@ def add_activity():
     if not destination:
         return jsonify({'error': 'Destination not found'}), 404
 
+    highest_position = db.session.query(db.func.max(Activity.position)).filter_by(destination_id=destination_id).scalar()
+    new_position = (highest_position + 1) if highest_position is not None else 1
+
+
     new_activity = Activity(title=title,
                             country=country,
                             duration=duration,
                             price=price,
                             activity_text=activity_text,
-                            number=number,
                             status=status,
                             web_link=web_link,
                             img_link=img_link,
@@ -227,6 +238,8 @@ def add_activity():
                             trip_price=trip_price,
                             trip_text=trip_text,
                             free_text=free_text,
+
+                            position=new_position,
                             user_id=user_id,
                             destination_id=destination_id)
 
@@ -284,7 +297,7 @@ def get_activities(destination_id):
 def reorder_activities():
     # Formulardaten holen
     destination_id = request.form.get("destination_id")
-    new_order = request.form.getlist("activities[]")  # Liste von Activity-IDs in neuer Reihenfolge
+    new_order = request.form.getlist("activities[]")
 
     if not destination_id or not new_order:
         return jsonify({"error": "Destination ID und Activities-Liste sind erforderlich"}), 400
@@ -301,7 +314,7 @@ def reorder_activities():
 
     # Aktualisiere die Reihenfolge
     for index, activity_id in enumerate(new_order):
-        activity_dict[int(activity_id)].number = index  # Neue Reihenfolge setzen
+        activity_dict[int(activity_id)].number = index
 
     db.session.commit()
     return jsonify({"message": "Activities erfolgreich umsortiert!"}), 200

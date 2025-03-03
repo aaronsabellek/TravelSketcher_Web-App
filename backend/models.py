@@ -1,12 +1,11 @@
 from app import db
 from flask_login import UserMixin
-# from flask_sqlalchemy import SQLAlchemy
 
 # Model für User
 class User(UserMixin, db.Model):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(20), unique=True, nullable=False)
-    email = db.Column(db.String(50), unique=True, nullable=False)  # Hinzufügen der E-Mail-Adresse
+    email = db.Column(db.String(50), unique=True, nullable=False)
     password = db.Column(db.String(50), nullable=False)
     img_link = db.Column(db.String(200), nullable=True)
 
@@ -25,7 +24,6 @@ class Destination(db.Model):
     country = db.Column(db.String(50), nullable=True)
     img_link = db.Column(db.String(200), nullable=True)
     duration = db.Column(db.String(50), nullable=True)
-    number = db.Column(db.Integer, default=0)
     tags = db.Column(db.String(200), nullable=True)
     position = db.Column(db.Integer, nullable=False, default=0)
     status = db.Column(db.String(50), nullable=True)
@@ -51,7 +49,7 @@ class Activity(db.Model):
     duration = db.Column(db.String(50), nullable=True)
     price = db.Column(db.String(50), nullable=True)
     activity_text = db.Column(db.String(500), nullable=True)
-    number = db.Column(db.Integer, default=0)
+    position = db.Column(db.Integer, default=0)
     status = db.Column(db.String(50), nullable=True)
     web_link = db.Column(db.String(200), nullable=True)
     img_link = db.Column(db.String(200), nullable=True)
