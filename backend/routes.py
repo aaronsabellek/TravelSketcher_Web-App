@@ -189,9 +189,9 @@ def reorder_destinations():
     if set(new_order) != set(destination_dict.keys()):
         return jsonify({"error": "Ungültige oder fehlende Destination-IDs"}), 400
 
-    # Aktualisiere die Reihenfolge
+    # Aktualisiere die Reihenfolge (Positionen)
     for index, destination_id in enumerate(new_order):
-        destination_dict[destination_id].number = index
+        destination_dict[destination_id].position = index  # Ändere nur die Position
 
     db.session.commit()
     return jsonify({"message": "Destinations erfolgreich umsortiert!"}), 200
