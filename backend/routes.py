@@ -318,3 +318,18 @@ def reorder_activities():
 
     db.session.commit()
     return jsonify({"message": "Activities erfolgreich umsortiert!"}), 200
+
+'''
+E-Mail verification für Registration
+Profil anzeigen
+Profil bearbeiten
+Passwort zurücksetzen
+Destination bearbeiten
+Activity bearbeiten
+Destinations suchen
+Activities suchen
+Profil löschen
+Destination löschen
+Activity löschen
+Wartungsmodus
+'''
