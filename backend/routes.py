@@ -71,10 +71,14 @@ def login():
         return redirect(url_for('dashboard'))
 
     if request.method == 'POST':
-        username = request.form['username']
+        identifier = request.form['identifier']
         password = request.form['password']
 
-        user = User.query.filter_by(username=username).first()
+        # Suche zuerst nach E-Mail, dann nach Benutzername
+        user = User.query.filter(
+            (User.email == identifier) | (User.username == identifier)
+        ).first()
+
         if user and check_password_hash(user.password, password):
             login_user(user)
             return redirect(url_for('dashboard'))
@@ -90,6 +94,17 @@ def logout():
     logout_user()
     flash("Erfolgreich abgemeldet.", "success")
     return redirect(url_for('home'))
+
+@app.route('/profile', methods=['GET'])
+@login_required
+def get_profile():
+    user_data = {
+        "id": current_user.id,
+        "username": current_user.username,
+        "email": current_user.email,
+        "img_link": current_user.img_link
+    }
+    return jsonify(user_data), 200
 
 @app.route('/add_destination', methods=['GET', 'POST'])
 @login_required
@@ -321,7 +336,6 @@ def reorder_activities():
 
 '''
 E-Mail verification für Registration
-Profil anzeigen
 Profil bearbeiten
 Passwort zurücksetzen
 Destination bearbeiten

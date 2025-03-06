@@ -20,34 +20,100 @@ def test_registration():
 
 # Funktion zum Testen des Logins
 def test_login():
-    # URL der Login-Route
-    url = 'http://127.0.0.1:5000/login'
+    # URLs für Login, Logout und Dashboard
+    login_url = 'http://127.0.0.1:5000/login'
+    logout_url = 'http://127.0.0.1:5000/logout'
+    dashboard_url = 'http://127.0.0.1:5000/dashboard'
 
-    # Deine Test-Benutzerdaten
+   # Test-Login mit Benutzername
+    login_data_username = {
+        'identifier': 'testuser',
+        'password': 'testpassword123!'
+    }
+
+    # Test-Login mit E-Mail
+    login_data_email = {
+        'identifier': 'testuser@example.com',
+        'password': 'testpassword123!'
+    }
+
+    # Sitzung starten
+    session = requests.Session()
+
+    response = session.post(login_url, data=login_data_username)
+    if response.status_code == 200:
+        print("Login mit Benutzername erfolgreich!")
+
+        # Test: Zugriff auf Dashboard
+        dashboard_response = session.get(dashboard_url)
+        if dashboard_response.status_code == 200:
+            print("Zugriff auf Dashboard nach Login mit Benutzername erfolgreich!")
+        else:
+            print(f"Fehler beim Zugriff auf das Dashboard. Statuscode: {dashboard_response.status_code}")
+    else:
+        print(f"Login mit Benutzername fehlgeschlagen. Statuscode: {response.status_code}")
+        print(response.text)
+        return
+
+    # Logout nach erstem Login
+    logout_response = session.get(logout_url)
+    if logout_response.status_code == 200:
+        print("Logout erfolgreich!")
+    else:
+        print(f"Fehler beim Logout. Statuscode: {logout_response.status_code}")
+
+    # Login mit E-Mail
+    response = session.post(login_url, data=login_data_email)
+    if response.status_code == 200:
+        print("Login mit E-Mail erfolgreich!")
+
+        # Test: Zugriff auf Dashboard
+        dashboard_response = session.get(dashboard_url)
+        if dashboard_response.status_code == 200:
+            print("Zugriff auf Dashboard nach Login mit E-Mail erfolgreich!")
+        else:
+            print(f"Fehler beim Zugriff auf das Dashboard. Statuscode: {dashboard_response.status_code}")
+    else:
+        print(f"Login mit E-Mail fehlgeschlagen. Statuscode: {response.status_code}")
+        print(response.text)
+
+# Funktion zum Testen der Anzeige der Profildaten
+def test_get_profile():
+    session = requests.Session()
+
+    # Login-Daten für einen bestehenden Benutzer
+    login_url = 'http://127.0.0.1:5000/login'
+    profile_url = 'http://127.0.0.1:5000/profile'
+
     login_data = {
         'username': 'testuser',
         'password': 'testpassword123!'
     }
 
-    # Starte eine Sitzung, um Cookies zu speichern (für die Authentifizierung)
-    session = requests.Session()
+    # Einloggen
+    login_response = session.post(login_url, data=login_data)
 
-    # Sende eine POST-Anfrage an den Server mit den Login-Daten
-    response = session.post(url, data=login_data)
-
-    # Überprüfe, ob der Login erfolgreich war (Statuscode 200)
-    if response.status_code == 200:
+    if login_response.status_code == 200:
         print("Login erfolgreich!")
-        dashboard_url = 'http://127.0.0.1:5000/dashboard'
-        dashboard_response = session.get(dashboard_url)
-
-        if dashboard_response.status_code == 200:
-            print("Zugriff auf Dashboard erfolgreich!")
-        else:
-            print(f"Fehler beim Zugriff auf das Dashboard. Statuscode: {dashboard_response.status_code}")
     else:
-        print(f"Login fehlgeschlagen. Statuscode: {response.status_code}")
-        print(response.text)
+        print(f"Login fehlgeschlagen. Statuscode: {login_response.status_code}")
+        print(login_response.text)
+        return
+
+    # Abrufen des Profils
+    profile_response = session.get(profile_url)
+
+    if profile_response.status_code == 200:
+        print("Profil erfolgreich abgerufen!")
+        profile_data = profile_response.json()
+        print("Profil-Daten:")
+        print(f"- ID: {profile_data['id']}")
+        print(f"- Username: {profile_data['username']}")
+        print(f"- E-Mail: {profile_data['email']}")
+        print(f"- Bild-Link: {profile_data['img_link']}")
+    else:
+        print(f"Fehler beim Abrufen des Profils. Statuscode: {profile_response.status_code}")
+        print(profile_response.text)
 
 # Funktion zum Testen der Erstellung einer Destination
 def test_add_destination():
@@ -216,7 +282,8 @@ def test_reorder_destinations():
 if __name__ == '__main__':
     # Comment out functions as needed
     #test_registration()
-    #test_login()
+    test_login()
+    #test_get_profile()
     #test_add_destination()
     #test_get_destinations()
-    test_reorder_destinations()
+    #test_reorder_destinations()
