@@ -1,5 +1,26 @@
 import requests
 
+# HILFSFUNKTION ZUM LOGIN
+def login(session):
+    login_url = 'http://127.0.0.1:5000/login'
+
+    login_data = {
+        'identifier': 'testuser',
+        'password': 'testpassword123!'
+    }
+
+    response = session.post(login_url, data=login_data)
+
+    if response.status_code == 200:
+        print("Login erfolgreich.")
+    else:
+        print(f"Login fehlgeschlagen. Statuscode: {response.status_code}")
+        print(response.text)
+
+
+# FUNKTIONEN ZUM TESTEN DER ROUTES
+
+# Funktion zum Testen der Registration
 def test_registration():
     url = "http://127.0.0.1:5000/register"
 
@@ -40,10 +61,10 @@ def test_login():
     # Sitzung starten
     session = requests.Session()
 
-    response = session.post(login_url, data=login_data_username)
-    if response.status_code == 200:
-        print("Login mit Benutzername erfolgreich!")
+    username_response = session.post(login_url, data=login_data_username)
 
+    if username_response.status_code == 200:
+        print("Login mit Benutzername erfolgreich!")
         # Test: Zugriff auf Dashboard
         dashboard_response = session.get(dashboard_url)
         if dashboard_response.status_code == 200:
@@ -51,9 +72,8 @@ def test_login():
         else:
             print(f"Fehler beim Zugriff auf das Dashboard. Statuscode: {dashboard_response.status_code}")
     else:
-        print(f"Login mit Benutzername fehlgeschlagen. Statuscode: {response.status_code}")
-        print(response.text)
-        return
+        print(f"Login mit Benutzername fehlgeschlagen. Statuscode: {username_response.status_code}")
+        print(username_response.text)
 
     # Logout nach erstem Login
     logout_response = session.get(logout_url)
@@ -66,7 +86,6 @@ def test_login():
     response = session.post(login_url, data=login_data_email)
     if response.status_code == 200:
         print("Login mit E-Mail erfolgreich!")
-
         # Test: Zugriff auf Dashboard
         dashboard_response = session.get(dashboard_url)
         if dashboard_response.status_code == 200:
@@ -80,59 +99,30 @@ def test_login():
 # Funktion zum Testen der Anzeige der Profildaten
 def test_get_profile():
     session = requests.Session()
+    login(session)
 
-    # Login-Daten für einen bestehenden Benutzer
-    login_url = 'http://127.0.0.1:5000/login'
     profile_url = 'http://127.0.0.1:5000/profile'
-
-    login_data = {
-        'username': 'testuser',
-        'password': 'testpassword123!'
-    }
-
-    # Einloggen
-    login_response = session.post(login_url, data=login_data)
-
-    if login_response.status_code == 200:
-        print("Login erfolgreich!")
-    else:
-        print(f"Login fehlgeschlagen. Statuscode: {login_response.status_code}")
-        print(login_response.text)
-        return
 
     # Abrufen des Profils
     profile_response = session.get(profile_url)
 
-    if profile_response.status_code == 200:
-        print("Profil erfolgreich abgerufen!")
-        profile_data = profile_response.json()
-        print("Profil-Daten:")
-        print(f"- ID: {profile_data['id']}")
-        print(f"- Username: {profile_data['username']}")
-        print(f"- E-Mail: {profile_data['email']}")
-        print(f"- Bild-Link: {profile_data['img_link']}")
-    else:
+    if profile_response.status_code != 200:
         print(f"Fehler beim Abrufen des Profils. Statuscode: {profile_response.status_code}")
         print(profile_response.text)
+        return
+
+    print("Profil erfolgreich abgerufen!")
+    profile_data = profile_response.json()
+    print("Profil-Daten:")
+    print(f"- ID: {profile_data['id']}")
+    print(f"- Username: {profile_data['username']}")
+    print(f"- E-Mail: {profile_data['email']}")
+    print(f"- Bild-Link: {profile_data['img_link']}")
 
 # Funktion zum Testen der Erstellung einer Destination
 def test_add_destination():
-
     session = requests.Session()
-
-    login_url = 'http://127.0.0.1:5000/login'
-    login_data = {
-        'username': 'testuser',
-        'password': 'testpassword123!'
-    }
-    login_response = session.post(login_url, data=login_data)
-
-    if login_response.status_code == 200:
-        print("Login erfolgreich!")
-    else:
-        print(f"Login fehlgeschlagen. Statuscode: {login_response.status_code}")
-        print(login_response.text)
-        return
+    login(session)
 
     dest_url = 'http://127.0.0.1:5000/add_destination'
 
@@ -140,7 +130,6 @@ def test_add_destination():
     dest_data = {
         'title': 'New Destination'
     }
-
 
     add_response = session.post(dest_url, data=dest_data)
     print(f"Add Destination Status Code: {add_response.status_code}")
@@ -152,24 +141,9 @@ def test_add_destination():
         print("Failed to add destination. Check response!")
         print(add_response.text)
 
-
 def test_get_destinations():
-    # Erstelle eine Session
     session = requests.Session()
-
-    login_url = 'http://127.0.0.1:5000/login'
-    login_data = {
-        'username': 'testuser',
-        'password': 'testpassword123!'
-    }
-    login_response = session.post(login_url, data=login_data)
-
-    if login_response.status_code == 200:
-        print("Login erfolgreich!")
-    else:
-        print(f"Login fehlgeschlagen. Statuscode: {login_response.status_code}")
-        print(login_response.text)
-        return
+    login(session)
 
     # Teste nun die Route /get_destinations
     destinations_url = 'http://127.0.0.1:5000/get_destinations'
@@ -178,12 +152,10 @@ def test_get_destinations():
     if get_response.status_code == 200:
         print("Zugriff auf /get_destinations erfolgreich!")
         destinations = get_response.json()
-
         if destinations:
             print("Gefundene Destinationen:")
             for destination in destinations:
                 print(f"- {destination['title']} (ID: {destination['id']}, Position: {destination['position']})")
-
         else:
             print("Keine Destinationen gefunden.")
     else:
@@ -193,20 +165,7 @@ def test_get_destinations():
 #Test reorder_destinations-route with position 2 and 3
 def test_reorder_destinations():
     session = requests.Session()
-
-    login_url = 'http://127.0.0.1:5000/login'
-    login_data = {
-        'username': 'testuser',
-        'password': 'testpassword123!'
-    }
-    login_response = session.post(login_url, data=login_data)
-
-    if login_response.status_code == 200:
-        print("Login erfolgreich!")
-    else:
-        print(f"Login fehlgeschlagen. Statuscode: {login_response.status_code}")
-        print(login_response.text)
-        return
+    login(session)
 
     destinations_url = 'http://127.0.0.1:5000/get_destinations'
     get_response = session.get(destinations_url)
@@ -214,7 +173,6 @@ def test_reorder_destinations():
     if get_response.status_code == 200:
         print("Zugriff auf /get_destinations erfolgreich!")
         destinations = get_response.json()
-
         if destinations:
             print("Gefundene Destinationen:")
             for destination in destinations:
@@ -265,7 +223,6 @@ def test_reorder_destinations():
     if get_response.status_code == 200:
         print("Zugriff auf /get_destinations erfolgreich!")
         destinations = get_response.json()
-
         if destinations:
             print("Gefundene Destinationen:")
             for destination in destinations:
@@ -282,8 +239,8 @@ def test_reorder_destinations():
 if __name__ == '__main__':
     # Comment out functions as needed
     #test_registration()
-    test_login()
+    #test_login()
     #test_get_profile()
     #test_add_destination()
     #test_get_destinations()
-    #test_reorder_destinations()
+    test_reorder_destinations()

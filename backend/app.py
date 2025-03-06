@@ -1,4 +1,4 @@
-from flask import Flask, jsonify
+from flask import Flask
 from flask_cors import CORS
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager
@@ -16,7 +16,7 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db = SQLAlchemy()
 db.init_app(app)
 
-migrate = Migrate(app, db)  # Initialisiere Flask-Migrate mit der App und der DB
+migrate = Migrate(app, db)
 
 login_manager = LoginManager()
 login_manager.init_app(app)
