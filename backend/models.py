@@ -11,8 +11,6 @@ class User(UserMixin, db.Model):
 
     # Beziehung zu Reisezielen
     destinations = db.relationship('Destination', backref='owner', lazy=True)
-    # Beziehung zu Aktivitäten
-    activities = db.relationship('Activity', backref='owner', lazy=True)
 
     def __repr__(self):
         return f'<User {self.username}>'
@@ -58,9 +56,6 @@ class Activity(db.Model):
     trip_price = db.Column(db.String(50), nullable=True)
     trip_text = db.Column(db.String(500), nullable=True)
     free_text = db.Column(db.String(500), nullable=True)
-
-    # ForeignKey, um auf den User zu verweisen
-    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
 
     destination_id = db.Column(db.Integer, db.ForeignKey('destination.id'), nullable=False)
 

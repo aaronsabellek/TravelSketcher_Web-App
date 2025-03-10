@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Destination bearbeiten</title>
+</head>
+<body>
+    <h1>Destination bearbeiten</h1>
+
+    <form method="POST">
+        <div>
+            <label for="title">Titel</label>
+            <input type="text" id="title" name="title" value="{{ destination.title }}" required>
+        </div>
+        <div>
+            <label for="country">Land</label>
+            <input type="text" id="country" name="country" value="{{ destination.country }}">
+        </div>
+        <div>
+            <label for="img_link">Bild-Link</label>
+            <input type="text" id="img_link" name="img_link" value="{{ destination.img_link }}">
+        </div>
+        <div>
+            <label for="duration">Dauer</label>
+            <input type="text" id="duration" name="duration" value="{{ destination.duration }}">
+        </div>
+        <div>
+            <label for="tags">Tags</label>
+            <input type="text" id="tags" name="tags" value="{{ destination.tags }}">
+        </div>
+        <div>
+            <label for="status">Status</label>
+            <input type="text" id="status" name="status" value="{{ destination.status }}">
+        </div>
+        <div>
+            <label for="months">Monate</label>
+            <input type="text" id="months" name="months" value="{{ destination.months }}">
+        </div>
+        <div>
+            <label for="accomodation_link">Unterkunft-Link</label>
+            <input type="text" id="accomodation_link" name="accomodation_link" value="{{ destination.accomodation_link }}">
+        </div>
+        <div>
+            <label for="accomodation_price">Unterkunftspreis</label>
+            <input type="text" id="accomodation_price" name="accomodation_price" value="{{ destination.accomodation_price }}">
+        </div>
+        <div>
+            <label for="accomodation_text">Unterkunftstext</label>
+            <textarea id="accomodation_text" name="accomodation_text">{{ destination.accomodation_text }}</textarea>
+        </div>
+        <div>
+            <label for="trip_duration">Reisedauer</label>
+            <input type="text" id="trip_duration" name="trip_duration" value="{{ destination.trip_duration }}">
+        </div>
+        <div>
+            <label for="trip_price">Reisepreis</label>
+            <input type="text" id="trip_price" name="trip_price" value="{{ destination.trip_price }}">
+        </div>
+        <div>
+            <label for="trip_text">Reisetext</label>
+            <textarea id="trip_text" name="trip_text">{{ destination.trip_text }}</textarea>
+        </div>
+        <div>
+            <label for="free_text">Freitext</label>
+            <textarea id="free_text" name="free_text">{{ destination.free_text }}</textarea>
+        </div>
+
+        <button type="submit">Destination aktualisieren</button>
+    </form>
+
+    <a href="{{ url_for('dashboard') }}">Zurück zum Dashboard</a>
+</body>
+</html>

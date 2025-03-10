@@ -27,7 +27,7 @@ def register():
     if request.method == 'POST':
 
         username = request.form['username']
-        email = request.form.get['email']
+        email = request.form['email']
         password = request.form['password']
 
         # Überprüfen, ob der Benutzername oder die E-Mail bereits existieren
@@ -106,6 +106,25 @@ def get_profile():
     }
     return jsonify(user_data), 200
 
+@app.route('/edit_username', methods=['POST'])
+@login_required
+def edit_username():
+    new_username = request.form.get('new_username')
+
+    if not new_username:
+        return jsonify({'error': 'Neuer Benutzername ist erforderlich'}), 400
+
+    # Überprüfen, ob der Benutzername bereits vergeben ist
+    existing_user = User.query.filter_by(username=new_username).first()
+    if existing_user:
+        return jsonify({'error': 'Dieser Benutzername ist bereits vergeben'}), 400
+
+    # Benutzername aktualisieren
+    current_user.username = new_username
+    db.session.commit()
+
+    return jsonify({'message': 'Benutzername erfolgreich aktualisiert!', 'new_username': new_username}), 200
+
 @app.route('/add_destination', methods=['GET', 'POST'])
 @login_required
 def add_destination():
@@ -130,7 +149,6 @@ def add_destination():
         # Set position number
         highest_position = db.session.query(db.func.max(Destination.position)).filter_by(user_id=current_user.id).scalar()
         new_position = (highest_position + 1) if highest_position is not None else 1
-
 
         new_destination = Destination(  title=title,
                                         country=country,
@@ -185,6 +203,45 @@ def get_destinations():
         'position': d.position
     } for d in destinations])
 
+@app.route('/edit_destination/<int:destination_id>', methods=['GET', 'POST'])
+@login_required
+def edit_destination(destination_id):
+    # Hole die Destination aus der Datenbank
+    destination = Destination.query.filter_by(id=destination_id, user_id=current_user.id).first()
+
+    # Überprüfen, ob die Destination existiert und ob der Benutzer berechtigt ist, sie zu bearbeiten
+    if not destination:
+        flash('Destination nicht gefunden oder du hast keine Berechtigung, sie zu bearbeiten.', 'danger')
+        return redirect(url_for('dashboard'))
+
+    # Wenn es sich um eine GET-Anfrage handelt, zeige das Bearbeitungsformular an
+    if request.method == 'GET':
+        return render_template('edit_destination.html', destination=destination)
+
+    # Wenn es sich um eine POST-Anfrage handelt, aktualisiere die Destination
+    if request.method == 'POST':
+        # Neue Werte aus dem Formular abrufen
+        destination.title = request.form['title']
+        destination.country = request.form.get('country')
+        destination.img_link = request.form.get('img_link')
+        destination.duration = request.form.get('duration')
+        destination.tags = request.form.get('tags')
+        destination.status = request.form.get('status')
+        destination.months = request.form.get('months')
+        destination.accomodation_link = request.form.get('accomodation_link')
+        destination.accomodation_price = request.form.get('accomodation_price')
+        destination.accomodation_text = request.form.get('accomodation_text')
+        destination.trip_duration = request.form.get('trip_duration')
+        destination.trip_price = request.form.get('trip_price')
+        destination.trip_text = request.form.get('trip_text')
+        destination.free_text = request.form.get('free_text')
+
+        # Änderungen in der Datenbank speichern
+        db.session.commit()
+
+        flash('Destination erfolgreich aktualisiert!', 'success')
+        return redirect(url_for('dashboard'))
+
 @app.route('/reorder_destinations', methods=['POST'])
 @login_required
 def reorder_destinations():
@@ -212,9 +269,11 @@ def reorder_destinations():
     return jsonify({"message": "Destinations erfolgreich umsortiert!"}), 200
 
 @app.route('/add_activity', methods=['POST'])
+@login_required
 def add_activity():
     # Formulardaten holen
-    title = request.form.get('title')
+    title = request.form['title']
+
     country = request.form.get('country')
     duration = request.form.get('duration')
     price = request.form.get('price')
@@ -228,8 +287,7 @@ def add_activity():
     trip_text = request.form.get('trip_text')
     free_text = request.form.get('free_text')
 
-    user_id = request.form.get('user_id')
-    destination_id = request.form.get('destination_id')
+    destination_id = request.form['destination_id']
 
     # Überprüfen, ob die Destination existiert
     destination = Destination.query.get(destination_id)
@@ -238,7 +296,6 @@ def add_activity():
 
     highest_position = db.session.query(db.func.max(Activity.position)).filter_by(destination_id=destination_id).scalar()
     new_position = (highest_position + 1) if highest_position is not None else 1
-
 
     new_activity = Activity(title=title,
                             country=country,
@@ -255,7 +312,6 @@ def add_activity():
                             free_text=free_text,
 
                             position=new_position,
-                            user_id=user_id,
                             destination_id=destination_id)
 
     db.session.add(new_activity)
@@ -268,7 +324,7 @@ def add_activity():
         'duration': new_activity.duration,
         'price': new_activity.price,
         'activity_text': new_activity.activity_text,
-        'number': new_activity.number,
+        'position': new_activity.position,
         'status': new_activity.status,
         'web_link': new_activity.web_link,
         'img_link': new_activity.img_link,
@@ -281,11 +337,11 @@ def add_activity():
     }})
 
 @app.route('/get_activities/<int:destination_id>', methods=['GET'])
+@login_required
 def get_activities(destination_id):
     destination = Destination.query.get(destination_id)
     if not destination:
         return jsonify({'error': 'Destination not found'}), 404
-
     activities = Activity.query.filter_by(destination_id=destination_id).all()
     activities_list = [{
         'id': act.id,
@@ -294,7 +350,7 @@ def get_activities(destination_id):
         'duration': act.duration,
         'price': act.price,
         'activity_text': act.activity_text,
-        'number': act.number,
+        'position': act.position,
         'status': act.status,
         'web_link': act.web_link,
         'img_link': act.img_link,
@@ -305,7 +361,8 @@ def get_activities(destination_id):
         'free_text': act.free_text
                         } for act in activities]
 
-    return jsonify({'destination': destination.name, 'activities': activities_list})
+    return jsonify({'destination': destination.title, 'activities': activities_list})
+
 
 @app.route('/reorder_activities', methods=['POST'])
 @login_required
@@ -336,9 +393,12 @@ def reorder_activities():
 
 '''
 E-Mail verification für Registration
-Profil bearbeiten
-Passwort zurücksetzen
-Destination bearbeiten
+Email bearbeiten, wenn E-Mail-verification drin ist
+Passwort zurücksetzen, wenn E-Mail-verification drin ist
+
+Testfunkton für "Edit Destinations"
+Testfunktion für "Reorder Activities"
+
 Activity bearbeiten
 Destinations suchen
 Activities suchen
