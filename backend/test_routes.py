@@ -101,12 +101,83 @@ def get_and_check_response(session, url, expected_key):
 
     # JSON-Daten extrahieren
     data = response.json()
-    assert isinstance(data, list) and len(data) > 0, f"Die {expected_key} sind leer oder keine Liste. Antwort: {data}"
+
+    if isinstance(data, list):
+        items = data  # Falls es eine Liste ist, direkt verwenden
+    elif isinstance(data, dict) and expected_key in data:
+        items = data[expected_key]  # Falls es ein Dict ist, die erwartete Liste extrahieren
+    else:
+        assert False, f"Unerwartetes Format der Antwort für {expected_key}. Antwort: {data}"
+
+    assert data, f"Fehler: Die Antwort für {expected_key} ist leer oder ungültig. Antwort: {data}"
 
     print(f"Gefundene {expected_key.capitalize()}:")
-    for item in data:
+    for item in items:
         assert 'title' in item and 'id' in item, f"Fehler: 'title' oder 'id' fehlt im Element: {item}"
         print(f"- {item['title']} (ID: {item['id']})")
+
+def reorder_items(url, reorder_url, item_key, destination_id=None):
+    # 1. Abrufen der aktuellen Elemente
+    if destination_id:
+        get_url = f'{url}/{destination_id}'
+        reorder_url = f'{reorder_url}/{destination_id}'
+    else:
+        get_url = url
+        reorder_url = reorder_url
+
+    get_response = session.get(get_url)
+    assert get_response.status_code == 200, f"Fehler beim Abrufen der {item_key}. Statuscode: {get_response.status_code}, Antwort: {get_response.text}"
+    print(f"Zugriff auf {url} erfolgreich!")
+
+    items = get_response.json()
+
+    if item_key == 'activities': items = items.get("activities", [])
+
+    assert items, f"Keine {item_key} gefunden."
+    print(f"Gefundene {item_key}:")
+    for item in items:
+        print(f"- {item['title']} (ID: {item['id']}, Position: {item['position']})")
+
+    # 2. Sortieren nach Position
+    sorted_items = sorted(items, key=lambda x: x['position'])
+    assert len(sorted_items) >= 3, f"Fehler: Es gibt weniger als 2 {item_key} zum Tauschen!"
+
+    # 3. IDs der zu tauschenden Items speichern
+    item_1_id = sorted_items[1]['id']
+    item_2_id = sorted_items[2]['id']
+    print(f"Vor dem Tausch: ID {item_1_id} hat Position {sorted_items[1]['position']}, ID {item_2_id} hat Position {sorted_items[2]['position']}")
+
+    # 4. Positionen tauschen
+    sorted_items[1]['position'], sorted_items[2]['position'] = sorted_items[2]['position'], sorted_items[1]['position']
+
+    # 5. Neue Reihenfolge vorbereiten
+    new_order = [item['id'] for item in sorted(sorted_items, key=lambda x: x['position'])]
+
+    # 6. API-Aufruf zum Neusortieren
+    reorder_response = session.post(reorder_url, json={item_key: new_order, "destination_id": destination_id} if destination_id else {item_key: new_order})
+    assert reorder_response.status_code == 200, f"Fehler beim Umsortieren der {item_key}. Statuscode: {reorder_response.status_code}, Antwort: {reorder_response.text}"
+    print(f"{item_key.capitalize()} erfolgreich umsortiert!")
+
+    # 7. Neue Reihenfolge abrufen und überprüfen
+    get_response = session.get(get_url)
+    assert get_response.status_code == 200, f"Fehler beim erneuten Abrufen der {item_key}. Statuscode: {get_response.status_code}, Antwort: {get_response.text}"
+
+    items_after = get_response.json()
+
+    if item_key == 'activities': items_after = items_after.get("activities", [])
+
+    assert items_after, f"Keine {item_key} gefunden nach dem Umsortieren."
+
+    # 8. Sicherstellen, dass die Positionen tatsächlich getauscht wurden
+    item_1_after = next(a for a in items_after if a['id'] == item_1_id)
+    item_2_after = next(a for a in items_after if a['id'] == item_2_id)
+
+    print(f"Nach dem Umsortieren: ID {item_1_after['id']} hat Position {item_1_after['position']}, ID {item_2_after['id']} hat Position {item_2_after['position']}")
+
+    assert item_1_after['position'] == sorted_items[1]['position'], f"Fehler: {item_key.capitalize()} {item_1_after['id']} sollte Position {sorted_items[1]['position']} haben, hat aber {item_1_after['position']}!"
+    assert item_2_after['position'] == sorted_items[2]['position'], f"Fehler: {item_key.capitalize()} {item_2_after['id']} sollte Position {sorted_items[2]['position']} haben, hat aber {item_2_after['position']}!"
+
+    print("Test erfolgreich abgeschlossen!")
 
 #Hilfsfunktion zum Logout
 def logout(session):
@@ -145,6 +216,7 @@ def test_registration():
 # Funktion zum Testen des Logins
 def test_login():
     print("Test: Login mit Username und mit Email")
+    #Beim Abrufen dieser Funktion Login und Logour herauskommentieren
     session = requests.Session()
 
     print("Login mit Benutzernamen")
@@ -160,8 +232,6 @@ def test_login():
 # Funktion zum Testen der Anzeige der Profildaten
 def test_get_profile():
     print("Test der Anzeige der Profildaten")
-    session = requests.Session()
-    login(session)
 
     profile_data = get_profile_data(session)
     assert profile_data is not None, "Fehler: Profil-Daten konnten nicht abgerufen werden!"
@@ -171,13 +241,9 @@ def test_get_profile():
     print(f"- E-Mail: {profile_data['email']}")
     print(f"- Bild-Link: {profile_data['img_link']}")
 
-    logout(session)
-
 #Funktion zum Bearbeiten des Usernames
 def test_edit_username():
     print("Test des Bearbeitens des Usernames")
-    session = requests.Session()
-    login(session)
 
     # Neuer Benutzername für den Test
     new_username = "testuser_edited"
@@ -188,13 +254,9 @@ def test_edit_username():
     new_username = "testuser"
     edit_username(session, new_username)
 
-    logout(session)
-
 #Funktion zum Testen des Hinzufügens einer Destination
 def test_add_destination():
     print("Test zum Hinzufügen einer Destination")
-    session = requests.Session()
-    login(session)
 
     dest_url = 'http://127.0.0.1:5000/add_destination'
 
@@ -236,24 +298,16 @@ def test_add_destination():
     # Aufruf der Hilfsfunktion
     add_item(session, dest_url, dest_data, 'destination', expected_fields)
 
-    logout(session)
-
 def test_get_destinations():
     print("Test zum Abrufen der Destinationen")
-    session = requests.Session()
-    login(session)
 
     # Teste nun die Route /get_destinations
     destinations_url = 'http://127.0.0.1:5000/get_destinations'
     get_and_check_response(session, destinations_url, 'destination')
 
-    logout(session)
-
 # Funktion zum Testen des Bearbeitens einer Destination
 def test_edit_destination():
     print("Test: Bearbeiten einer Destination")
-    session = requests.Session()
-    login(session)
 
     destination_id = 1  # ID der Destination, die bearbeitet werden soll
 
@@ -279,8 +333,6 @@ def test_edit_destination():
 
     # API-Request senden
     response = session.post(edit_url, json=updated_data)
-
-    # Überprüfen, ob die Antwort den Statuscode 200 zurückgibt
     assert response.status_code == 200, f"Expected status code 200, but got {response.status_code}"
 
     # Überprüfen, ob die Rückgabe die erwarteten Daten enthält
@@ -295,88 +347,18 @@ def test_edit_destination():
     for key, value in response_data['destination'].items():
         print(f"{key}: {value}")
 
-    logout(session)
-
 def test_reorder_destinations():
     print("Test zum Umsortieren von zwei Destinationen")
-    session = requests.Session()
-    login(session)
 
-    #stattadessen get_and_check_response()?
     destinations_url = 'http://127.0.0.1:5000/get_destinations'
-    get_response = session.get(destinations_url)
-
-    assert get_response.status_code == 200, f"Fehler beim Abrufen der Destinationen. Statuscode: {get_response.status_code}, Antwort: {get_response.text}"
-    print("Zugriff auf /get_destinations erfolgreich!")
-
-    destinations = get_response.json()
-    assert destinations, "Keine Destinationen gefunden."
-    print("Gefundene Destinationen:")
-    for destination in destinations:
-        print(f"- {destination['title']} (ID: {destination['id']}, Position: {destination['position']})")
-
-    # Wir nehmen an, dass die Destinationen nach ihrer Position sortiert sind
-    dest_by_position = sorted(destinations, key=lambda x: x['position'])
-    print(f"Destinationen nach Position sortiert: {[d['id'] for d in dest_by_position]}")
-
-    # Sicherstellen, dass mindestens 3 Destinationen vorhanden sind
-    assert len(dest_by_position) >= 3, "Fehler: Weniger als 3 Destinationen vorhanden!"
-
-    # Überprüfe die IDs der Destinationen an den Positionen 2 und 3
-    pos_2_id = dest_by_position[1]['id']  # ID der 2. Destination
-    pos_3_id = dest_by_position[2]['id']  # ID der 3. Destination
-    print(f"ID der 2. Destination: {pos_2_id}, ID der 3. Destination: {pos_3_id}")
-
-    # Tausche nur die Positionen (nicht die IDs) der 2. und 3. Destination
-    pos_2 = next(d for d in destinations if d['id'] == pos_2_id)
-    pos_3 = next(d for d in destinations if d['id'] == pos_3_id)
-
-    print(f"Vor dem Tausch: Position 2 = {pos_2['position']}, Position 3 = {pos_3['position']}")
-
-    # Tausche nur die Positionen
-    temp_position = pos_2['position']
-    pos_2['position'] = pos_3['position']
-    pos_3['position'] = temp_position
-
-    print(f"Nach dem Tausch: Position 2 = {pos_2['position']}, Position 3 = {pos_3['position']}")
-
-    # Übermittle nun die neue Reihenfolge mit den IDs der Destinationen
-    new_order = [d['id'] for d in sorted(destinations, key=lambda x: x['position'])]
-    print(f"Neue Reihenfolge der Destinationen: {new_order}")
     reorder_url = 'http://127.0.0.1:5000/reorder_destinations'
-    reorder_response = session.post(reorder_url, json={"destinations": new_order})
 
-    assert reorder_response.status_code == 200, f"Fehler beim Umsortieren der Destinationen. Statuscode: {reorder_response.status_code}, Antwort: {reorder_response.text}"
-    print("Destinations erfolgreich umsortiert!")
+    # Nutzung der Hilfsfunktion
+    reorder_items(destinations_url, reorder_url, "destinations")
 
-    get_response = session.get(destinations_url)
-
-    assert get_response.status_code == 200, f"Fehler beim Abrufen der Destinationen nach dem Umsortieren. Statuscode: {get_response.status_code}, Antwort: {get_response.text}"
-    print("Zugriff auf /get_destinations erfolgreich!")
-
-    destinations = get_response.json()
-
-    # Stelle sicher, dass die Positionen korrekt umgetauscht wurden
-    destination_1 = next(d for d in destinations if d['id'] == pos_2_id)
-    destination_2 = next(d for d in destinations if d['id'] == pos_3_id)
-
-    print(f"Nach dem Umsortieren: {destination_1['title']} (Position: {destination_1['position']}), {destination_2['title']} (Position: {destination_2['position']})")
-
-    destinations = get_response.json()
-    assert destinations, "Keine Destinationen gefunden."
-    print("Gefundene Destinationen:")
-    for destination in destinations:
-        print(f"- {destination['title']} (ID: {destination['id']}, Position: {destination['position']})")
-
-    assert destination_1['position'] == pos_2['position'], f"Fehler: {destination_1['title']} sollte Position {pos_2['position']} haben, hat aber Position {destination_1['position']}!"
-    assert destination_2['position'] == pos_3['position'], f"Fehler: {destination_2['title']} sollte Position {pos_3['position']} haben, hat aber Position {destination_2['position']}!"
-
-    logout(session)
 
 def test_add_activity():
     print("Test zum Hinzufügen einer Aktivität zu einer Destination")
-    session = requests.Session()
-    login(session)
 
     # Aktivitätsdaten
     activity_data = {
@@ -415,102 +397,82 @@ def test_add_activity():
 
     # Anfrage zum Hinzufügen der Aktivität
     add_activity_url = 'http://127.0.0.1:5000/add_activity'
-    # Aufruf der Hilfsfunktion
     add_item(session, add_activity_url, activity_data, 'activity', expected_fields)
 
-    # Logout durchführen
-    logout(session)
+def test_get_activities():
+    print('Test: Anzeigen der Activities einer Destination')
+
+    destination_id = 1
+    url = f"http://127.0.0.1:5000/get_activities/{destination_id}"
+    get_and_check_response(session, url, "activities")
+
+def test_edit_activity():
+    print("Test: Bearbeiten einer Activity")
+
+    destination_id = 1  # ID der Destination, zu der die Activity gehört
+    activity_id = 1  # ID der Activity, die bearbeitet werden soll
+
+    edit_url = f'http://127.0.0.1:5000/edit_activity/{destination_id}/{activity_id}'
+
+    # Neue Werte für die Activity
+    updated_data = {
+        'title': 'Neue Aktivität',
+        'country': 'Deutschland',
+        'duration': '5',
+        'price': '150.0',
+        'activity_text': 'Dies ist die Beschreibung der neuen Aktivität.',
+        'status': 'Aktiv',
+        'web_link': 'https://example.com',
+        'img_link': 'https://example.com/image.jpg',
+        'tags': 'Abenteuer Natur',
+        'trip_duration': '7',
+        'trip_price': '500.0',
+        'trip_text': 'Detaillierte Beschreibung der Reise',
+        'free_text': 'Zusätzliche Informationen zur Reise'
+    }
+
+    print("Gesendete Daten:", updated_data)
+
+    # API-Request senden
+    response = session.post(edit_url, json=updated_data)
+    print(f"Antwortstatus: {response.status_code}")
+    print("Antwortinhalt:", response.text)
+    assert response.status_code == 200, f"Expected status code 200, but got {response.status_code}"
+
+    # Überprüfen, ob die Rückgabe die erwarteten Daten enthält
+    response_data = response.json()
+
+    # Hier prüfen wir, ob die geänderten Felder korrekt sind
+    for key, value in updated_data.items():
+        if isinstance(value, list):
+            # Wenn der Wert eine Liste ist (z. B. für "tags"), vergleichen wir die Listen
+            assert sorted(response_data['activity'][key]) == sorted(value), f"Expected {key} to be {value}, but got {response_data['activity'][key]}"
+        else:
+            assert response_data['activity'][key] == value, f"Expected {key} to be {value}, but got {response_data['activity'][key]}"
+
+    print("Activity erfolgreich aktualisiert!")
+    print("Neue Daten der Activity:")
+    for key, value in response_data['activity'].items():
+        print(f"{key}: {value}")
 
 def test_reorder_activities():
-    print("Test zum Umsortieren der Aktivitäten für eine Destination")
-    session = requests.Session()
-    login(session)
+    print("Test zum Umsortieren von Activitie 2 und 3 der Destination 1")
 
-    # Abrufen der Aktivitäten für eine bestimmte Destination
-    destination_id = 1  # Beispiel Destination ID
-    get_activities_url = f'http://127.0.0.1:5000/get_activities/{destination_id}'
-    get_response = session.get(get_activities_url)
-
-    if get_response.status_code == 200:
-        print("Zugriff auf /get_activities erfolgreich!")
-        data = get_response.json()
-
-        activities = data.get('activities', [])
-        if activities:
-            print("Gefundene Aktivitäten:")
-            for activity in activities:
-                print(f"- {activity['title']} (ID: {activity['id']}, Position: {activity['position']})")
-        else:
-            print("Keine Aktivitäten gefunden.")
-            logout(session)
-            return
-    else:
-        print(f"Fehler beim Abrufen der Aktivitäten. Statuscode: {get_response.status_code}")
-        print(get_response.text)
-        logout(session)
-        return
-
-    # Wir nehmen an, dass die Aktivitäten nach ihrer Position sortiert sind
-    activities_by_position = sorted(activities, key=lambda x: x['position'])
-    print(f"Aktivitäten nach Position sortiert: {[a['id'] for a in activities_by_position]}")
-
-    # Überprüfe die IDs der Aktivitäten an den Positionen 2 und 3
-    pos_2_id = activities_by_position[1]['id']  # ID der 2. Aktivität
-    pos_3_id = activities_by_position[2]['id']  # ID der 3. Aktivität
-    print(f"ID der 2. Aktivität: {pos_2_id}, ID der 3. Aktivität: {pos_3_id}")
-
-    # Tausche nur die Positionen der Aktivitäten
-    pos_2 = next(a for a in activities if a['id'] == pos_2_id)
-    pos_3 = next(a for a in activities if a['id'] == pos_3_id)
-
-    print(f"Vor dem Tausch: Position 2 = {pos_2['position']}, Position 3 = {pos_3['position']}")
-
-    # Tausche die Positionen
-    temp_position = pos_2['position']
-    pos_2['position'] = pos_3['position']
-    pos_3['position'] = temp_position
-
-    print(f"Nach dem Tausch: Position 2 = {pos_2['position']}, Position 3 = {pos_3['position']}")
-
-    # Übermittle nun die neue Reihenfolge mit den IDs der Aktivitäten
-    new_order = [a['id'] for a in sorted(activities, key=lambda x: x['position'])]
+    activities_url = 'http://127.0.0.1:5000/get_activities'
     reorder_url = 'http://127.0.0.1:5000/reorder_activities'
-    reorder_response = session.post(reorder_url, data={
-        'destination_id': destination_id,
-        'activities[]': new_order
-    })
 
-    if reorder_response.status_code == 200:
-        print("Aktivitäten erfolgreich umsortiert!")
-    else:
-        print(f"Fehler beim Umsortieren der Aktivitäten. Statuscode: {reorder_response.status_code}")
-        print(reorder_response.text)
+    # Nutzung der Hilfsfunktion
+    destination_id = 1
+    reorder_items(activities_url, reorder_url, "activities", destination_id=destination_id)
 
-    # Abrufen der Aktivitäten nach dem Umordnen
-    get_response = session.get(get_activities_url)
-
-    if get_response.status_code == 200:
-        print("Zugriff auf /get_activities erfolgreich!")
-        data = get_response.json()
-
-        # Stelle sicher, dass die Positionen korrekt umgetauscht wurden
-        activity_1 = next(a for a in data['activities'] if a['id'] == pos_2_id)
-        activity_2 = next(a for a in data['activities'] if a['id'] == pos_3_id)
-
-        assert activity_1['position'] == pos_3['position'], f"Fehler: {activity_1['title']} sollte Position {pos_3['position']} haben, hat aber Position {activity_1['position']}!"
-        assert activity_2['position'] == pos_2['position'], f"Fehler: {activity_2['title']} sollte Position {pos_2['position']} haben, hat aber Position {activity_2['position']}!"
-
-        # Ausgabe der aktuellen Positionen
-        print(f"Nach dem Umsortieren: {activity_1['title']} (Position: {activity_1['position']}), {activity_2['title']} (Position: {activity_2['position']})")
-    else:
-        print(f"Fehler beim Abrufen der Aktivitäten. Statuscode: {get_response.status_code}")
-        print(get_response.text)
-
-    logout(session)
 
 # Ausführen der Tests
 if __name__ == '__main__':
     # Comment out functions as needed
+
+    session = requests.Session()
+    login(session)
+
     #test_registration()
     #test_login()
     #test_get_profile()
@@ -518,7 +480,10 @@ if __name__ == '__main__':
     #test_add_destination()
     #test_get_destinations()
     #test_edit_destination()
-    test_reorder_destinations()
+    #test_reorder_destinations()
     #test_add_activity()
     #test_get_activities()
+    test_edit_activity()
     #test_reorder_activities()
+
+    logout(session)

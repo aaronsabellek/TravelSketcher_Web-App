@@ -310,10 +310,6 @@ def reorder_destinations():
         destination = destination_dict[destination_id]
         destination.position = new_position
 
-        # Ausgabe für Debugging-Zwecke
-        print("Destination ID:", destination_id)
-        print("Neue Position:", destination.position)
-
     db.session.commit()
     return jsonify({"message": "Destinations erfolgreich umsortiert!"}), 200
 
@@ -412,30 +408,93 @@ def get_activities(destination_id):
 
     return jsonify({'destination': destination.title, 'activities': activities_list})
 
-
-@app.route('/reorder_activities', methods=['POST'])
+@app.route('/edit_activity/<int:destination_id>/<int:activity_id>', methods=['POST'])
 @login_required
-def reorder_activities():
-    # Formulardaten holen
-    destination_id = request.form.get("destination_id")
-    new_order = request.form.getlist("activities[]")
+def edit_activity(destination_id, activity_id):
+    destination = Destination.query.filter_by(id=destination_id).first()
+
+    if not destination:
+        return jsonify({'error': 'Destination nicht gefunden'}), 404
+
+    # Überprüfen, ob der aktuelle Benutzer der Besitzer der Destination ist
+    if destination.user_id != current_user.id:
+        return jsonify({'error': 'Keine Berechtigung für diese Destination'}), 403
+
+    # Hole die Activity, die mit der ID übereinstimmt, und überprüfe, ob sie dem aktuellen Nutzer gehört
+    activity = Activity.query.filter_by(id=activity_id, destination_id=destination_id).first()
+
+    if not activity:
+        return jsonify({'error': 'Activity nicht gefunden oder keine Berechtigung'}), 403
+
+    # Empfange die JSON-Daten aus der Anfrage
+    data = request.get_json()
+
+    # Setze die neuen Werte, falls vorhanden
+    activity.title = data.get('title', activity.title)
+    activity.country = data.get('country', activity.country)
+    activity.duration = data.get('duration', activity.duration)
+    activity.price = data.get('price', activity.price)
+    activity.activity_text = data.get('activity_text', activity.activity_text)
+    activity.status = data.get('status', activity.status)
+    activity.web_link = data.get('web_link', activity.web_link)
+    activity.img_link = data.get('img_link', activity.img_link)
+    activity.tags = data.get('tags', activity.tags)
+    activity.trip_duration = data.get('trip_duration', activity.trip_duration)
+    activity.trip_price = data.get('trip_price', activity.trip_price)
+    activity.trip_text = data.get('trip_text', activity.trip_text)
+    activity.free_text = data.get('free_text', activity.free_text)
+
+    # Speichern der Änderungen in der Datenbank
+    db.session.commit()
+
+    return jsonify({
+        'message': 'Activity erfolgreich aktualisiert!',
+        'activity': {
+            'id': activity.id,
+            'title': activity.title,
+            'country': activity.country,
+            'duration': activity.duration,
+            'price': activity.price,
+            'activity_text': activity.activity_text,
+            'status': activity.status,
+            'web_link': activity.web_link,
+            'img_link': activity.img_link,
+            'tags': activity.tags,
+            'trip_duration': activity.trip_duration,
+            'trip_price': activity.trip_price,
+            'trip_text': activity.trip_text,
+            'free_text': activity.free_text
+        }
+    })
+
+@app.route('/reorder_activities/<int:destination_id>', methods=['POST'])
+@login_required
+def reorder_activities(destination_id):
+    # JSON-Daten holen
+    data = request.get_json()
+
+    new_order = data.get("activities")
 
     if not destination_id or not new_order:
         return jsonify({"error": "Destination ID und Activities-Liste sind erforderlich"}), 400
 
     # Hole alle Activities für die Destination und den Nutzer
-    activities = Activity.query.filter_by(destination_id=destination_id, user_id=current_user.id).all()
+    activities = Activity.query.filter_by(destination_id=destination_id).all()
 
     # Erstelle ein Dictionary mit den vorhandenen Activities für eine schnelle Zuordnung
     activity_dict = {activity.id: activity for activity in activities}
+    print("Aktuelle Activities und ihre Positionen:")
+    for activity in activities:
+        print(f"ID: {activity.id}, Position: {activity.position}")
 
     # Überprüfe, ob alle angegebenen Activity-IDs existieren
     if set(map(int, new_order)) != set(activity_dict.keys()):
         return jsonify({"error": "Ungültige oder fehlende Activity-IDs"}), 400
 
     # Aktualisiere die Reihenfolge
-    for index, activity_id in enumerate(new_order):
-        activity_dict[int(activity_id)].number = index
+    for new_position, activity_id in enumerate(new_order, start=1):
+        activity = activity_dict[int(activity_id)]
+        activity.position = new_position
 
     db.session.commit()
     return jsonify({"message": "Activities erfolgreich umsortiert!"}), 200
@@ -445,7 +504,6 @@ E-Mail verification für Registration
 Email bearbeiten, wenn E-Mail-verification drin ist
 Passwort zurücksetzen, wenn E-Mail-verification drin ist
 
-Activity bearbeiten
 Destinations suchen
 Activities suchen
 Profil löschen
