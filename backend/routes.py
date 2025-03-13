@@ -3,6 +3,7 @@ from flask_login import login_required, current_user, login_user, logout_user
 from werkzeug.security import generate_password_hash, check_password_hash
 
 from models import User, Destination, Activity
+from helpers import create_entry
 from app import app, db, login_manager
 
 
@@ -115,74 +116,8 @@ def edit_username():
 @app.route('/add_destination', methods=['POST'])
 @login_required
 def add_destination():
-    # Formulardaten abrufen
     data = request.get_json()
-
-    title = data.get('title')
-    country = data.get('country')
-    img_link = data.get('img_link')
-    duration = data.get('duration')
-    tags = data.get('tags')
-    status = data.get('status')
-    months = data.get('months')
-    accomodation_link = data.get('accomodation_link')
-    accomodation_price = data.get('accomodation_price')
-    accomodation_text = data.get('accomodation_text')
-    trip_duration = data.get('trip_duration')
-    trip_price = data.get('trip_price')
-    trip_text = data.get('trip_text')
-    free_text = data.get('free_text')
-
-    # Setze Position
-    highest_position = db.session.query(db.func.max(Destination.position)).filter_by(user_id=current_user.id).scalar()
-    new_position = (highest_position + 1) if highest_position is not None else 1
-
-    # Erstelle eine neue Destination
-    new_destination = Destination(
-        title=title,
-        country=country,
-        img_link=img_link,
-        duration=duration,
-        tags=tags,
-        status=status,
-        months=months,
-        accomodation_link=accomodation_link,
-        accomodation_price=accomodation_price,
-        accomodation_text=accomodation_text,
-        trip_duration=trip_duration,
-        trip_price=trip_price,
-        trip_text=trip_text,
-        free_text=free_text,
-        position=new_position,
-        user_id=current_user.id
-    )
-
-    db.session.add(new_destination)
-    db.session.commit()
-
-    # Gib die hinzugefügte Destination als JSON zurück
-    return jsonify({
-        'message': 'Destination added successfully!',
-        'destination': {
-            'id': new_destination.id,
-            'title': new_destination.title,
-            'country': new_destination.country,
-            'img_link': new_destination.img_link,
-            'duration': new_destination.duration,
-            'tags': new_destination.tags,
-            'status': new_destination.status,
-            'months': new_destination.months,
-            'accomodation_link': new_destination.accomodation_link,
-            'accomodation_price': new_destination.accomodation_price,
-            'accomodation_text': new_destination.accomodation_text,
-            'trip_duration': new_destination.trip_duration,
-            'trip_price': new_destination.trip_price,
-            'trip_text': new_destination.trip_text,
-            'free_text': new_destination.free_text,
-            'position': new_destination.position,
-            'user_id': new_destination.user_id
-        }
-    }), 201
+    return create_entry(Destination, data, user_id=current_user.id)
 
 @app.route('/get_destinations', methods=['GET'])
 @login_required
@@ -293,72 +228,17 @@ def reorder_destinations():
 @login_required
 def add_activity():
     data = request.get_json()
-    # Formulardaten holen
-    title = data.get('title')
-    country = data.get('country')
-    duration = data.get('duration')
-    price = data.get('price')
-    activity_text = data.get('activity_text')
-    status = data.get('status')
-    web_link = data.get('web_link')
-    img_link = data.get('img_link')
-    tags = data.get('tags')
-    trip_duration = data.get('trip_duration')
-    trip_price = data.get('trip_price')
-    trip_text = data.get('trip_text')
-    free_text = data.get('free_text')
     destination_id = data.get('destination_id')
 
-    # Überprüfen, ob die Destination existiert
-    destination = Destination.query.get(destination_id)
-    if not destination:
+    if not Destination.query.get(destination_id):
         return jsonify({'error': 'Destination not found'}), 404
 
-    highest_position = db.session.query(db.func.max(Activity.position)).filter_by(destination_id=destination_id).scalar()
-    new_position = (highest_position + 1) if highest_position is not None else 1
-
-    new_activity = Activity(title=title,
-                            country=country,
-                            duration=duration,
-                            price=price,
-                            activity_text=activity_text,
-                            status=status,
-                            web_link=web_link,
-                            img_link=img_link,
-                            tags=tags,
-                            trip_duration=trip_duration,
-                            trip_price=trip_price,
-                            trip_text=trip_text,
-                            free_text=free_text,
-
-                            position=new_position,
-                            destination_id=destination_id)
-
-    db.session.add(new_activity)
-    db.session.commit()
-
-    return jsonify({'message': 'Activity added successfully!', 'activity': {
-        'id': new_activity.id,
-        'title': new_activity.title,
-        'country': new_activity.country,
-        'duration': new_activity.duration,
-        'price': new_activity.price,
-        'activity_text': new_activity.activity_text,
-        'position': new_activity.position,
-        'status': new_activity.status,
-        'web_link': new_activity.web_link,
-        'img_link': new_activity.img_link,
-        'tags': new_activity.tags,
-        'trip_duration': new_activity.trip_duration,
-        'trip_price': new_activity.trip_price,
-        'trip_text': new_activity.trip_text,
-        'free_text': new_activity.free_text,
-        'destination_id': new_activity.destination_id
-    }})
+    return create_entry(Activity, data, destination_id=destination_id)
 
 @app.route('/get_activities/<int:destination_id>', methods=['GET'])
 @login_required
 def get_activities(destination_id):
+
     destination = Destination.query.get(destination_id)
 
     if not destination:

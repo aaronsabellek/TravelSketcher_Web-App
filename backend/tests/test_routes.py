@@ -86,7 +86,7 @@ def test_add_destination(session):
 
     # Beispiel-Daten für die Destination
     dest_data = {
-        'title': 'Bali Adventure',
+        'title': 'Bali',
         'country': 'Indonesia',
         'img_link': 'https://example.com/bali.jpg',
         'duration': '2 weeks',
@@ -258,11 +258,12 @@ def test_reorder_activities(session):
 if __name__ == '__main__':
     # Comment out functions as needed
 
+    #test_registration()
+    #test_login()
+
     session = requests.Session()
     login(session)
 
-    #test_registration()
-    #test_login()
     #test_get_profile(session)
     #test_edit_username(session)
     #test_add_destination(session)
