@@ -5,6 +5,7 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from models import User, Destination, Activity
 from app import app, db, login_manager
 
+
 # Benutzer laden
 @login_manager.user_loader
 def load_user(user_id):
@@ -359,8 +360,14 @@ def add_activity():
 @login_required
 def get_activities(destination_id):
     destination = Destination.query.get(destination_id)
+
     if not destination:
         return jsonify({'error': 'Destination not found'}), 404
+
+    # Überprüfen, ob der aktuelle Benutzer der Besitzer der Destination ist
+    if destination.user_id != current_user.id:
+        return jsonify({'error': 'Keine Berechtigung für diese Destination'}), 403
+
     activities = Activity.query.filter_by(destination_id=destination_id).all()
     activities_list = [{
         'id': act.id,
@@ -486,5 +493,6 @@ Activities suchen
 Profil löschen
 Destination löschen
 Activity löschen
+
 Wartungsmodus
 '''
