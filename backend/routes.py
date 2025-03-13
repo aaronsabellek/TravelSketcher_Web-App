@@ -1,10 +1,9 @@
-from flask import request, render_template, redirect, url_for, flash, jsonify
+from flask import request, redirect, url_for, flash, jsonify
 from flask_login import login_required, current_user, login_user, logout_user
 from werkzeug.security import generate_password_hash, check_password_hash
 
 from models import User, Destination, Activity
 from app import app, db, login_manager
-
 
 # Benutzer laden
 @login_manager.user_loader
@@ -14,32 +13,6 @@ def load_user(user_id):
 @app.route('/')
 def home():
     return "Backend ist aktiv!"
-
-
-@app.route('/dashboard', methods=['GET'])
-@login_required
-def dashboard():
-    destinations = Destination.query.filter_by(user_id=current_user.id).order_by(Destination.position).all()
-
-    destinations_list = [{
-        'id': d.id,
-        'title': d.title,
-        'country': d.country,
-        'img_link': d.img_link,
-        'duration': d.duration,
-        'tags': d.tags,
-        'status': d.status,
-        'months': d.months,
-        'accomodation_link': d.accomodation_link,
-        'accomodation_price': d.accomodation_price,
-        'accomodation_text': d.accomodation_text,
-        'trip_duration': d.trip_duration,
-        'trip_price': d.trip_price,
-        'trip_text': d.trip_text,
-        'free_text': d.free_text
-    } for d in destinations]
-
-    return jsonify({'destinations': destinations_list})
 
 @app.route('/register', methods=['POST'])
 def register():
@@ -121,7 +94,8 @@ def get_profile():
 @app.route('/edit_username', methods=['POST'])
 @login_required
 def edit_username():
-    new_username = request.form.get('new_username')
+    data = request.get_json()
+    new_username = data.get('new_username')
 
     if not new_username:
         return jsonify({'error': 'Neuer Benutzername ist erforderlich'}), 400
@@ -140,73 +114,74 @@ def edit_username():
 @app.route('/add_destination', methods=['POST'])
 @login_required
 def add_destination():
-    if request.method == 'POST':
-        # Formulardaten abrufen
-        title = request.form['title']
-        country = request.form.get('country')
-        img_link = request.form.get('img_link')
-        duration = request.form.get('duration')
-        tags = request.form.get('tags')
-        status = request.form.get('status')
-        months = request.form.get('months')
-        accomodation_link = request.form.get('accomodation_link')
-        accomodation_price = request.form.get('accomodation_price')
-        accomodation_text = request.form.get('accomodation_text')
-        trip_duration = request.form.get('trip_duration')
-        trip_price = request.form.get('trip_price')
-        trip_text = request.form.get('trip_text')
-        free_text = request.form.get('free_text')
+    # Formulardaten abrufen
+    data = request.get_json()
 
-        # Setze Position
-        highest_position = db.session.query(db.func.max(Destination.position)).filter_by(user_id=current_user.id).scalar()
-        new_position = (highest_position + 1) if highest_position is not None else 1
+    title = data.get('title')
+    country = data.get('country')
+    img_link = data.get('img_link')
+    duration = data.get('duration')
+    tags = data.get('tags')
+    status = data.get('status')
+    months = data.get('months')
+    accomodation_link = data.get('accomodation_link')
+    accomodation_price = data.get('accomodation_price')
+    accomodation_text = data.get('accomodation_text')
+    trip_duration = data.get('trip_duration')
+    trip_price = data.get('trip_price')
+    trip_text = data.get('trip_text')
+    free_text = data.get('free_text')
 
-        # Erstelle eine neue Destination
-        new_destination = Destination(
-            title=title,
-            country=country,
-            img_link=img_link,
-            duration=duration,
-            tags=tags,
-            status=status,
-            months=months,
-            accomodation_link=accomodation_link,
-            accomodation_price=accomodation_price,
-            accomodation_text=accomodation_text,
-            trip_duration=trip_duration,
-            trip_price=trip_price,
-            trip_text=trip_text,
-            free_text=free_text,
-            position=new_position,
-            user_id=current_user.id
-        )
+    # Setze Position
+    highest_position = db.session.query(db.func.max(Destination.position)).filter_by(user_id=current_user.id).scalar()
+    new_position = (highest_position + 1) if highest_position is not None else 1
 
-        db.session.add(new_destination)
-        db.session.commit()
+    # Erstelle eine neue Destination
+    new_destination = Destination(
+        title=title,
+        country=country,
+        img_link=img_link,
+        duration=duration,
+        tags=tags,
+        status=status,
+        months=months,
+        accomodation_link=accomodation_link,
+        accomodation_price=accomodation_price,
+        accomodation_text=accomodation_text,
+        trip_duration=trip_duration,
+        trip_price=trip_price,
+        trip_text=trip_text,
+        free_text=free_text,
+        position=new_position,
+        user_id=current_user.id
+    )
 
-        # Gib die hinzugefügte Destination als JSON zurück
-        return jsonify({
-            'message': 'Destination added successfully!',
-            'destination': {
-                'id': new_destination.id,
-                'title': new_destination.title,
-                'country': new_destination.country,
-                'img_link': new_destination.img_link,
-                'duration': new_destination.duration,
-                'tags': new_destination.tags,
-                'status': new_destination.status,
-                'months': new_destination.months,
-                'accomodation_link': new_destination.accomodation_link,
-                'accomodation_price': new_destination.accomodation_price,
-                'accomodation_text': new_destination.accomodation_text,
-                'trip_duration': new_destination.trip_duration,
-                'trip_price': new_destination.trip_price,
-                'trip_text': new_destination.trip_text,
-                'free_text': new_destination.free_text,
-                'position': new_destination.position,
-                'user_id': new_destination.user_id
-            }
-        }), 201
+    db.session.add(new_destination)
+    db.session.commit()
+
+    # Gib die hinzugefügte Destination als JSON zurück
+    return jsonify({
+        'message': 'Destination added successfully!',
+        'destination': {
+            'id': new_destination.id,
+            'title': new_destination.title,
+            'country': new_destination.country,
+            'img_link': new_destination.img_link,
+            'duration': new_destination.duration,
+            'tags': new_destination.tags,
+            'status': new_destination.status,
+            'months': new_destination.months,
+            'accomodation_link': new_destination.accomodation_link,
+            'accomodation_price': new_destination.accomodation_price,
+            'accomodation_text': new_destination.accomodation_text,
+            'trip_duration': new_destination.trip_duration,
+            'trip_price': new_destination.trip_price,
+            'trip_text': new_destination.trip_text,
+            'free_text': new_destination.free_text,
+            'position': new_destination.position,
+            'user_id': new_destination.user_id
+        }
+    }), 201
 
 @app.route('/get_destinations', methods=['GET'])
 @login_required
@@ -316,23 +291,22 @@ def reorder_destinations():
 @app.route('/add_activity', methods=['POST'])
 @login_required
 def add_activity():
+    data = request.get_json()
     # Formulardaten holen
-    title = request.form['title']
-
-    country = request.form.get('country')
-    duration = request.form.get('duration')
-    price = request.form.get('price')
-    activity_text = request.form.get('activity_text')
-    status = request.form.get('status')
-    web_link = request.form.get('web_link')
-    img_link = request.form.get('img_link')
-    tags = request.form.get('tags')
-    trip_duration = request.form.get('trip_duration')
-    trip_price = request.form.get('trip_price')
-    trip_text = request.form.get('trip_text')
-    free_text = request.form.get('free_text')
-
-    destination_id = request.form['destination_id']
+    title = data.get('title')
+    country = data.get('country')
+    duration = data.get('duration')
+    price = data.get('price')
+    activity_text = data.get('activity_text')
+    status = data.get('status')
+    web_link = data.get('web_link')
+    img_link = data.get('img_link')
+    tags = data.get('tags')
+    trip_duration = data.get('trip_duration')
+    trip_price = data.get('trip_price')
+    trip_text = data.get('trip_text')
+    free_text = data.get('free_text')
+    destination_id = data.get('destination_id')
 
     # Überprüfen, ob die Destination existiert
     destination = Destination.query.get(destination_id)
@@ -503,6 +477,9 @@ def reorder_activities(destination_id):
 E-Mail verification für Registration
 Email bearbeiten, wenn E-Mail-verification drin ist
 Passwort zurücksetzen, wenn E-Mail-verification drin ist
+
+Einzelne Destination anzeigen
+Einzelne Activity anzeigen
 
 Destinations suchen
 Activities suchen

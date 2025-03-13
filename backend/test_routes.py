@@ -24,17 +24,6 @@ def login(session, login_data=None):
 
     print('Login erfolgreich!')
 
-def dashboard(session):
-    dashboard_url = "http://127.0.0.1:5000/dashboard"
-
-    response = session.get(dashboard_url)
-    assert response.status_code == 200, f"Fehler beim Abrufen des Dashboards: {response.status_code} - {response.text}"
-
-    data = response.json()
-    destinations = data.get('destinations', [])
-    print(f"Dashboard-Daten erfolgreich geladen! {len(destinations)} Destinationen gefunden.")
-    return destinations
-
 #Holen von Profildaten
 def get_profile_data(session):
     print("Test: Abruf der Profildaten")
@@ -53,7 +42,7 @@ def edit_username(session, new_username):
     edit_username_url = 'http://127.0.0.1:5000/edit_username'
     edit_data = {'new_username': new_username}
 
-    response = session.post(edit_username_url, data=edit_data)
+    response = session.post(edit_username_url, json=edit_data)
     assert response.status_code == 200, f"Fehler beim Ändern des Benutzernamens! Status: {response.status_code}, Antwort: {response.text}"
 
     print("Benutzername erfolgreich geändert")
@@ -69,7 +58,7 @@ def edit_username(session, new_username):
 #Item hinzufügen (Destination oder Activity)
 def add_item(session, url, data, item_key, expected_fields):
 # Anfrage zum Hinzufügen
-    response = session.post(url, data=data)
+    response = session.post(url, json=data)
     print(f"Add Item Status Code: {response.status_code}")
     assert response.status_code in [200, 201], f"Fehler beim Hinzufügen von {item_key}. Statuscode: {response.status_code}, Antwort: {response.text}"
 
@@ -116,7 +105,30 @@ def get_and_check_response(session, url, expected_key):
         assert 'title' in item and 'id' in item, f"Fehler: 'title' oder 'id' fehlt im Element: {item}"
         print(f"- {item['title']} (ID: {item['id']})")
 
-def reorder_items(url, reorder_url, item_key, destination_id=None):
+def edit_item(session, edit_url, updated_data, item_key):
+    print(f"Test: Bearbeiten einer {item_key.capitalize()}")
+
+    # API-Request senden
+    response = session.post(edit_url, json=updated_data)
+    assert response.status_code == 200, f"Expected status code 200, but got {response.status_code}"
+
+    # Überprüfen, ob die Rückgabe die erwarteten Daten enthält
+    response_data = response.json()
+
+    # Hier prüfen wir, ob die geänderten Felder korrekt sind
+    for key, value in updated_data.items():
+        if isinstance(value, list):
+            # Wenn der Wert eine Liste ist (z. B. für "tags"), vergleichen wir die Listen
+            assert sorted(response_data[item_key][key]) == sorted(value), f"Expected {key} to be {value}, but got {response_data[item_key][key]}"
+        else:
+            assert response_data[item_key][key] == value, f"Expected {key} to be {value}, but got {response_data[item_key][key]}"
+
+    print(f"{item_key.capitalize()} erfolgreich aktualisiert!")
+    print(f"Neue Daten der {item_key.capitalize()}:")
+    for key, value in response_data[item_key].items():
+        print(f"{key}: {value}")
+
+def reorder_items(session, url, reorder_url, item_key, destination_id=None):
     # 1. Abrufen der aktuellen Elemente
     if destination_id:
         get_url = f'{url}/{destination_id}'
@@ -221,16 +233,14 @@ def test_login():
 
     print("Login mit Benutzernamen")
     login(session, login_data_username)
-    dashboard(session)
     logout(session)
 
     print("Login mit Email")
     login(session, login_data_email)
-    dashboard(session)
     logout(session)
 
 # Funktion zum Testen der Anzeige der Profildaten
-def test_get_profile():
+def test_get_profile(session):
     print("Test der Anzeige der Profildaten")
 
     profile_data = get_profile_data(session)
@@ -242,7 +252,7 @@ def test_get_profile():
     print(f"- Bild-Link: {profile_data['img_link']}")
 
 #Funktion zum Bearbeiten des Usernames
-def test_edit_username():
+def test_edit_username(session):
     print("Test des Bearbeitens des Usernames")
 
     # Neuer Benutzername für den Test
@@ -255,7 +265,7 @@ def test_edit_username():
     edit_username(session, new_username)
 
 #Funktion zum Testen des Hinzufügens einer Destination
-def test_add_destination():
+def test_add_destination(session):
     print("Test zum Hinzufügen einer Destination")
 
     dest_url = 'http://127.0.0.1:5000/add_destination'
@@ -298,7 +308,7 @@ def test_add_destination():
     # Aufruf der Hilfsfunktion
     add_item(session, dest_url, dest_data, 'destination', expected_fields)
 
-def test_get_destinations():
+def test_get_destinations(session):
     print("Test zum Abrufen der Destinationen")
 
     # Teste nun die Route /get_destinations
@@ -306,7 +316,7 @@ def test_get_destinations():
     get_and_check_response(session, destinations_url, 'destination')
 
 # Funktion zum Testen des Bearbeitens einer Destination
-def test_edit_destination():
+def test_edit_destination(session):
     print("Test: Bearbeiten einer Destination")
 
     destination_id = 1  # ID der Destination, die bearbeitet werden soll
@@ -331,33 +341,19 @@ def test_edit_destination():
         'free_text': 'Jetzt buchen und sparen!'
     }
 
-    # API-Request senden
-    response = session.post(edit_url, json=updated_data)
-    assert response.status_code == 200, f"Expected status code 200, but got {response.status_code}"
+    edit_item(session, edit_url, updated_data, 'destination')
 
-    # Überprüfen, ob die Rückgabe die erwarteten Daten enthält
-    response_data = response.json()
-
-    # Hier prüfen wir, ob die geänderten Felder korrekt sind
-    for key, value in updated_data.items():
-        assert response_data['destination'][key] == value, f"Expected {key} to be {value}, but got {response_data['destination'][key]}"
-
-    print("Destination erfolgreich aktualisiert!")
-    print("Neue Daten der Destination:")
-    for key, value in response_data['destination'].items():
-        print(f"{key}: {value}")
-
-def test_reorder_destinations():
+def test_reorder_destinations(session):
     print("Test zum Umsortieren von zwei Destinationen")
 
     destinations_url = 'http://127.0.0.1:5000/get_destinations'
     reorder_url = 'http://127.0.0.1:5000/reorder_destinations'
 
     # Nutzung der Hilfsfunktion
-    reorder_items(destinations_url, reorder_url, "destinations")
+    reorder_items(session, destinations_url, reorder_url, "destinations")
 
 
-def test_add_activity():
+def test_add_activity(session):
     print("Test zum Hinzufügen einer Aktivität zu einer Destination")
 
     # Aktivitätsdaten
@@ -399,14 +395,14 @@ def test_add_activity():
     add_activity_url = 'http://127.0.0.1:5000/add_activity'
     add_item(session, add_activity_url, activity_data, 'activity', expected_fields)
 
-def test_get_activities():
+def test_get_activities(session):
     print('Test: Anzeigen der Activities einer Destination')
 
     destination_id = 1
     url = f"http://127.0.0.1:5000/get_activities/{destination_id}"
     get_and_check_response(session, url, "activities")
 
-def test_edit_activity():
+def test_edit_activity(session):
     print("Test: Bearbeiten einer Activity")
 
     destination_id = 1  # ID der Destination, zu der die Activity gehört
@@ -431,31 +427,9 @@ def test_edit_activity():
         'free_text': 'Zusätzliche Informationen zur Reise'
     }
 
-    print("Gesendete Daten:", updated_data)
+    edit_item(session, edit_url, updated_data, 'activity')
 
-    # API-Request senden
-    response = session.post(edit_url, json=updated_data)
-    print(f"Antwortstatus: {response.status_code}")
-    print("Antwortinhalt:", response.text)
-    assert response.status_code == 200, f"Expected status code 200, but got {response.status_code}"
-
-    # Überprüfen, ob die Rückgabe die erwarteten Daten enthält
-    response_data = response.json()
-
-    # Hier prüfen wir, ob die geänderten Felder korrekt sind
-    for key, value in updated_data.items():
-        if isinstance(value, list):
-            # Wenn der Wert eine Liste ist (z. B. für "tags"), vergleichen wir die Listen
-            assert sorted(response_data['activity'][key]) == sorted(value), f"Expected {key} to be {value}, but got {response_data['activity'][key]}"
-        else:
-            assert response_data['activity'][key] == value, f"Expected {key} to be {value}, but got {response_data['activity'][key]}"
-
-    print("Activity erfolgreich aktualisiert!")
-    print("Neue Daten der Activity:")
-    for key, value in response_data['activity'].items():
-        print(f"{key}: {value}")
-
-def test_reorder_activities():
+def test_reorder_activities(session):
     print("Test zum Umsortieren von Activitie 2 und 3 der Destination 1")
 
     activities_url = 'http://127.0.0.1:5000/get_activities'
@@ -463,7 +437,7 @@ def test_reorder_activities():
 
     # Nutzung der Hilfsfunktion
     destination_id = 1
-    reorder_items(activities_url, reorder_url, "activities", destination_id=destination_id)
+    reorder_items(session, activities_url, reorder_url, "activities", destination_id=destination_id)
 
 
 # Ausführen der Tests
@@ -475,15 +449,15 @@ if __name__ == '__main__':
 
     #test_registration()
     #test_login()
-    #test_get_profile()
-    #test_edit_username()
-    #test_add_destination()
-    #test_get_destinations()
-    #test_edit_destination()
-    #test_reorder_destinations()
-    #test_add_activity()
-    #test_get_activities()
-    test_edit_activity()
-    #test_reorder_activities()
+    #test_get_profile(session)
+    #test_edit_username(session)
+    #test_add_destination(session)
+    #test_get_destinations(session)
+    #test_edit_destination(session)
+    #test_reorder_destinations(session)
+    #test_add_activity(session)
+    test_get_activities(session)
+    #test_edit_activity(session)
+    #test_reorder_activities(session)
 
     logout(session)
