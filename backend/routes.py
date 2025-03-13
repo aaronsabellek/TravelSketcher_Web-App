@@ -494,5 +494,7 @@ Profil löschen
 Destination löschen
 Activity löschen
 
+Hilfsfunktionen?
+
 Wartungsmodus
 '''
