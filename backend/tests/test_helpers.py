@@ -1,5 +1,7 @@
 # HILFSFUNKTIONEN FÜR DIE TESTS
 
+url = "http://127.0.0.1:5000"
+
 login_data_username = {
     'identifier': 'testuser',
     'password': 'testpassword123!'

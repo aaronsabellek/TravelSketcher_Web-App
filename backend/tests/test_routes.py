@@ -9,6 +9,7 @@ from .test_helpers import (
     edit_username, add_item,
     get_and_check_response,
     edit_item,
+    url,
     reorder_items,
     logout
 )
@@ -19,7 +20,7 @@ from .test_helpers import (
 def test_registration():
     print("Test: Benutzerregistrierung")
 
-    register_url = "http://127.0.0.1:5000/register"
+    register_url = f"{url}/register"
     user_data = {
         "username": "testuser",
         "email": "testuser@example.com",
@@ -81,7 +82,7 @@ def test_edit_username(session):
 def test_add_destination(session):
     print("Test zum Hinzufügen einer Destination")
 
-    dest_url = 'http://127.0.0.1:5000/add_destination'
+    dest_url = f'{url}/add_destination'
 
     # Beispiel-Daten für die Destination
     dest_data = {
@@ -125,7 +126,7 @@ def test_get_destinations(session):
     print("Test zum Abrufen der Destinationen")
 
     # Teste nun die Route /get_destinations
-    destinations_url = 'http://127.0.0.1:5000/get_destinations'
+    destinations_url = f'{url}/get_destinations'
     get_and_check_response(session, destinations_url, 'destination')
 
 # Funktion zum Testen des Bearbeitens einer Destination
@@ -134,7 +135,7 @@ def test_edit_destination(session):
 
     destination_id = 1  # ID der Destination, die bearbeitet werden soll
 
-    edit_url = f'http://127.0.0.1:5000/edit_destination/{destination_id}'
+    edit_url = f'{url}/edit_destination/{destination_id}'
 
     # Neue Werte für die Destination
     updated_data = {
@@ -159,8 +160,8 @@ def test_edit_destination(session):
 def test_reorder_destinations(session):
     print("Test zum Umsortieren von zwei Destinationen")
 
-    destinations_url = 'http://127.0.0.1:5000/get_destinations'
-    reorder_url = 'http://127.0.0.1:5000/reorder_destinations'
+    destinations_url = f'{url}/get_destinations'
+    reorder_url = f'{url}/reorder_destinations'
 
     # Nutzung der Hilfsfunktion
     reorder_items(session, destinations_url, reorder_url, "destinations")
@@ -205,14 +206,14 @@ def test_add_activity(session):
         ]
 
     # Anfrage zum Hinzufügen der Aktivität
-    add_activity_url = 'http://127.0.0.1:5000/add_activity'
+    add_activity_url = f'{url}/add_activity'
     add_item(session, add_activity_url, activity_data, 'activity', expected_fields)
 
 def test_get_activities(session):
     print('Test: Anzeigen der Activities einer Destination')
 
     destination_id = 1
-    url = f"http://127.0.0.1:5000/get_activities/{destination_id}"
+    url = f"{url}/get_activities/{destination_id}"
     get_and_check_response(session, url, "activities")
 
 def test_edit_activity(session):
@@ -221,7 +222,7 @@ def test_edit_activity(session):
     destination_id = 1  # ID der Destination, zu der die Activity gehört
     activity_id = 1  # ID der Activity, die bearbeitet werden soll
 
-    edit_url = f'http://127.0.0.1:5000/edit_activity/{destination_id}/{activity_id}'
+    edit_url = f'{url}/edit_activity/{destination_id}/{activity_id}'
 
     # Neue Werte für die Activity
     updated_data = {
@@ -245,8 +246,8 @@ def test_edit_activity(session):
 def test_reorder_activities(session):
     print("Test zum Umsortieren von Activitie 2 und 3 der Destination 1")
 
-    activities_url = 'http://127.0.0.1:5000/get_activities'
-    reorder_url = 'http://127.0.0.1:5000/reorder_activities'
+    activities_url = f'{url}/get_activities'
+    reorder_url = f'{url}/reorder_activities'
 
     # Nutzung der Hilfsfunktion
     destination_id = 1
