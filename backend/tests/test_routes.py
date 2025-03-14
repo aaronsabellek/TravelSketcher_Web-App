@@ -2,14 +2,22 @@ import requests
 from app import app
 from models import User
 
-from .test_helpers import (
+from .helping_variables import (
     login_data_username,
     login_data_email,
+    registration_data,
+    destination_data,
+    updated_destination_data,
+    activity_data,
+    updated_activity_data,
+    url
+)
+
+from .helping_functions import (
     login, get_profile_data,
     edit_username, add_item,
     get_and_check_response,
     edit_item,
-    url,
     reorder_items,
     logout
 )
@@ -21,16 +29,13 @@ def test_registration():
     print("Test: Benutzerregistrierung")
 
     register_url = f"{url}/register"
-    user_data = {
-        "username": "testuser",
-        "email": "testuser@example.com",
-        "password": "testpassword123!"
-    }
+    user_data = registration_data
 
     response = requests.post(register_url, json=user_data)
     assert response.status_code == 201, f"Fehler: Registrierung fehlgeschlagen! Status: {response.status_code}, Antwort: {response.text}"
 
     print("Benutzer erfolgreich registriert!")
+
     # Datenbankprüfung innerhalb des Kontextes
     with app.app_context():
         user = User.query.filter(
@@ -74,33 +79,16 @@ def test_edit_username(session):
     print(f"Versuch, den Username zu ändern in: {new_username}")
     edit_username(session, new_username)
 
-    print("Username zurücksetzen")
-    new_username = "testuser"
-    edit_username(session, new_username)
+    old_username = "testuser"
+    print(f"Username zurücksetzen in: {old_username}")
+    edit_username(session, old_username)
 
 #Funktion zum Testen des Hinzufügens einer Destination
 def test_add_destination(session):
     print("Test zum Hinzufügen einer Destination")
 
     dest_url = f'{url}/add_destination'
-
-    # Beispiel-Daten für die Destination
-    dest_data = {
-        'title': 'Bali',
-        'country': 'Indonesia',
-        'img_link': 'https://example.com/bali.jpg',
-        'duration': '2 weeks',
-        'tags': 'beach, adventure, culture',
-        'status': 'planned',
-        'months': 'May, June, July',
-        'accomodation_link': 'https://example.com/bali-hotel',
-        'accomodation_price': '800',
-        'accomodation_text': 'Luxury resort near the beach',
-        'trip_duration': '14 days',
-        'trip_price': '1500',
-        'trip_text': 'Includes flights and tours',
-        'free_text': 'Must try the local cuisine and visit hidden waterfalls!'
-    }
+    dest_data = destination_data
 
     expected_fields = [
             ('title', dest_data['title']),
@@ -136,24 +124,7 @@ def test_edit_destination(session):
     destination_id = 1  # ID der Destination, die bearbeitet werden soll
 
     edit_url = f'{url}/edit_destination/{destination_id}'
-
-    # Neue Werte für die Destination
-    updated_data = {
-        'title': 'Updated Destination Title',
-        'country': 'Italien',
-        'img_link': 'https://example.com/new_image.jpg',
-        'duration': '7 Tage',
-        'tags': 'Strand, Sommer, Erholung',
-        'status': 'aktiv',
-        'months': 'Juni, Juli, August',
-        'accomodation_link': 'https://example.com/accomodation',
-        'accomodation_price': '1500',
-        'accomodation_text': 'Luxushotel am Meer',
-        'trip_duration': '10 Tage',
-        'trip_price': '2500',
-        'trip_text': 'Erholung pur an der Amalfiküste',
-        'free_text': 'Jetzt buchen und sparen!'
-    }
+    updated_data = updated_destination_data
 
     edit_item(session, edit_url, updated_data, 'destination')
 
@@ -170,23 +141,8 @@ def test_reorder_destinations(session):
 def test_add_activity(session):
     print("Test zum Hinzufügen einer Aktivität zu einer Destination")
 
-    # Aktivitätsdaten
-    activity_data = {
-        'title': 'Wanderung im Gebirge',
-        'country': 'Deutschland',
-        'duration': '5 Stunden',
-        'price': '20',
-        'activity_text': 'Eine wunderschöne Wanderung mit atemberaubender Aussicht.',
-        'status': 'aktiv',
-        'web_link': 'http://example.com',
-        'img_link': 'http://example.com/image.jpg',
-        'tags': 'Wandern, Berge, Natur',
-        'trip_duration': '7 Tage',
-        'trip_price': '500',
-        'trip_text': 'Entdecke die Berge in 7 Tagen',
-        'free_text': 'Die Wanderung kann individuell angepasst werden.',
-        'destination_id': 1
-    }
+    add_activity_url = f'{url}/add_activity'
+    activity_data = activity_data
 
     expected_fields = [
             ('title', activity_data['title']),
@@ -205,16 +161,14 @@ def test_add_activity(session):
             ('destination_id', activity_data['destination_id']),
         ]
 
-    # Anfrage zum Hinzufügen der Aktivität
-    add_activity_url = f'{url}/add_activity'
     add_item(session, add_activity_url, activity_data, 'activity', expected_fields)
 
 def test_get_activities(session):
     print('Test: Anzeigen der Activities einer Destination')
 
     destination_id = 1
-    url = f"{url}/get_activities/{destination_id}"
-    get_and_check_response(session, url, "activities")
+    activities_url = f"{url}/get_activities/{destination_id}"
+    get_and_check_response(session, activities_url, "activities")
 
 def test_edit_activity(session):
     print("Test: Bearbeiten einer Activity")
@@ -225,21 +179,7 @@ def test_edit_activity(session):
     edit_url = f'{url}/edit_activity/{destination_id}/{activity_id}'
 
     # Neue Werte für die Activity
-    updated_data = {
-        'title': 'Neue Aktivität',
-        'country': 'Deutschland',
-        'duration': '5',
-        'price': '150.0',
-        'activity_text': 'Dies ist die Beschreibung der neuen Aktivität.',
-        'status': 'Aktiv',
-        'web_link': 'https://example.com',
-        'img_link': 'https://example.com/image.jpg',
-        'tags': 'Abenteuer Natur',
-        'trip_duration': '7',
-        'trip_price': '500.0',
-        'trip_text': 'Detaillierte Beschreibung der Reise',
-        'free_text': 'Zusätzliche Informationen zur Reise'
-    }
+    updated_data = updated_activity_data
 
     edit_item(session, edit_url, updated_data, 'activity')
 
@@ -267,12 +207,12 @@ if __name__ == '__main__':
     #test_get_profile(session)
     #test_edit_username(session)
     #test_add_destination(session)
-    test_get_destinations(session)
+    #test_get_destinations(session)
     #test_edit_destination(session)
     #test_reorder_destinations(session)
     #test_add_activity(session)
     #test_get_activities(session)
-    #test_edit_activity(session)
+    test_edit_activity(session)
     #test_reorder_activities(session)
 
     logout(session)

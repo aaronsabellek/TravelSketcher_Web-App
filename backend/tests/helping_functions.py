@@ -1,20 +1,10 @@
 # HILFSFUNKTIONEN FÜR DIE TESTS
 
-url = "http://127.0.0.1:5000"
-
-login_data_username = {
-    'identifier': 'testuser',
-    'password': 'testpassword123!'
-}
-
-login_data_email = {
-    'identifier': 'testuser@example.com',
-    'password': 'testpassword123!'
-}
+from .helping_variables import login_data_username,url
 
 #Login mit einem bestimmten Datenpaket
 def login(session, login_data=None):
-    login_url = 'http://127.0.0.1:5000/login'
+    login_url = f'{url}/login'
     login_data = login_data or login_data_username
 
     response = session.post(login_url, json=login_data)
@@ -25,7 +15,7 @@ def login(session, login_data=None):
 #Holen von Profildaten
 def get_profile_data(session):
     print("Test: Abruf der Profildaten")
-    profile_url = 'http://127.0.0.1:5000/profile'
+    profile_url = f'{url}/profile'
 
     response = session.get(profile_url)
     assert response.status_code == 200, f"Fehler: Unerwarteter Statuscode {response.status_code}, Antwort: {response.text}"
@@ -37,7 +27,7 @@ def get_profile_data(session):
 
 #Verändern des Usernames
 def edit_username(session, new_username):
-    edit_username_url = 'http://127.0.0.1:5000/edit_username'
+    edit_username_url = f'{url}/edit_username'
     edit_data = {'new_username': new_username}
 
     response = session.post(edit_username_url, json=edit_data)
@@ -104,16 +94,14 @@ def get_and_check_response(session, url, expected_key):
         print(f"- {item['title']} (ID: {item['id']})")
 
 def edit_item(session, edit_url, updated_data, item_key):
-    print(f"Test: Bearbeiten einer {item_key.capitalize()}")
-
     # API-Request senden
     response = session.post(edit_url, json=updated_data)
     assert response.status_code == 200, f"Expected status code 200, but got {response.status_code}"
 
     # Überprüfen, ob die Rückgabe die erwarteten Daten enthält
     response_data = response.json()
+    print(f"Response data: {response_data}")
 
-    # Hier prüfen wir, ob die geänderten Felder korrekt sind
     for key, value in updated_data.items():
         if isinstance(value, list):
             # Wenn der Wert eine Liste ist (z. B. für "tags"), vergleichen wir die Listen
@@ -191,7 +179,7 @@ def reorder_items(session, url, reorder_url, item_key, destination_id=None):
 
 #Hilfsfunktion zum Logout
 def logout(session):
-    logout_url = 'http://127.0.0.1:5000/logout'
+    logout_url = f'{url}/logout'
     response = session.get(logout_url)
 
     assert response.status_code == 200, f"Fehler beim Logout! Statuscode: {response.status_code}, Antwort: {response.text}"
