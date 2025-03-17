@@ -54,7 +54,6 @@ def add_item(session, url, data, item_key, expected_fields):
 
     # Antwortdaten als JSON
     response_data = response.json()
-    print("Response Data:", response_data)
 
     # Item aus der Antwort extrahieren
     item = response_data.get(item_key, {})
@@ -100,7 +99,6 @@ def edit_item(session, edit_url, updated_data, item_key):
 
     # Überprüfen, ob die Rückgabe die erwarteten Daten enthält
     response_data = response.json()
-    print(f"Response data: {response_data}")
 
     for key, value in updated_data.items():
         if isinstance(value, list):
@@ -112,7 +110,8 @@ def edit_item(session, edit_url, updated_data, item_key):
     print(f"{item_key.capitalize()} erfolgreich aktualisiert!")
     print(f"Neue Daten der {item_key.capitalize()}:")
     for key, value in response_data[item_key].items():
-        print(f"{key}: {value}")
+        if key != 'password':
+            print(f"{key}: {value}")
 
 def reorder_items(session, url, reorder_url, item_key, destination_id=None):
     # 1. Abrufen der aktuellen Elemente

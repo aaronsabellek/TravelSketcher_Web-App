@@ -5,7 +5,32 @@ url = "http://127.0.0.1:5000"
 registration_data = {
         "username": "testuser",
         "email": "testuser@example.com",
-        "password": "testpassword123!"
+        "password": "testpassword123!",
+        "city": "Leipzig",
+        "longitude": "12.3731",
+        "latitude": "51.3397",
+        "country": "Deutschland",
+        "currency": "EUR"
+}
+
+updated_profile_data = {
+        "username": "testuser",
+        "email": "testuser@example_edited.com",
+        "city": "Leipzig",
+        "longitude": "12.3731",
+        "latitude": "51.3397",
+        "country": "Deutschland",
+        "currency": "EUR"
+}
+
+original_profile_data = {
+    "username": "testuser",
+        "email": "testuser@example.com",
+        "city": "Leipzig",
+        "longitude": "12.3731",
+        "latitude": "51.3397",
+        "country": "Deutschland",
+        "currency": "EUR"
 }
 
 login_data_username = {
@@ -19,68 +44,77 @@ login_data_email = {
 }
 
 destination_data = {
-        'title': 'Bali',
-        'country': 'Indonesia',
-        'img_link': 'https://example.com/bali.jpg',
-        'duration': '2 weeks',
-        'tags': 'beach, adventure, culture',
-        'status': 'planned',
-        'months': 'May, June, July',
-        'accomodation_link': 'https://example.com/bali-hotel',
-        'accomodation_price': '800',
-        'accomodation_text': 'Luxury resort near the beach',
-        'trip_duration': '14 days',
-        'trip_price': '1500',
-        'trip_text': 'Includes flights and tours',
-        'free_text': 'Must try the local cuisine and visit hidden waterfalls!'
+    'title': 'Helsinki',
+    'country': 'Finland',
+    'img_link': 'https://example.com/helsinki.jpg',
+    'duration': '5 days',
+    'tags': 'city, culture, nature',
+    'status': 'planned',
+    'time': 'summer',
+    'accomodation_link': 'https://example.com/helsinki-hotel',
+    'pricing': '1200',
+    'trip_pricing_flight': '300',
+    'trip_pricing_no_flight': '900',
+    'travel_duration_flight': '2h',
+    'travel_duration_no_flight': '20h',
+    'longitude': '24.941',
+    'latitude': '60.173',
+    'description': 'Experience the Nordic charm of Helsinki with its unique mix of modern architecture and historical sites.',
+    'free_text': 'Don’t miss the Suomenlinna sea fortress and the traditional Finnish saunas!'
 }
 
 updated_destination_data = {
-        'title': 'Updated Destination Title',
-        'country': 'Italien',
-        'img_link': 'https://example.com/new_image.jpg',
-        'duration': '7 Tage',
-        'tags': 'Strand, Sommer, Erholung',
-        'status': 'aktiv',
-        'months': 'Juni, Juli, August',
-        'accomodation_link': 'https://example.com/accomodation',
-        'accomodation_price': '1500',
-        'accomodation_text': 'Luxushotel am Meer',
-        'trip_duration': '10 Tage',
-        'trip_price': '2500',
-        'trip_text': 'Erholung pur an der Amalfiküste',
-        'free_text': 'Jetzt buchen und sparen!'
+    'title': 'Turku',
+    'country': 'Finland',
+    'img_link': 'https://example.com/turku.jpg',
+    'duration': '5 days',
+    'tags': 'city, culture, nature',
+    'status': 'planned',
+    'time': 'summer',
+    'accomodation_link': 'https://example.com/turku-hotel',
+    'pricing': '1200',
+    'trip_pricing_flight': '300',
+    'trip_pricing_no_flight': '900',
+    'travel_duration_flight': '2h',
+    'travel_duration_no_flight': '20h',
+    'longitude': '24.941',
+    'latitude': '60.173',
+    'description': 'Experience the Nordic charm of Turku with its unique mix of modern architecture and historical sites.',
+    'free_text': 'Don’t miss the Turku castle and the traditional Finnish saunas!'
 }
 
 activity_data = {
-        'title': 'Wanderung im Gebirge',
-        'country': 'Deutschland',
-        'duration': '5 Stunden',
-        'price': '20',
-        'activity_text': 'Eine wunderschöne Wanderung mit atemberaubender Aussicht.',
-        'status': 'aktiv',
-        'web_link': 'http://example.com',
-        'img_link': 'http://example.com/image.jpg',
-        'tags': 'Wandern, Berge, Natur',
-        'trip_duration': '7 Tage',
-        'trip_price': '500',
-        'trip_text': 'Entdecke die Berge in 7 Tagen',
-        'free_text': 'Die Wanderung kann individuell angepasst werden.',
-        'destination_id': 1
+    'title': 'Helsinki Sightseeing Tour',
+    'country': 'Finland',
+    'duration': '3 hours',
+    'pricing': '50',
+    'status': 'available',
+    'web_link': 'https://example.com/helsinki-tour',
+    'img_link': 'https://example.com/helsinki-tour.jpg',
+    'tags': 'sightseeing, history, culture',
+    'trip_duration': '1 day',
+    'trip_pricing': '75',
+    'longitude': '24.945',
+    'latitude': '60.169',
+    'description': 'Explore Helsinki’s iconic landmarks, including Senate Square, Temppeliaukio Church, and Market Square.',
+    'free_text': 'Includes a professional guide and transport between locations.',
+    'destination_id': 1
 }
 
 updated_activity_data = {
-        'title': 'Neue Aktivität',
-        'country': 'Deutschland',
-        'duration': '5',
-        'price': '150.0',
-        'activity_text': 'Dies ist die Beschreibung der neuen Aktivität.',
-        'status': 'Aktiv',
-        'web_link': 'https://example.com',
-        'img_link': 'https://example.com/image.jpg',
-        'tags': 'Abenteuer Natur',
-        'trip_duration': '7',
-        'trip_price': '500.0',
-        'trip_text': 'Detaillierte Beschreibung der Reise',
-        'free_text': 'Zusätzliche Informationen zur Reise'
+    'title': 'Turku Sightseeing Tour',
+    'country': 'Finland',
+    'duration': '3 hours',
+    'pricing': '50',
+    'status': 'available',
+    'web_link': 'https://example.com/helsinki-tour',
+    'img_link': 'https://example.com/helsinki-tour.jpg',
+    'tags': 'sightseeing, history, culture',
+    'trip_duration': '1 day',
+    'trip_pricing': '75',
+    'longitude': '24.945',
+    'latitude': '60.169',
+    'description': 'Explore Turku’s iconic landmarks.',
+    'free_text': 'Includes a professional guide and transport between locations.',
+    'destination_id': 1
 }

@@ -3,7 +3,7 @@ from flask_login import login_required, current_user, login_user, logout_user
 from werkzeug.security import generate_password_hash, check_password_hash
 
 from models import User, Destination, Activity
-from helpers import model_to_dict, models_to_list, check_unique_username, create_entry, edit_entry
+from helpers import model_to_dict, models_to_list, create_entry, edit_entry
 from app import app, db, login_manager
 
 
@@ -22,6 +22,11 @@ def register():
     username = data.get('username')
     email = data.get('email')
     password = data.get('password')
+    city = data.get('city')
+    longitude = data.get('longitude')
+    latitude = data.get('latitude')
+    country = data.get('country')
+    currency = data.get('currency')
 
     # Überprüfen, ob der Benutzername oder die E-Mail bereits existieren
     if User.query.filter_by(username=username).first():
@@ -44,7 +49,17 @@ def register():
     hashed_password = generate_password_hash(password, method='pbkdf2:sha256')
 
     # Neuen User erstellen
-    new_user = User(username=username, email=email, password=hashed_password)
+    new_user = User(
+            username=username,
+            email=email,
+            password=hashed_password,
+            city=city,
+            longitude=longitude,
+            latitude=latitude,
+            country=country,
+            currency=currency
+        )
+
     db.session.add(new_user)
     db.session.commit()
 
@@ -85,26 +100,34 @@ def logout():
 @app.route('/profile', methods=['GET'])
 @login_required
 def get_profile():
+
     user_data = {
         'id': current_user.id,
         'username': current_user.username,
         'email': current_user.email,
-        'img_link': current_user.img_link
+        'city': current_user.city,
+        'longitude': current_user.longitude,
+        'latitude': current_user.latitude,
+        'country': current_user.country,
+        'currency': current_user.currency
     }
+
     return jsonify(user_data), 200
 
-@app.route('/edit_username', methods=['POST'])
+@app.route('/edit_profile', methods=['POST'])
 @login_required
 def edit_username():
     data = request.get_json()
 
-    error_response = check_unique_username(data.get('new_username'))
-    if error_response: return error_response
+    existing_user = User.query.filter_by(username=data['username']).first()
+    if existing_user and existing_user.id != current_user.id:
+        return jsonify({'error': 'Dieser Benutzername ist bereits vergeben'}), 400
 
-    current_user.username = data.get('new_username')
-    db.session.commit()
+    existing_user = User.query.filter_by(email=data['email']).first()
+    if existing_user and existing_user.id != current_user.id:
+        return jsonify({'error': 'Diese Email ist bereits vergeben'}), 400
 
-    return jsonify({'message': 'Benutzername erfolgreich aktualisiert!', 'new_username': data.get('new_username')}), 200
+    return edit_entry(User, user_id=current_user.id, data=data)
 
 @app.route('/add_destination', methods=['POST'])
 @login_required
@@ -225,6 +248,10 @@ def reorder_activities(destination_id):
     return jsonify({"message": "Activities erfolgreich umsortiert!"}), 200
 
 '''
+Funktion zum Checken, ob ein String Format einer Email entspricht
+
+Pytest installieren und zum Testen der Routes ausprobieren
+
 APIs zum Neusortieren durch Hilfsfunktion verschlanken
 
 Einzelne Destination anzeigen
@@ -241,4 +268,12 @@ E-Mail verification für Registration
 Email bearbeiten, wenn E-Mail-verification drin ist
 Passwort zurücksetzen, wenn E-Mail-verification drin ist
 Hilfsfunktion, die Bearbeiten der Userdaten übernimmt
+
+Frontend braucht API zu geonames, um Längen- und Breitengrad zu validieren und Städtenamen für spätere Links zu validieren
+Frontend braucht API zu AI, die bestimmte Felder selbstständig ausfüllt und destinations/activities selbst vorschlägt
+Frontend braucht API zu Restcountries, um currency zu bestimmen, die später in Preis-Icons dargestellt wird
+Frontend braucht Direktlinks zu externen Anbietern, die nach Funktion gegliedert sind:
+    Booking, AirBnB
+    Rome2Rio, Google Maps Routes
+    TripAdvisor
 '''

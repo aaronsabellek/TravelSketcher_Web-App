@@ -6,6 +6,8 @@ from .helping_variables import (
     login_data_username,
     login_data_email,
     registration_data,
+    updated_profile_data,
+    original_profile_data,
     destination_data,
     updated_destination_data,
     activity_data,
@@ -21,6 +23,8 @@ from .helping_functions import (
     reorder_items,
     logout
 )
+
+# ÜBERTRAGEN IN PYTEST
 
 # FUNKTIONEN ZUM TESTEN DER ROUTES
 
@@ -66,22 +70,19 @@ def test_get_profile(session):
     assert profile_data is not None, "Fehler: Profil-Daten konnten nicht abgerufen werden!"
 
     print("Profil erfolgreich abgerufen!")
-    print(f"- Username: {profile_data['username']}")
-    print(f"- E-Mail: {profile_data['email']}")
-    print(f"- Bild-Link: {profile_data['img_link']}")
 
-#Funktion zum Bearbeiten des Usernames
-def test_edit_username(session):
-    print("Test des Bearbeitens des Usernames")
+    for key, value in profile_data.items():
+        print(f'{key}: {value}')
 
-    # Neuer Benutzername für den Test
-    new_username = "testuser_edited"
-    print(f"Versuch, den Username zu ändern in: {new_username}")
-    edit_username(session, new_username)
+def test_edit_profile(session):
+    print("Test des Bearbeitens des Profils")
+    print("Versuch, Email zu ändern in: ", updated_profile_data['email'])
+    edit_url = f'{url}/edit_profile'
 
-    old_username = "testuser"
-    print(f"Username zurücksetzen in: {old_username}")
-    edit_username(session, old_username)
+    edit_item(session, edit_url, updated_profile_data, 'user')
+
+    print("Name zurücksetzen in: ", original_profile_data['email'])
+    edit_item(session, edit_url, original_profile_data, 'user')
 
 #Funktion zum Testen des Hinzufügens einer Destination
 def test_add_destination(session):
@@ -97,13 +98,16 @@ def test_add_destination(session):
             ('duration', dest_data['duration']),
             ('tags', dest_data['tags']),
             ('status', dest_data['status']),
-            ('months', dest_data['months']),
+            ('time', dest_data['time']),
             ('accomodation_link', dest_data['accomodation_link']),
-            ('accomodation_price', dest_data['accomodation_price']),
-            ('accomodation_text', dest_data['accomodation_text']),
-            ('trip_duration', dest_data['trip_duration']),
-            ('trip_price', dest_data['trip_price']),
-            ('trip_text', dest_data['trip_text']),
+            ('pricing', dest_data['pricing']),
+            ('trip_pricing_flight', dest_data['trip_pricing_flight']),
+            ('trip_pricing_no_flight', dest_data['trip_pricing_no_flight']),
+            ('travel_duration_flight', dest_data['travel_duration_flight']),
+            ('travel_duration_no_flight', dest_data['travel_duration_no_flight']),
+            ('longitude', dest_data['longitude']),
+            ('latitude', dest_data['latitude']),
+            ('description', dest_data['description']),
             ('free_text', dest_data['free_text']),
         ]
 
@@ -142,23 +146,24 @@ def test_add_activity(session):
     print("Test zum Hinzufügen einer Aktivität zu einer Destination")
 
     add_activity_url = f'{url}/add_activity'
-    activity_data = activity_data
+    act_data = activity_data
 
     expected_fields = [
-            ('title', activity_data['title']),
-            ('country', activity_data['country']),
-            ('duration', activity_data['duration']),
-            ('price', activity_data['price']),
-            ('activity_text', activity_data['activity_text']),
-            ('status', activity_data['status']),
-            ('web_link', activity_data['web_link']),
-            ('img_link', activity_data['img_link']),
-            ('tags', activity_data['tags']),
-            ('trip_duration', activity_data['trip_duration']),
-            ('trip_price', activity_data['trip_price']),
-            ('trip_text', activity_data['trip_text']),
-            ('free_text', activity_data['free_text']),
-            ('destination_id', activity_data['destination_id']),
+            ('title', act_data['title']),
+            ('country', act_data['country']),
+            ('duration', act_data['duration']),
+            ('pricing', act_data['pricing']),
+            ('status', act_data['status']),
+            ('web_link', act_data['web_link']),
+            ('img_link', act_data['img_link']),
+            ('tags', act_data['tags']),
+            ('trip_duration', act_data['trip_duration']),
+            ('trip_pricing', act_data['trip_pricing']),
+            ('longitude', act_data['longitude']),
+            ('latitude', act_data['latitude']),
+            ('description', act_data['description']),
+            ('free_text', act_data['free_text']),
+            ('destination_id', act_data['destination_id']),
         ]
 
     add_item(session, add_activity_url, activity_data, 'activity', expected_fields)
@@ -204,15 +209,15 @@ if __name__ == '__main__':
     session = requests.Session()
     login(session)
 
-    #test_get_profile(session)
-    #test_edit_username(session)
+    test_get_profile(session)
+    #test_edit_profile(session)
     #test_add_destination(session)
     #test_get_destinations(session)
     #test_edit_destination(session)
     #test_reorder_destinations(session)
     #test_add_activity(session)
     #test_get_activities(session)
-    test_edit_activity(session)
+    #test_edit_activity(session)
     #test_reorder_activities(session)
 
     logout(session)

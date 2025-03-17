@@ -11,13 +11,6 @@ def models_to_list(models):
     """Wandelt eine Liste von SQLAlchemy-Objekten in eine Liste von Dictionaries um."""
     return [model_to_dict(model) for model in models]
 
-def check_unique_username(new_username):
-    if not new_username:
-        return jsonify({'error': 'Neuer Benutzername ist erforderlich'}), 400
-
-    if User.query.filter_by(username=new_username).first():
-        return jsonify({'error': 'Dieser Benutzername ist bereits vergeben'}), 400
-
 #Funktion zum Hinzufügen eines Objekts zur Datenbank (Destination oder Activity)
 def create_entry(model, data, user_id=None, destination_id=None):
 
@@ -56,11 +49,14 @@ def create_entry(model, data, user_id=None, destination_id=None):
     # JSON-Antwort mit den erstellten Daten zurückgeben
     return jsonify({'message': f'{model.__name__} added successfully!', model.__name__.lower(): model_to_dict(new_entry)}), 201
 
-def edit_entry(model, entry_id, user_id=None, destination_id=None, data=None):
+def edit_entry(model, entry_id=None, user_id=None, destination_id=None, data=None):
     """ Bearbeitet einen bestehenden Datenbankeintrag """
 
     # Passendes Model-Objekt abrufen
-    query = model.query.filter_by(id=entry_id)
+    if model == User:
+        query = model.query.filter_by(id=user_id)
+    else:
+        query = model.query.filter_by(id=entry_id)
     # Falls es sich um eine Destination handelt, prüfen, ob sie dem Nutzer gehört
     if model == Destination:
         query = query.filter_by(user_id=user_id)
@@ -76,7 +72,6 @@ def edit_entry(model, entry_id, user_id=None, destination_id=None, data=None):
     allowed_fields = {column.name for column in model.__table__.columns}
 
     # Nur erlaubte Werte aktualisieren
-    print(data.items)
     for key, value in data.items():
         if key in allowed_fields:
             setattr(entry, key, value)
