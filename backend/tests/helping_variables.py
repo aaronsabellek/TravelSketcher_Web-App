@@ -3,7 +3,7 @@
 url = "http://127.0.0.1:5000"
 
 registration_data = {
-        "username": "testuser",
+        "username": "testuser_123",
         "email": "testuser@example.com",
         "password": "testpassword123!",
         "city": "Leipzig",

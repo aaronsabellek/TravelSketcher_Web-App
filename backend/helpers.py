@@ -1,5 +1,7 @@
 from flask import jsonify
 
+import re
+
 from models import db, User, Destination, Activity
 
 
@@ -10,6 +12,14 @@ def model_to_dict(model):
 def models_to_list(models):
     """Wandelt eine Liste von SQLAlchemy-Objekten in eine Liste von Dictionaries um."""
     return [model_to_dict(model) for model in models]
+
+
+def is_valid_email(email):
+    # Regulärer Ausdruck für eine einfache E-Mail-Validierung
+    regex = r'^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$'
+
+    # Überprüft, ob die E-Mail dem regulären Ausdruck entspricht
+    return bool(re.match(regex, email))
 
 #Funktion zum Hinzufügen eines Objekts zur Datenbank (Destination oder Activity)
 def create_entry(model, data, user_id=None, destination_id=None):

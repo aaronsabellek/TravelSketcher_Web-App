@@ -3,7 +3,7 @@ from flask_login import login_required, current_user, login_user, logout_user
 from werkzeug.security import generate_password_hash, check_password_hash
 
 from models import User, Destination, Activity
-from helpers import model_to_dict, models_to_list, create_entry, edit_entry
+from helpers import model_to_dict, models_to_list, is_valid_email, create_entry, edit_entry
 from app import app, db, login_manager
 
 
@@ -18,7 +18,7 @@ def home():
 
 @app.route('/register', methods=['POST'])
 def register():
-    data = request.get_json()  # JSON-Daten vom Frontend
+    data = request.get_json()
     username = data.get('username')
     email = data.get('email')
     password = data.get('password')
@@ -34,6 +34,9 @@ def register():
 
     if User.query.filter_by(email=email).first():
         return jsonify({'error': 'E-Mail bereits registriert!'}), 400
+
+    if not is_valid_email(email):
+        return jsonify({'error': 'Wrong Email format!'}), 400
 
     # Passwort-Checks
     if len(password) < 8:
