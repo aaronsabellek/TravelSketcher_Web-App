@@ -3,7 +3,7 @@ from flask_login import login_required, current_user, login_user, logout_user
 from werkzeug.security import generate_password_hash, check_password_hash
 
 from models import User, Destination, Activity
-from helpers import model_to_dict, models_to_list, is_valid_email, create_entry, edit_entry
+from helpers import model_to_dict, models_to_list, is_valid_email, create_entry, edit_entry, reorder_items
 from app import app, db, login_manager
 
 
@@ -157,29 +157,7 @@ def edit_destination(destination_id):
 def reorder_destinations():
     data = request.get_json()
     new_order = data.get("destinations")
-
-    if not new_order:
-        return jsonify({"error": "Die Liste der Destination-IDs fehlt"}), 400
-
-    # Hole alle Destinationen des aktuellen Nutzers
-    destinations = Destination.query.filter_by(user_id=current_user.id).all()
-    print(f"Empfangene Destination-IDs: {new_order}")
-    print(f"Verfügbare Destinationen in der Datenbank: {[d.id for d in destinations]}")
-    # Erstelle ein Dictionary für schnelleren Zugriff
-    destination_dict = {destination.id: destination for destination in destinations}
-
-    # Überprüfe, ob alle angegebenen Destination-IDs existieren
-    if set(new_order) != set(destination_dict.keys()):
-        return jsonify({"error": "Ungültige oder fehlende Destination-IDs"}), 400
-
-    print(f"Vor dem Umtauschen: {[destination.position for destination in destinations]}")
-
-    for new_position, destination_id in enumerate(new_order, start=1):
-        destination = destination_dict[destination_id]
-        destination.position = new_position
-
-    db.session.commit()
-    return jsonify({"message": "Destinations erfolgreich umsortiert!"}), 200
+    return reorder_items(Destination, {"user_id": current_user.id}, new_order, "destinations")
 
 @app.route('/add_activity', methods=['POST'])
 @login_required
@@ -221,40 +199,11 @@ def edit_activity(destination_id, activity_id):
 @app.route('/reorder_activities/<int:destination_id>', methods=['POST'])
 @login_required
 def reorder_activities(destination_id):
-    # JSON-Daten holen
     data = request.get_json()
-
     new_order = data.get("activities")
-
-    if not destination_id or not new_order:
-        return jsonify({"error": "Destination ID und Activities-Liste sind erforderlich"}), 400
-
-    # Hole alle Activities für die Destination und den Nutzer
-    activities = Activity.query.filter_by(destination_id=destination_id).all()
-
-    # Erstelle ein Dictionary mit den vorhandenen Activities für eine schnelle Zuordnung
-    activity_dict = {activity.id: activity for activity in activities}
-    print("Aktuelle Activities und ihre Positionen:")
-    for activity in activities:
-        print(f"ID: {activity.id}, Position: {activity.position}")
-
-    # Überprüfe, ob alle angegebenen Activity-IDs existieren
-    if set(map(int, new_order)) != set(activity_dict.keys()):
-        return jsonify({"error": "Ungültige oder fehlende Activity-IDs"}), 400
-
-    # Aktualisiere die Reihenfolge
-    for new_position, activity_id in enumerate(new_order, start=1):
-        activity = activity_dict[int(activity_id)]
-        activity.position = new_position
-
-    db.session.commit()
-    return jsonify({"message": "Activities erfolgreich umsortiert!"}), 200
+    return reorder_items(Activity, {"destination_id": destination_id}, new_order, "activities")
 
 '''
-Funktion zum Checken, ob ein String Format einer Email entspricht
-
-Pytest installieren und zum Testen der Routes ausprobieren
-
 APIs zum Neusortieren durch Hilfsfunktion verschlanken
 
 Einzelne Destination anzeigen

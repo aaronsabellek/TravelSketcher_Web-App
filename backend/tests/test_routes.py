@@ -24,8 +24,6 @@ from .helping_functions import (
     logout
 )
 
-# ÜBERTRAGEN IN PYTEST
-
 # FUNKTIONEN ZUM TESTEN DER ROUTES
 
 # Funktion zum Testen der Registration

@@ -91,3 +91,26 @@ def edit_entry(model, entry_id=None, user_id=None, destination_id=None, data=Non
 
     return jsonify({'message': f'{model.__name__} erfolgreich aktualisiert!', model.__name__.lower(): model_to_dict(entry)})
 
+def reorder_items(model, filter_by, new_order, item_name):
+    """Allgemeine Funktion zur Neuanordnung von Objekten in einer bestimmten Reihenfolge."""
+    if not new_order:
+        return jsonify({"error": f"Die Liste {item_name} fehlt"}), 400
+
+    # Hole alle Objekte basierend auf dem Filter
+    items = model.query.filter_by(**filter_by).all()
+
+    # Erstelle ein Dictionary für schnellen Zugriff
+    item_dict = {item.id: item for item in items}
+
+    # Überprüfe, ob alle angegebenen IDs existieren
+    if set(map(int, new_order)) != set(item_dict.keys()):
+        return jsonify({"error": f"Ungültige oder fehlende {item_name}-IDs"}), 400
+
+    # Aktualisiere die Positionen
+    for new_position, item_id in enumerate(new_order, start=1):
+        item = item_dict[int(item_id)]
+        item.position = new_position
+
+    db.session.commit()
+    return jsonify({"message": f"{item_name.capitalize()} erfolgreich umsortiert!"}), 200
+
