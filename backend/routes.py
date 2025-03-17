@@ -19,14 +19,12 @@ def home():
 @app.route('/register', methods=['POST'])
 def register():
     data = request.get_json()
-    username = data.get('username')
-    email = data.get('email')
-    password = data.get('password')
-    city = data.get('city')
-    longitude = data.get('longitude')
-    latitude = data.get('latitude')
-    country = data.get('country')
-    currency = data.get('currency')
+    required_fields = ["username", "email", "password", "city", "longitude", "latitude", "country", "currency"]
+
+    if not all(field in data for field in required_fields):
+        return jsonify({'error': 'Fehlende Eingaben!'}), 400
+
+    username, email, password = data["username"], data["email"], data["password"]
 
     # Überprüfen, ob der Benutzername oder die E-Mail bereits existieren
     if User.query.filter_by(username=username).first():
@@ -51,17 +49,8 @@ def register():
     # Passwort verschlüsseln
     hashed_password = generate_password_hash(password, method='pbkdf2:sha256')
 
-    # Neuen User erstellen
-    new_user = User(
-            username=username,
-            email=email,
-            password=hashed_password,
-            city=city,
-            longitude=longitude,
-            latitude=latitude,
-            country=country,
-            currency=currency
-        )
+    new_user = User(**{key: data[key] for key in required_fields if key != "password"},
+                    password=hashed_password)
 
     db.session.add(new_user)
     db.session.commit()
@@ -204,8 +193,6 @@ def reorder_activities(destination_id):
     return reorder_items(Activity, {"destination_id": destination_id}, new_order, "activities")
 
 '''
-APIs zum Neusortieren durch Hilfsfunktion verschlanken
-
 Einzelne Destination anzeigen
 Einzelne Activity anzeigen
 Destinations suchen
