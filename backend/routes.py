@@ -92,18 +92,7 @@ def logout():
 @app.route('/profile', methods=['GET'])
 @login_required
 def get_profile():
-
-    user_data = {
-        'id': current_user.id,
-        'username': current_user.username,
-        'email': current_user.email,
-        'city': current_user.city,
-        'longitude': current_user.longitude,
-        'latitude': current_user.latitude,
-        'country': current_user.country,
-        'currency': current_user.currency
-    }
-
+    user_data = {key: value for key, value in current_user.__dict__.items() if key != 'password' and not key.startswith('_')}
     return jsonify(user_data), 200
 
 @app.route('/edit_profile', methods=['POST'])
