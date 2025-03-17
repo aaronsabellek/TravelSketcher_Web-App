@@ -100,12 +100,12 @@ def get_profile():
 def edit_username():
     data = request.get_json()
 
-    existing_user = User.query.filter_by(username=data['username']).first()
-    if existing_user and existing_user.id != current_user.id:
+    existing_username = User.query.filter_by(username=data['username']).first()
+    if existing_username and existing_username.id != current_user.id:
         return jsonify({'error': 'Dieser Benutzername ist bereits vergeben'}), 400
 
-    existing_user = User.query.filter_by(email=data['email']).first()
-    if existing_user and existing_user.id != current_user.id:
+    existing_email = User.query.filter_by(email=data['email']).first()
+    if existing_email and existing_email.id != current_user.id:
         return jsonify({'error': 'Diese Email ist bereits vergeben'}), 400
 
     return edit_entry(User, user_id=current_user.id, data=data)

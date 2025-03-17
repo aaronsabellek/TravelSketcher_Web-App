@@ -1,7 +1,6 @@
 from flask import jsonify
 
 import re
-
 from models import db, User, Destination, Activity
 
 
