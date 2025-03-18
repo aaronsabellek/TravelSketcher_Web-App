@@ -19,6 +19,7 @@ from .helping_functions import (
     login, get_profile_data,
     edit_username, add_item,
     get_and_check_response,
+    test_get_resource,
     edit_item,
     reorder_items,
     logout
@@ -119,6 +120,12 @@ def test_get_destinations(session):
     destinations_url = f'{url}/get_destinations'
     get_and_check_response(session, destinations_url, 'destination')
 
+def test_get_destination(session):
+    print("Test zum Abrufen einer spezifischen Destination")
+
+    destination_id = 1
+    test_get_resource(session, 'destination', destination_id)
+
 # Funktion zum Testen des Bearbeitens einer Destination
 def test_edit_destination(session):
     print("Test: Bearbeiten einer Destination")
@@ -173,13 +180,18 @@ def test_get_activities(session):
     activities_url = f"{url}/get_activities/{destination_id}"
     get_and_check_response(session, activities_url, "activities")
 
+def test_get_activity(session):
+    print('Test: Anzeigen einer bestimmten Activity')
+
+    activity_id = 1
+    test_get_resource(session, 'activity', activity_id)
+
 def test_edit_activity(session):
     print("Test: Bearbeiten einer Activity")
 
-    destination_id = 1  # ID der Destination, zu der die Activity gehört
-    activity_id = 1  # ID der Activity, die bearbeitet werden soll
+    activity_id = 2  # ID der Activity, die bearbeitet werden soll
 
-    edit_url = f'{url}/edit_activity/{destination_id}/{activity_id}'
+    edit_url = f'{url}/edit_activity/{activity_id}'
 
     # Neue Werte für die Activity
     updated_data = updated_activity_data
@@ -207,14 +219,16 @@ if __name__ == '__main__':
     session = requests.Session()
     login(session)
 
-    test_get_profile(session)
+    #test_get_profile(session)
     #test_edit_profile(session)
     #test_add_destination(session)
     #test_get_destinations(session)
+    #test_get_destination(session)
     #test_edit_destination(session)
     #test_reorder_destinations(session)
     #test_add_activity(session)
     #test_get_activities(session)
+    test_get_activity(session)
     #test_edit_activity(session)
     #test_reorder_activities(session)
 

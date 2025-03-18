@@ -38,7 +38,7 @@ class Destination(db.Model):
     travel_duration_no_flight = db.Column(db.String(15), nullable=True)
     longitude = db.Column(db.String(20), nullable=True)
     latitude = db.Column(db.String(20), nullable=True)
-    description = db.Column(db.String(200), nullable=False)
+    description = db.Column(db.String(200), nullable=True)
     free_text = db.Column(db.String(500), nullable=True)
 
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
@@ -60,9 +60,9 @@ class Activity(db.Model):
     tags = db.Column(db.String(200), nullable=True)
     trip_duration = db.Column(db.String(50), nullable=True)
     trip_pricing = db.Column(db.String(50), nullable=True)
-    longitude = db.Column(db.String(20), nullable=False)
-    latitude = db.Column(db.String(20), nullable=False)
-    description = db.Column(db.String(200), nullable=False)
+    longitude = db.Column(db.String(20), nullable=True)
+    latitude = db.Column(db.String(20), nullable=True)
+    description = db.Column(db.String(200), nullable=True)
     free_text = db.Column(db.String(500), nullable=True)
 
     destination_id = db.Column(db.Integer, db.ForeignKey('destination.id'), nullable=False)

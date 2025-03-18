@@ -58,19 +58,24 @@ def create_entry(model, data, user_id=None, destination_id=None):
     # JSON-Antwort mit den erstellten Daten zurückgeben
     return jsonify({'message': f'{model.__name__} added successfully!', model.__name__.lower(): model_to_dict(new_entry)}), 201
 
-def edit_entry(model, entry_id=None, user_id=None, destination_id=None, data=None):
+def get_entry(model, entry_id):
+    """Hilfsfunktion, um die Daten eines Eintrags zu erhalten und zurückzugeben"""
+
+    entry = model.query.filter_by(id=entry_id).first()
+    if not entry:
+        return None, 404
+
+    # Daten extrahieren
+    entry_data = {
+        key: getattr(entry, key) for key in model.__table__.columns.keys() if not key.startswith('_')
+    }
+
+    return entry_data, 200
+
+def edit_entry(model, entry_id, data):
     """ Bearbeitet einen bestehenden Datenbankeintrag """
 
-    # Passendes Model-Objekt abrufen
-    if model == User:
-        query = model.query.filter_by(id=user_id)
-    else:
-        query = model.query.filter_by(id=entry_id)
-    # Falls es sich um eine Destination handelt, prüfen, ob sie dem Nutzer gehört
-    if model == Destination:
-        query = query.filter_by(user_id=user_id)
-    elif model == Activity and destination_id:
-        query = query.filter_by(destination_id=destination_id)
+    query = model.query.filter_by(id=entry_id)
     entry = query.first()
 
     # Falls kein Eintrag gefunden oder keine Berechtigung, Fehler zurückgeben

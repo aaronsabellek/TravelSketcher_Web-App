@@ -92,6 +92,21 @@ def get_and_check_response(session, url, expected_key):
         assert 'title' in item and 'id' in item, f"Fehler: 'title' oder 'id' fehlt im Element: {item}"
         print(f"- {item['title']} (ID: {item['id']})")
 
+def test_get_resource(session, resource_type, resource_id):
+    """
+    Hilfsfunktion, um eine Ressource abzurufen und zu testen.
+    """
+    get_url = f'{url}/get_{resource_type}/{resource_id}'
+
+    response = session.get(get_url)
+    assert response.status_code == 200, f"Fehler beim Abrufen von {resource_type} {resource_id}. Statuscode: {response.status_code}, Antwort: {response.text}"
+    print(f"Zugriff auf {resource_type.capitalize()} {resource_id} erfolgreich!")
+
+    data = response.json()
+
+    for key, value in data.items():
+        print(f'{key}: {value}')
+
 def edit_item(session, edit_url, updated_data, item_key):
     # API-Request senden
     response = session.post(edit_url, json=updated_data)

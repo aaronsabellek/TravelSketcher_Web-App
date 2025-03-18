@@ -3,9 +3,16 @@ from flask_login import login_required, current_user, login_user, logout_user
 from werkzeug.security import generate_password_hash, check_password_hash
 
 from models import User, Destination, Activity
-from helpers import model_to_dict, models_to_list, is_valid_email, create_entry, edit_entry, reorder_items
 from app import app, db, login_manager
-
+from helpers import (
+    model_to_dict,
+    models_to_list,
+    is_valid_email,
+    create_entry,
+    get_entry,
+    edit_entry,
+    reorder_items
+)
 
 # Benutzer laden
 @login_manager.user_loader
@@ -49,8 +56,10 @@ def register():
     # Passwort verschlüsseln
     hashed_password = generate_password_hash(password, method='pbkdf2:sha256')
 
-    new_user = User(**{key: data[key] for key in required_fields if key != "password"},
-                    password=hashed_password)
+    new_user = User(
+        **{key: data[key] for key in required_fields if key != "password"},
+                    password=hashed_password
+    )
 
     db.session.add(new_user)
     db.session.commit()
@@ -108,7 +117,7 @@ def edit_username():
     if existing_email and existing_email.id != current_user.id:
         return jsonify({'error': 'Diese Email ist bereits vergeben'}), 400
 
-    return edit_entry(User, user_id=current_user.id, data=data)
+    return edit_entry(User, current_user.id, data)
 
 @app.route('/add_destination', methods=['POST'])
 @login_required
@@ -124,11 +133,28 @@ def get_destinations():
 
     return jsonify(models_to_list(destinations))
 
+@app.route('/get_destination/<int:destination_id>', methods=['GET'])
+@login_required
+def get_destination(destination_id):
+    destination_data, status_code = get_entry(Destination, destination_id)
+
+    if status_code != 200:
+        return jsonify({'error': 'Destination nicht gefunden oder nicht berechtigt'}), status_code
+
+    return jsonify(destination_data), status_code
+
 @app.route('/edit_destination/<int:destination_id>', methods=['POST'])
 @login_required
 def edit_destination(destination_id):
     data = request.get_json()
-    return edit_entry(Destination, destination_id, user_id=current_user.id, data=data)
+
+    # Sicherstellen, dass die Destination dem aktuellen Benutzer gehört
+    destination = Destination.query.filter_by(id=destination_id, user_id=current_user.id).first()
+
+    if not destination:
+        return jsonify({'error': 'Destination nicht gefunden oder nicht berechtigt'}), 403
+
+    return edit_entry(Destination, destination_id, data)
 
 @app.route('/reorder_destinations', methods=['POST'])
 @login_required
@@ -168,11 +194,33 @@ def get_activities(destination_id):
         'activities': models_to_list(activities)  # Kein manuelles Mapping mehr nötig!
     })
 
-@app.route('/edit_activity/<int:destination_id>/<int:activity_id>', methods=['POST'])
+@app.route('/get_activity/<int:activity_id>', methods=['GET'])
 @login_required
-def edit_activity(destination_id, activity_id):
+def get_activity(activity_id):
+    # Benutze die Hilfsfunktion, um die Activity-Daten zu holen
+    activity_data, status_code = get_entry(Activity, activity_id)
+
+    if status_code != 200:
+        return jsonify({'error': 'Activity nicht gefunden'}), status_code
+
+    # Sicherstellen, dass der Benutzer Zugriff auf die Activity hat
+    activity = Activity.query.get(activity_id)
+    if activity.destination.owner.id != current_user.id:
+        return jsonify({'error': 'Nicht autorisiert'}), 403
+
+    return jsonify(activity_data), status_code
+
+@app.route('/edit_activity/<int:activity_id>', methods=['POST'])
+@login_required
+def edit_activity(activity_id):
     data = request.get_json()
-    return edit_entry(Activity, activity_id, user_id=current_user.id, destination_id=destination_id, data=data)
+    activity = Activity.query.get(activity_id)
+
+    # Stelle sicher, dass der Nutzer berechtigt ist, die Activity zu bearbeiten
+    if activity.destination.owner.id != current_user.id:
+        return jsonify({'error': 'Nicht autorisiert'}), 403
+
+    return edit_entry(Activity, activity_id, data)
 
 @app.route('/reorder_activities/<int:destination_id>', methods=['POST'])
 @login_required
@@ -182,8 +230,6 @@ def reorder_activities(destination_id):
     return reorder_items(Activity, {"destination_id": destination_id}, new_order, "activities")
 
 '''
-Einzelne Destination anzeigen
-Einzelne Activity anzeigen
 Destinations suchen
 Activities suchen
 Profil löschen
