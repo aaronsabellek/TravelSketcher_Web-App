@@ -1,4 +1,5 @@
 from flask import jsonify
+from sqlalchemy import func, String, Text
 
 import re
 from models import db, User, Destination, Activity
@@ -117,4 +118,31 @@ def reorder_items(model, filter_by, new_order, item_name):
 
     db.session.commit()
     return jsonify({"message": f"{item_name.capitalize()} erfolgreich umsortiert!"}), 200
+
+def create_search_query(model, search_query, exclude_fields):
+    """
+    Erstellt eine SQLAlchemy-Abfrage für eine unscharfe Suche in einem bestimmten Modell.
+    Die Felder `id` und `position` sowie andere angegebene Felder werden ausgeschlossen.
+    """
+    # Dynamische Erstellung der Filterbedingung: Felder durchsuchen, die nicht ausgeschlossen sind
+    filters = []
+    for column in model.__table__.columns:
+        if column.name not in exclude_fields and isinstance(column.type, (String, Text)):
+            filters.append(func.lower(getattr(model, column.name)).contains(func.lower(search_query)))
+
+    # Kombiniere alle Filter mit `or`-Verknüpfung, damit ein Treffer in einem der Felder ausreicht
+    query = db.session.query(model)
+    query = query.filter(
+        db.or_(*filters)  # Übergebe alle Filterbedingungen als OR-Bedingung
+    )
+
+    return query
+
+def search_resources(model, search_query, exclude_fields):
+    """
+    Führt eine Suche für das gegebene Modell aus und gibt die Ergebnisse als Liste von Dictionaries zurück.
+    """
+    query = create_search_query(model, search_query, exclude_fields)
+    results = query.all()
+    return [model_to_dict(resource) for resource in results]
 

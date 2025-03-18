@@ -208,6 +208,57 @@ def test_reorder_activities(session):
     destination_id = 1
     reorder_items(session, activities_url, reorder_url, "activities", destination_id=destination_id)
 
+def test_search(session):
+    print("Test: Suche nach Schlagwort in Destinations und Activities")
+
+    search_query = "helsin"
+    resource_type = "both"
+
+    # URL der Such-API
+    search_url = f'{url}/search'
+
+    # Test mit 'search_query' und 'resource_type' als Parameter
+    response = session.get(search_url, params={
+        'search_query': search_query,
+        'resource_type': resource_type
+    })
+
+    print(f'Search for "{search_query}" in resource type: {resource_type}')
+
+    # Überprüfen, ob die Antwort den Statuscode 200 hat
+    assert response.status_code == 200, f"Fehler bei der Suche. Statuscode: {response.status_code}, Antwort: {response.text}"
+
+    # Ergebnisse aus der Antwort extrahieren
+    data = response.json()
+    assert 'results' in data, "Es wurden keine Ergebnisse gefunden."
+    results = data['results']
+
+    # Überprüfen, ob Ergebnisse zurückgegeben wurden
+    assert len(results) > 0, f"Keine Ergebnisse für die Suche nach '{search_query}'"
+
+    destinations = []
+    activities = []
+
+    for entry in results:
+        if 'destination_id' in entry:  # Eintrag ist eine Activity (hat eine destination_id)
+            activities.append(entry)
+        else:  # Eintrag ist eine Destination
+            destinations.append(entry)
+
+    # Ausgabe der Destinations
+    if destinations:
+        print("Destinations:")
+        for destination in destinations:
+            print(f"Id: {destination['id']}, Title: {destination['title']}")
+
+    # Ausgabe der Activities
+    if activities:
+        print("Activities:")
+        for activity in activities:
+            print(f"Id: {activity['id']}, Title: {activity['title']}")
+
+    print("Suche erfolgreich durchgeführt und Ergebnisse überprüft!")
+
 
 # Ausführen der Tests
 if __name__ == '__main__':
@@ -228,8 +279,9 @@ if __name__ == '__main__':
     #test_reorder_destinations(session)
     #test_add_activity(session)
     #test_get_activities(session)
-    test_get_activity(session)
+    #test_get_activity(session)
     #test_edit_activity(session)
     #test_reorder_activities(session)
+    test_search(session)
 
     logout(session)

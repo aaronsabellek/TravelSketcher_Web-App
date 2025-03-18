@@ -1,6 +1,7 @@
 from flask import request, redirect, url_for, flash, jsonify
 from flask_login import login_required, current_user, login_user, logout_user
 from werkzeug.security import generate_password_hash, check_password_hash
+from sqlalchemy import func
 
 from models import User, Destination, Activity
 from app import app, db, login_manager
@@ -11,7 +12,9 @@ from helpers import (
     create_entry,
     get_entry,
     edit_entry,
-    reorder_items
+    reorder_items,
+    create_search_query,
+    search_resources
 )
 
 # Benutzer laden
@@ -229,9 +232,32 @@ def reorder_activities(destination_id):
     new_order = data.get("activities")
     return reorder_items(Activity, {"destination_id": destination_id}, new_order, "activities")
 
+
+@app.route('/search', methods=['GET'])
+@login_required
+def search():
+    search_query = request.args.get('search_query')  # Der Suchtext
+    resource_type = request.args.get('resource_type')  # 'destination', 'activity' oder 'both' für beide
+
+    if not search_query:
+        return jsonify({'error': 'Suchtext ist erforderlich'}), 400
+
+    # Felder, die wir nicht durchsuchen wollen (ID, Position und Beziehungen)
+    exclude_fields = ['id', 'position', 'user_id', 'destination_id']  # Anpassbar je nach Bedarf
+
+    results_data = []
+
+    # Wenn nur 'destination' angegeben ist
+    if resource_type == 'destination' or resource_type == 'both' or not resource_type:
+        results_data.extend(search_resources(Destination, search_query, exclude_fields))
+
+    # Wenn nur 'activity' angegeben ist
+    if resource_type == 'activity' or resource_type == 'both' or not resource_type:
+        results_data.extend(search_resources(Activity, search_query, exclude_fields))
+
+    return jsonify(results=results_data), 200
+
 '''
-Destinations suchen
-Activities suchen
 Profil löschen
 Destination löschen
 Activity löschen
