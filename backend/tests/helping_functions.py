@@ -1,6 +1,6 @@
-# HILFSFUNKTIONEN FÜR DIE TESTS
+from .helping_variables import url, login_data_username
 
-from .helping_variables import login_data_username,url
+# HILFSFUNKTIONEN FÜR DIE TESTS
 
 #Login mit einem bestimmten Datenpaket
 def login(session, login_data=None):
@@ -11,6 +11,14 @@ def login(session, login_data=None):
     assert response.status_code == 200, f"Login fehlgeschlagen! Status: {response.status_code}, Antwort: {response.text}"
 
     print('Login erfolgreich!')
+
+#Hilfsfunktion zum Logout
+def logout(session):
+    logout_url = f'{url}/logout'
+    response = session.post(logout_url)
+
+    assert response.status_code == 200, f"Fehler beim Logout! Statuscode: {response.status_code}, Antwort: {response.text}"
+    print("Logout erfolgreich!")
 
 #Holen von Profildaten
 def get_profile_data(session):
@@ -24,24 +32,6 @@ def get_profile_data(session):
     print("Profildaten erfolgreich abgerufen!")
 
     return profile_data
-
-#Verändern des Usernames
-def edit_username(session, new_username):
-    edit_username_url = f'{url}/edit_username'
-    edit_data = {'new_username': new_username}
-
-    response = session.post(edit_username_url, json=edit_data)
-    assert response.status_code == 200, f"Fehler beim Ändern des Benutzernamens! Status: {response.status_code}, Antwort: {response.text}"
-
-    print("Benutzername erfolgreich geändert")
-
-    profile_data = get_profile_data(session)
-    assert profile_data is not None, "Fehler: Profil-Daten konnten nicht abgerufen werden!"
-    assert profile_data['username'] == new_username, (
-        f"Fehler: Erwarteter Username '{new_username}', aber erhalten: '{profile_data['username']}'"
-    )
-
-    print(f"Benutzername erfolgreich geändert und überprüft: {profile_data['username']}")
 
 #Item hinzufügen (Destination oder Activity)
 def add_item(session, url, data, item_key, expected_fields):
@@ -92,7 +82,7 @@ def get_and_check_response(session, url, expected_key):
         assert 'title' in item and 'id' in item, f"Fehler: 'title' oder 'id' fehlt im Element: {item}"
         print(f"- {item['title']} (ID: {item['id']})")
 
-def test_get_resource(session, resource_type, resource_id):
+def get_resource(session, resource_type, resource_id):
     """
     Hilfsfunktion, um eine Ressource abzurufen und zu testen.
     """
@@ -191,10 +181,3 @@ def reorder_items(session, url, reorder_url, item_key, destination_id=None):
 
     print("Test erfolgreich abgeschlossen!")
 
-#Hilfsfunktion zum Logout
-def logout(session):
-    logout_url = f'{url}/logout'
-    response = session.get(logout_url)
-
-    assert response.status_code == 200, f"Fehler beim Logout! Statuscode: {response.status_code}, Antwort: {response.text}"
-    print("Logout erfolgreich!")

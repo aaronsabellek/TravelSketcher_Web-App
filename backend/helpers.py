@@ -2,7 +2,7 @@ from flask import jsonify
 from sqlalchemy import func, String, Text
 
 import re
-from models import db, User, Destination, Activity
+from models import db, Destination, Activity
 
 
 def model_to_dict(model):

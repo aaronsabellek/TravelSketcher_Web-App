@@ -1,4 +1,4 @@
-from flask import request, redirect, url_for, flash, jsonify
+from flask import request, jsonify
 from flask_login import login_required, current_user, login_user, logout_user
 from werkzeug.security import generate_password_hash, check_password_hash
 
@@ -75,7 +75,7 @@ def register():
 def login():
     # Wenn der Benutzer bereits eingeloggt ist, zurück zum Dashboard
     if current_user.is_authenticated:
-        return jsonify({'message': 'Bereits eingeloggt', 'redirect': '/dashboard'}), 200
+        return jsonify({'message': 'Bereits eingeloggt'}), 200
 
     # JSON-Daten aus der Anfrage
     data = request.get_json()
@@ -92,16 +92,15 @@ def login():
 
     if user and check_password_hash(user.password, password):
         login_user(user)
-        return jsonify({'message': 'Erfolgreich eingeloggt', 'redirect': '/dashboard'}), 200
+        return jsonify({'message': 'Erfolgreich eingeloggt'}), 200
 
     return jsonify({'error': 'Login fehlgeschlagen. Überprüfe deinen Benutzernamen und dein Passwort.'}), 401
 
-@app.route('/logout')
+@app.route('/logout', methods=['POST'])
 @login_required
 def logout():
     logout_user()
-    flash("Erfolgreich abgemeldet.", "success")
-    return redirect(url_for('home'))
+    return jsonify({"message": "Erfolgreich abgemeldet"}), 200
 
 @app.route('/profile', methods=['GET'])
 @login_required
@@ -282,9 +281,8 @@ Wartungsmodus
 E-Mail verification für Registration
 Email bearbeiten, wenn E-Mail-verification drin ist
 Passwort zurücksetzen, wenn E-Mail-verification drin ist
-Hilfsfunktion, die Bearbeiten der Userdaten übernimmt
 
-Tests mit Pytest überarbeiten?
+Test mit Pytest anpassen: Vor jedem Test gleiche Einträge bereitstellen, nach jedem Test bereinigen
 
 Frontend braucht API zu geonames, um Längen- und Breitengrad zu validieren und Städtenamen für spätere Links zu validieren
 Frontend braucht API zu AI, die bestimmte Felder selbstständig ausfüllt und destinations/activities selbst vorschlägt

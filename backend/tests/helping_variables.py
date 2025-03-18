@@ -1,10 +1,13 @@
+import uuid
+
+
 # HILFSVARIABLEN UND -FUNKTIONEN FÜR DIE TESTS
 
 url = "http://127.0.0.1:5000"
 
 registration_data = {
-        "username": "testuser",
-        "email": "testuser@example.com",
+        "username": f"test_{uuid.uuid4().hex}",
+        "email": f"test_{uuid.uuid4().hex}@example.com",
         "password": "testpassword123!",
         "city": "Leipzig",
         "longitude": "12.3731",

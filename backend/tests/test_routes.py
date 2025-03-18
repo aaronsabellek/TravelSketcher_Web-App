@@ -3,27 +3,29 @@ from app import app
 from models import User
 
 from .helping_variables import (
+    url,
+    registration_data,
     login_data_username,
     login_data_email,
-    registration_data,
-    updated_profile_data,
     original_profile_data,
+    updated_profile_data,
     destination_data,
     updated_destination_data,
     activity_data,
-    updated_activity_data,
-    url
+    updated_activity_data
 )
 
 from .helping_functions import (
-    login, get_profile_data,
-    edit_username, add_item,
+    login,
+    logout,
+    get_profile_data,
+    add_item,
     get_and_check_response,
-    test_get_resource,
+    get_resource,
     edit_item,
-    reorder_items,
-    logout
+    reorder_items
 )
+
 
 # FUNKTIONEN ZUM TESTEN DER ROUTES
 
@@ -32,7 +34,7 @@ def test_registration():
     print("Test: Benutzerregistrierung")
 
     register_url = f"{url}/register"
-    user_data = registration_data
+    user_data=registration_data
 
     response = requests.post(register_url, json=user_data)
     assert response.status_code == 201, f"Fehler: Registrierung fehlgeschlagen! Status: {response.status_code}, Antwort: {response.text}"
@@ -50,7 +52,7 @@ def test_registration():
 # Funktion zum Testen des Logins
 def test_login():
     print("Test: Login mit Username und mit Email")
-    #Beim Abrufen dieser Funktion Login und Logour herauskommentieren
+    #Beim Abrufen dieser Funktion Login und Logout herauskommentieren
     session = requests.Session()
 
     print("Login mit Benutzernamen")
@@ -124,7 +126,7 @@ def test_get_destination(session):
     print("Test zum Abrufen einer spezifischen Destination")
 
     destination_id = 1
-    test_get_resource(session, 'destination', destination_id)
+    get_resource(session, 'destination', destination_id)
 
 # Funktion zum Testen des Bearbeitens einer Destination
 def test_edit_destination(session):
@@ -145,7 +147,6 @@ def test_reorder_destinations(session):
 
     # Nutzung der Hilfsfunktion
     reorder_items(session, destinations_url, reorder_url, "destinations")
-
 
 def test_add_activity(session):
     print("Test zum Hinzufügen einer Aktivität zu einer Destination")
@@ -184,7 +185,7 @@ def test_get_activity(session):
     print('Test: Anzeigen einer bestimmten Activity')
 
     activity_id = 1
-    test_get_resource(session, 'activity', activity_id)
+    get_resource(session, 'activity', activity_id)
 
 def test_edit_activity(session):
     print("Test: Bearbeiten einer Activity")
@@ -259,29 +260,3 @@ def test_search(session):
 
     print("Suche erfolgreich durchgeführt und Ergebnisse überprüft!")
 
-
-# Ausführen der Tests
-if __name__ == '__main__':
-    # Comment out functions as needed
-
-    #test_registration()
-    #test_login()
-
-    session = requests.Session()
-    login(session)
-
-    #test_get_profile(session)
-    #test_edit_profile(session)
-    #test_add_destination(session)
-    #test_get_destinations(session)
-    #test_get_destination(session)
-    #test_edit_destination(session)
-    #test_reorder_destinations(session)
-    #test_add_activity(session)
-    #test_get_activities(session)
-    #test_get_activity(session)
-    #test_edit_activity(session)
-    #test_reorder_activities(session)
-    test_search(session)
-
-    logout(session)

@@ -11,3 +11,7 @@ if os.path.exists(db_path):
 with app.app_context():
     db.create_all()
     print("Datenbank wurde erstellt!")
+
+'''
+Ggf. erweitern um das direkte Erstellen von Dummy data
+'''
