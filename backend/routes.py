@@ -1,21 +1,23 @@
 from flask import request, redirect, url_for, flash, jsonify
 from flask_login import login_required, current_user, login_user, logout_user
 from werkzeug.security import generate_password_hash, check_password_hash
-from sqlalchemy import func
 
 from models import User, Destination, Activity
 from app import app, db, login_manager
 from helpers import (
-    model_to_dict,
     models_to_list,
     is_valid_email,
     create_entry,
     get_entry,
     edit_entry,
     reorder_items,
-    create_search_query,
     search_resources
 )
+
+
+'''
+                APIs FOR USER
+'''
 
 # Benutzer laden
 @login_manager.user_loader
@@ -122,6 +124,10 @@ def edit_username():
 
     return edit_entry(User, current_user.id, data)
 
+'''
+                APIs FOR DESTINATIONS
+'''
+
 @app.route('/add_destination', methods=['POST'])
 @login_required
 def add_destination():
@@ -165,6 +171,11 @@ def reorder_destinations():
     data = request.get_json()
     new_order = data.get("destinations")
     return reorder_items(Destination, {"user_id": current_user.id}, new_order, "destinations")
+
+
+'''
+                APIs FOR ACTIVITIES
+'''
 
 @app.route('/add_activity', methods=['POST'])
 @login_required
@@ -232,6 +243,9 @@ def reorder_activities(destination_id):
     new_order = data.get("activities")
     return reorder_items(Activity, {"destination_id": destination_id}, new_order, "activities")
 
+'''
+                APIs FOR DESTINATIONS AND ACTIVITIES
+'''
 
 @app.route('/search', methods=['GET'])
 @login_required
@@ -257,6 +271,7 @@ def search():
 
     return jsonify(results=results_data), 200
 
+
 '''
 Profil löschen
 Destination löschen
@@ -268,6 +283,8 @@ E-Mail verification für Registration
 Email bearbeiten, wenn E-Mail-verification drin ist
 Passwort zurücksetzen, wenn E-Mail-verification drin ist
 Hilfsfunktion, die Bearbeiten der Userdaten übernimmt
+
+Tests mit Pytest überarbeiten?
 
 Frontend braucht API zu geonames, um Längen- und Breitengrad zu validieren und Städtenamen für spätere Links zu validieren
 Frontend braucht API zu AI, die bestimmte Felder selbstständig ausfüllt und destinations/activities selbst vorschlägt
