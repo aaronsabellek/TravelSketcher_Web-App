@@ -1,5 +1,53 @@
 from .helping_variables import url, login_data_username
 
+# HILFSFUNKTION ZUM BEFÜLLEN DER NEUEN DATENBANK
+def get_dummy_data():
+    """Gibt Dummy-Daten für die Tests zurück."""
+    return {
+        'user': {
+            'username': 'test_user',
+            'email': 'test_user@example.com',
+            'password': 'testpassword123!',
+            'city': 'Leipzig',
+            'longitude': '12.3731',
+            'latitude': '51.3397',
+            'country': 'Deutschland',
+            'currency': 'EUR'
+        },
+        'destinations': [
+            {
+                'title': 'Paris',
+                'country': 'Frankreich',
+                'position': 1,
+                'activities': [
+                    {'title': 'Eiffelturm besuchen', 'country': 'Frankreich', 'position': 1},
+                    {'title': 'Louvre Museum', 'country': 'Frankreich', 'position': 2},
+                    {'title': 'Notre-Dame Cathedral besichtigen', 'country': 'Frankreich', 'position': 3},
+                    {'title': 'Bootsfahrt auf der Seine', 'country': 'Frankreich', 'position': 4},
+                    {'title': 'Champs-Élysées spazieren', 'country': 'Frankreich', 'position': 5}
+                ]
+            },
+            {
+                'title': 'New York',
+                'country': 'USA',
+                'position': 2,
+                'activities': [
+                    {'title': 'Central Park', 'country': 'USA', 'position': 1},
+                    {'title': 'Statue of Liberty', 'country': 'USA', 'position': 2}
+                ]
+            },
+            {
+                'title': 'Tokyo',
+                'country': 'Japan',
+                'position': 3,
+                'activities': [
+                    {'title': 'Shibuya Crossing', 'country': 'Japan', 'position': 1},
+                    {'title': 'Mount Fuji', 'country': 'Japan', 'position': 2}
+                ]
+            }
+        ]
+    }
+
 # HILFSFUNKTIONEN FÜR DIE TESTS
 
 #Login mit einem bestimmten Datenpaket

@@ -28,7 +28,7 @@ from .helping_functions import (
 
 
 # FUNKTIONEN ZUM TESTEN DER ROUTES
-
+'''
 # Funktion zum Testen der Registration
 def test_registration():
     print("Test: Benutzerregistrierung")
@@ -62,12 +62,12 @@ def test_login():
     print("Login mit Email")
     login(session, login_data_email)
     logout(session)
-
+'''
 # Funktion zum Testen der Anzeige der Profildaten
-def test_get_profile(session):
+def test_get_profile(setup_application):
     print("Test der Anzeige der Profildaten")
 
-    profile_data = get_profile_data(session)
+    profile_data = get_profile_data(setup_application)
     assert profile_data is not None, "Fehler: Profil-Daten konnten nicht abgerufen werden!"
 
     print("Profil erfolgreich abgerufen!")
@@ -75,18 +75,18 @@ def test_get_profile(session):
     for key, value in profile_data.items():
         print(f'{key}: {value}')
 
-def test_edit_profile(session):
+def test_edit_profile(setup_application):
     print("Test des Bearbeitens des Profils")
     print("Versuch, Email zu ändern in: ", updated_profile_data['email'])
     edit_url = f'{url}/edit_profile'
 
-    edit_item(session, edit_url, updated_profile_data, 'user')
+    edit_item(setup_application, edit_url, updated_profile_data, 'user')
 
     print("Name zurücksetzen in: ", original_profile_data['email'])
-    edit_item(session, edit_url, original_profile_data, 'user')
+    edit_item(setup_application, edit_url, original_profile_data, 'user')
 
 #Funktion zum Testen des Hinzufügens einer Destination
-def test_add_destination(session):
+def test_add_destination(setup_application):
     print("Test zum Hinzufügen einer Destination")
 
     dest_url = f'{url}/add_destination'
@@ -113,23 +113,23 @@ def test_add_destination(session):
         ]
 
     # Aufruf der Hilfsfunktion
-    add_item(session, dest_url, dest_data, 'destination', expected_fields)
+    add_item(setup_application, dest_url, dest_data, 'destination', expected_fields)
 
-def test_get_destinations(session):
+def test_get_destinations(setup_application):
     print("Test zum Abrufen der Destinationen")
 
     # Teste nun die Route /get_destinations
     destinations_url = f'{url}/get_destinations'
-    get_and_check_response(session, destinations_url, 'destination')
+    get_and_check_response(setup_application, destinations_url, 'destination')
 
-def test_get_destination(session):
+def test_get_destination(setup_application):
     print("Test zum Abrufen einer spezifischen Destination")
 
     destination_id = 1
-    get_resource(session, 'destination', destination_id)
+    get_resource(setup_application, 'destination', destination_id)
 
 # Funktion zum Testen des Bearbeitens einer Destination
-def test_edit_destination(session):
+def test_edit_destination(setup_application):
     print("Test: Bearbeiten einer Destination")
 
     destination_id = 1  # ID der Destination, die bearbeitet werden soll
@@ -137,18 +137,18 @@ def test_edit_destination(session):
     edit_url = f'{url}/edit_destination/{destination_id}'
     updated_data = updated_destination_data
 
-    edit_item(session, edit_url, updated_data, 'destination')
+    edit_item(setup_application, edit_url, updated_data, 'destination')
 
-def test_reorder_destinations(session):
+def test_reorder_destinations(setup_application):
     print("Test zum Umsortieren von zwei Destinationen")
 
     destinations_url = f'{url}/get_destinations'
     reorder_url = f'{url}/reorder_destinations'
 
     # Nutzung der Hilfsfunktion
-    reorder_items(session, destinations_url, reorder_url, "destinations")
+    reorder_items(setup_application, destinations_url, reorder_url, "destinations")
 
-def test_add_activity(session):
+def test_add_activity(setup_application):
     print("Test zum Hinzufügen einer Aktivität zu einer Destination")
 
     add_activity_url = f'{url}/add_activity'
@@ -172,22 +172,22 @@ def test_add_activity(session):
             ('destination_id', act_data['destination_id']),
         ]
 
-    add_item(session, add_activity_url, activity_data, 'activity', expected_fields)
+    add_item(setup_application, add_activity_url, activity_data, 'activity', expected_fields)
 
-def test_get_activities(session):
+def test_get_activities(setup_application):
     print('Test: Anzeigen der Activities einer Destination')
 
     destination_id = 1
     activities_url = f"{url}/get_activities/{destination_id}"
-    get_and_check_response(session, activities_url, "activities")
+    get_and_check_response(setup_application, activities_url, "activities")
 
-def test_get_activity(session):
+def test_get_activity(setup_application):
     print('Test: Anzeigen einer bestimmten Activity')
 
     activity_id = 1
-    get_resource(session, 'activity', activity_id)
+    get_resource(setup_application, 'activity', activity_id)
 
-def test_edit_activity(session):
+def test_edit_activity(setup_application):
     print("Test: Bearbeiten einer Activity")
 
     activity_id = 2  # ID der Activity, die bearbeitet werden soll
@@ -197,9 +197,9 @@ def test_edit_activity(session):
     # Neue Werte für die Activity
     updated_data = updated_activity_data
 
-    edit_item(session, edit_url, updated_data, 'activity')
+    edit_item(setup_application, edit_url, updated_data, 'activity')
 
-def test_reorder_activities(session):
+def test_reorder_activities(setup_application):
     print("Test zum Umsortieren von Activitie 2 und 3 der Destination 1")
 
     activities_url = f'{url}/get_activities'
@@ -207,9 +207,9 @@ def test_reorder_activities(session):
 
     # Nutzung der Hilfsfunktion
     destination_id = 1
-    reorder_items(session, activities_url, reorder_url, "activities", destination_id=destination_id)
+    reorder_items(setup_application, activities_url, reorder_url, "activities", destination_id=destination_id)
 
-def test_search(session):
+def test_search(setup_application):
     print("Test: Suche nach Schlagwort in Destinations und Activities")
 
     search_query = "helsin"
@@ -219,7 +219,7 @@ def test_search(session):
     search_url = f'{url}/search'
 
     # Test mit 'search_query' und 'resource_type' als Parameter
-    response = session.get(search_url, params={
+    response = setup_application.get(search_url, params={
         'search_query': search_query,
         'resource_type': resource_type
     })

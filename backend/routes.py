@@ -272,6 +272,10 @@ def search():
 
 
 '''
+helpung_variables an neue Pytest-Architektur anpassen
+create_db.py löschen
+Tests erweitern um Fälle, in denen falsche Daten eingegeben werden?
+
 Profil löschen
 Destination löschen
 Activity löschen
@@ -281,8 +285,6 @@ Wartungsmodus
 E-Mail verification für Registration
 Email bearbeiten, wenn E-Mail-verification drin ist
 Passwort zurücksetzen, wenn E-Mail-verification drin ist
-
-Test mit Pytest anpassen: Vor jedem Test gleiche Einträge bereitstellen, nach jedem Test bereinigen
 
 Frontend braucht API zu geonames, um Längen- und Breitengrad zu validieren und Städtenamen für spätere Links zu validieren
 Frontend braucht API zu AI, die bestimmte Felder selbstständig ausfüllt und destinations/activities selbst vorschlägt

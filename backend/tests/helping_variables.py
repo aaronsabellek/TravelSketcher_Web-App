@@ -17,8 +17,8 @@ registration_data = {
 }
 
 updated_profile_data = {
-        "username": "testuser",
-        "email": "testuser@example_edited.com",
+        "username": f"test_{uuid.uuid4().hex}",
+        "email": f"test_{uuid.uuid4().hex}@example.com",
         "city": "Leipzig",
         "longitude": "12.3731",
         "latitude": "51.3397",
