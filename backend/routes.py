@@ -312,6 +312,8 @@ E-Mail verification für Registration
 Email bearbeiten, wenn E-Mail-verification drin ist
 Passwort zurücksetzen, wenn E-Mail-verification drin ist
 
+Sicherheitsabfragen in APIs durch Hilfsfunktoinen zusammenfassen?
+
 Tests mit Pytest gründlich überarbeiten
 
 Frontend braucht API zu geonames, um Längen- und Breitengrad zu validieren und Städtenamen für spätere Links zu validieren
