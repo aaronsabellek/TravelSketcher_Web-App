@@ -1,6 +1,8 @@
 from models import User, Destination, Activity
 
-def test_user_creation(setup_application):
+# ÜBERARBEITEN: DATEN DIREKT AUS DUMMY DATA EXTRAHIEREN
+
+def test_user_creation(setup_database):
     """Testet, ob der Benutzer korrekt erstellt wurde."""
     # Greife auf den User zu
     user = User.query.filter_by(username='test_user').first()
@@ -10,7 +12,7 @@ def test_user_creation(setup_application):
     assert user.city == 'Leipzig'
     assert user.currency == 'EUR'
 
-def test_destination_creation(setup_application):
+def test_destination_creation(setup_database):
     """Testet, ob die Destinationen korrekt erstellt wurden."""
     # Greife auf eine Destination zu
     destination = Destination.query.filter_by(title='Paris').first()
@@ -18,7 +20,7 @@ def test_destination_creation(setup_application):
     assert destination is not None
     assert destination.country == 'Frankreich'
 
-def test_activity_creation(setup_application):
+def test_activity_creation(setup_database):
     """Testet, ob Activities korrekt erstellt wurden."""
     # Greife auf eine Activity zu
     activity = Activity.query.filter_by(title='Eiffelturm besuchen').first()

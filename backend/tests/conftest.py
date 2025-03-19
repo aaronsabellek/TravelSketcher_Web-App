@@ -5,20 +5,16 @@ from app import app, db
 from models import User, Destination, Activity
 from werkzeug.security import generate_password_hash
 
-from .helping_functions import get_dummy_data
-from .helping_variables import url
+from .helping_variables import url, dummy_data, login_data_username
 
-@pytest.fixture(scope="module")
-def setup_application():
+@pytest.fixture(scope="function")
+def setup_database():
     """Fixture zur Vorbereitung der Testdatenbank und Session."""
     # Setze den Application Context
     with app.app_context():
         # Leere die Datenbank
         db.drop_all()
         db.create_all()
-
-        # Füge Dummy-Daten hinzu
-        dummy_data = get_dummy_data()
 
         hashed_password = generate_password_hash(dummy_data['user']['password'])
 
@@ -58,25 +54,29 @@ def setup_application():
 
             db.session.commit()
 
-        # Session für Tests vorbereiten
-        session = requests.Session()
-        login_url = f'{url}/login'
-        login_data = {
-            "identifier": "test_user",  # Benutzername
-            "password": "testpassword123!"  # Passwort
-        }
-        #login_url = f'{url}/login'
-        response_login = session.post(login_url, json=login_data)
-        assert response_login.status_code == 200, f"Login fehlgeschlagen! Status: {response_login.status_code}, Antwort: {response_login.text}"
-
-        yield session  # Session für Tests bereitstellen und Datenbankzugriff
-
-        # Logout
-        logout_url = f'{url}/logout'
-        response_logout = session.post(logout_url)
-        assert response_logout.status_code == 200, f"Fehler beim Logout! Statuscode: {response_logout.status_code}, Antwort: {response_logout.text}"
+        yield db
 
         # Bereinigen der db
         db.session.remove()
         db.drop_all()
 
+@pytest.fixture(scope="function")
+def setup_logged_in_user(setup_database):
+    """Fixture, die einen User einloggt und eine Requests-Session zurückgibt."""
+    session = requests.Session()
+
+    with app.app_context():
+        user = User.query.filter_by(username=login_data_username['identifier']).first()
+        assert user is not None, "User existiert nicht in der Datenbank!"
+
+    login_url = f'{url}/login'
+
+    response_login = session.post(login_url, json=login_data_username)
+    assert response_login.status_code == 200, f"Login fehlgeschlagen! Status: {response_login.status_code}, Antwort: {response_login.text}"
+
+    yield session  # Session für Tests bereitstellen
+
+    # Logout
+    logout_url = f'{url}/logout'
+    response_logout = session.post(logout_url)
+    assert response_logout.status_code == 200, f"Fehler beim Logout! Statuscode: {response_logout.status_code}, Antwort: {response_logout.text}"

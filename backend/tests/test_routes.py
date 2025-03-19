@@ -7,12 +7,9 @@ from .helping_variables import (
     registration_data,
     login_data_username,
     login_data_email,
-    original_profile_data,
     updated_profile_data,
     destination_data,
-    updated_destination_data,
     activity_data,
-    updated_activity_data
 )
 
 from .helping_functions import (
@@ -28,9 +25,9 @@ from .helping_functions import (
 
 
 # FUNKTIONEN ZUM TESTEN DER ROUTES
-'''
+
 # Funktion zum Testen der Registration
-def test_registration():
+def test_registration(setup_database):
     print("Test: Benutzerregistrierung")
 
     register_url = f"{url}/register"
@@ -50,9 +47,8 @@ def test_registration():
     print(f"Benutzer erfolgreich in der Datenbank gefunden: {user.username}")
 
 # Funktion zum Testen des Logins
-def test_login():
+def test_login(setup_database):
     print("Test: Login mit Username und mit Email")
-    #Beim Abrufen dieser Funktion Login und Logout herauskommentieren
     session = requests.Session()
 
     print("Login mit Benutzernamen")
@@ -62,12 +58,12 @@ def test_login():
     print("Login mit Email")
     login(session, login_data_email)
     logout(session)
-'''
+
 # Funktion zum Testen der Anzeige der Profildaten
-def test_get_profile(setup_application):
+def test_get_profile(setup_logged_in_user):
     print("Test der Anzeige der Profildaten")
 
-    profile_data = get_profile_data(setup_application)
+    profile_data = get_profile_data(setup_logged_in_user)
     assert profile_data is not None, "Fehler: Profil-Daten konnten nicht abgerufen werden!"
 
     print("Profil erfolgreich abgerufen!")
@@ -75,18 +71,15 @@ def test_get_profile(setup_application):
     for key, value in profile_data.items():
         print(f'{key}: {value}')
 
-def test_edit_profile(setup_application):
+def test_edit_profile(setup_logged_in_user):
     print("Test des Bearbeitens des Profils")
-    print("Versuch, Email zu ändern in: ", updated_profile_data['email'])
+    print(f"Versuch, Email zu ändern in: {updated_profile_data['email']}")
     edit_url = f'{url}/edit_profile'
 
-    edit_item(setup_application, edit_url, updated_profile_data, 'user')
-
-    print("Name zurücksetzen in: ", original_profile_data['email'])
-    edit_item(setup_application, edit_url, original_profile_data, 'user')
+    edit_item(setup_logged_in_user, edit_url, updated_profile_data, 'user')
 
 #Funktion zum Testen des Hinzufügens einer Destination
-def test_add_destination(setup_application):
+def test_add_destination(setup_logged_in_user):
     print("Test zum Hinzufügen einer Destination")
 
     dest_url = f'{url}/add_destination'
@@ -113,42 +106,41 @@ def test_add_destination(setup_application):
         ]
 
     # Aufruf der Hilfsfunktion
-    add_item(setup_application, dest_url, dest_data, 'destination', expected_fields)
+    add_item(setup_logged_in_user, dest_url, dest_data, 'destination', expected_fields)
 
-def test_get_destinations(setup_application):
+def test_get_destinations(setup_logged_in_user):
     print("Test zum Abrufen der Destinationen")
 
     # Teste nun die Route /get_destinations
     destinations_url = f'{url}/get_destinations'
-    get_and_check_response(setup_application, destinations_url, 'destination')
+    get_and_check_response(setup_logged_in_user, destinations_url, 'destination')
 
-def test_get_destination(setup_application):
+def test_get_destination(setup_logged_in_user):
     print("Test zum Abrufen einer spezifischen Destination")
 
     destination_id = 1
-    get_resource(setup_application, 'destination', destination_id)
+    get_resource(setup_logged_in_user, 'destination', destination_id)
 
 # Funktion zum Testen des Bearbeitens einer Destination
-def test_edit_destination(setup_application):
+def test_edit_destination(setup_logged_in_user):
     print("Test: Bearbeiten einer Destination")
 
     destination_id = 1  # ID der Destination, die bearbeitet werden soll
 
     edit_url = f'{url}/edit_destination/{destination_id}'
-    updated_data = updated_destination_data
 
-    edit_item(setup_application, edit_url, updated_data, 'destination')
+    edit_item(setup_logged_in_user, edit_url, destination_data, 'destination')
 
-def test_reorder_destinations(setup_application):
+def test_reorder_destinations(setup_logged_in_user):
     print("Test zum Umsortieren von zwei Destinationen")
 
     destinations_url = f'{url}/get_destinations'
     reorder_url = f'{url}/reorder_destinations'
 
     # Nutzung der Hilfsfunktion
-    reorder_items(setup_application, destinations_url, reorder_url, "destinations")
+    reorder_items(setup_logged_in_user, destinations_url, reorder_url, "destinations")
 
-def test_add_activity(setup_application):
+def test_add_activity(setup_logged_in_user):
     print("Test zum Hinzufügen einer Aktivität zu einer Destination")
 
     add_activity_url = f'{url}/add_activity'
@@ -172,34 +164,31 @@ def test_add_activity(setup_application):
             ('destination_id', act_data['destination_id']),
         ]
 
-    add_item(setup_application, add_activity_url, activity_data, 'activity', expected_fields)
+    add_item(setup_logged_in_user, add_activity_url, activity_data, 'activity', expected_fields)
 
-def test_get_activities(setup_application):
+def test_get_activities(setup_logged_in_user):
     print('Test: Anzeigen der Activities einer Destination')
 
     destination_id = 1
     activities_url = f"{url}/get_activities/{destination_id}"
-    get_and_check_response(setup_application, activities_url, "activities")
+    get_and_check_response(setup_logged_in_user, activities_url, "activities")
 
-def test_get_activity(setup_application):
+def test_get_activity(setup_logged_in_user):
     print('Test: Anzeigen einer bestimmten Activity')
 
     activity_id = 1
-    get_resource(setup_application, 'activity', activity_id)
+    get_resource(setup_logged_in_user, 'activity', activity_id)
 
-def test_edit_activity(setup_application):
+def test_edit_activity(setup_logged_in_user):
     print("Test: Bearbeiten einer Activity")
 
     activity_id = 2  # ID der Activity, die bearbeitet werden soll
 
     edit_url = f'{url}/edit_activity/{activity_id}'
 
-    # Neue Werte für die Activity
-    updated_data = updated_activity_data
+    edit_item(setup_logged_in_user, edit_url, activity_data, 'activity')
 
-    edit_item(setup_application, edit_url, updated_data, 'activity')
-
-def test_reorder_activities(setup_application):
+def test_reorder_activities(setup_logged_in_user):
     print("Test zum Umsortieren von Activitie 2 und 3 der Destination 1")
 
     activities_url = f'{url}/get_activities'
@@ -207,19 +196,19 @@ def test_reorder_activities(setup_application):
 
     # Nutzung der Hilfsfunktion
     destination_id = 1
-    reorder_items(setup_application, activities_url, reorder_url, "activities", destination_id=destination_id)
+    reorder_items(setup_logged_in_user, activities_url, reorder_url, "activities", destination_id=destination_id)
 
-def test_search(setup_application):
+def test_search(setup_logged_in_user):
     print("Test: Suche nach Schlagwort in Destinations und Activities")
 
-    search_query = "helsin"
+    search_query = "frank"
     resource_type = "both"
 
     # URL der Such-API
     search_url = f'{url}/search'
 
     # Test mit 'search_query' und 'resource_type' als Parameter
-    response = setup_application.get(search_url, params={
+    response = setup_logged_in_user.get(search_url, params={
         'search_query': search_query,
         'resource_type': resource_type
     })

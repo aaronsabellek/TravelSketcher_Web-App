@@ -137,7 +137,6 @@ def add_destination():
 @login_required
 def get_destinations():
     destinations = Destination.query.filter_by(user_id=current_user.id).all()
-    print(f"Anzahl gefundener Destinationen: {len(destinations)}")
 
     return jsonify(models_to_list(destinations))
 
@@ -272,7 +271,6 @@ def search():
 
 
 '''
-helpung_variables an neue Pytest-Architektur anpassen
 create_db.py löschen
 Tests erweitern um Fälle, in denen falsche Daten eingegeben werden?
 
@@ -285,6 +283,8 @@ Wartungsmodus
 E-Mail verification für Registration
 Email bearbeiten, wenn E-Mail-verification drin ist
 Passwort zurücksetzen, wenn E-Mail-verification drin ist
+
+Tests mit Pytest gründlich überarbeiten
 
 Frontend braucht API zu geonames, um Längen- und Breitengrad zu validieren und Städtenamen für spätere Links zu validieren
 Frontend braucht API zu AI, die bestimmte Felder selbstständig ausfüllt und destinations/activities selbst vorschlägt
