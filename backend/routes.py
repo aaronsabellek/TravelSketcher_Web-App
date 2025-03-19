@@ -17,7 +17,7 @@ from helpers import (
 
 
 '''
-                APIs FOR USER
+                APIs FOR USERS
 '''
 
 # Benutzer laden
@@ -312,7 +312,7 @@ E-Mail verification für Registration
 Email bearbeiten, wenn E-Mail-verification drin ist
 Passwort zurücksetzen, wenn E-Mail-verification drin ist
 
-Sicherheitsabfragen in APIs durch Hilfsfunktoinen zusammenfassen?
+Überarbeiten der APIs für mehr Konsistenz
 
 Tests mit Pytest gründlich überarbeiten
 
