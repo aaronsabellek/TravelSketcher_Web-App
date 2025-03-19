@@ -14,7 +14,7 @@ class User(UserMixin, db.Model):
     currency = db.Column(db.String(20), nullable=False)
 
     # Beziehung zu Reisezielen
-    destinations = db.relationship('Destination', backref='owner', lazy=True)
+    destinations = db.relationship('Destination', backref='owner', lazy=True, cascade="all, delete")
 
     def __repr__(self):
         return f'<User {self.username}>'
@@ -41,8 +41,8 @@ class Destination(db.Model):
     description = db.Column(db.String(200), nullable=True)
     free_text = db.Column(db.String(500), nullable=True)
 
-    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
-    activities = db.relationship('Activity', backref='destination', lazy=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id', ondelete="CASCADE"), nullable=False)
+    activities = db.relationship('Activity', backref='destination', lazy=True, cascade="all, delete")
 
     def __repr__(self):
         return f'<Destination {self.title} (Position: {self.position})>'
@@ -65,7 +65,7 @@ class Activity(db.Model):
     description = db.Column(db.String(200), nullable=True)
     free_text = db.Column(db.String(500), nullable=True)
 
-    destination_id = db.Column(db.Integer, db.ForeignKey('destination.id'), nullable=False)
+    destination_id = db.Column(db.Integer, db.ForeignKey('destination.id', ondelete="CASCADE"), nullable=False)
 
     def __repr__(self):
         return f'<Activity {self.title} for Destination {self.destination_id}>'

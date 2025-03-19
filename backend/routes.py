@@ -30,46 +30,51 @@ def home():
 
 @app.route('/register', methods=['POST'])
 def register():
-    data = request.get_json()
-    required_fields = ["username", "email", "password", "city", "longitude", "latitude", "country", "currency"]
+    try:
+        data = request.get_json()
+        required_fields = ["username", "email", "password", "city", "longitude", "latitude", "country", "currency"]
 
-    if not all(field in data for field in required_fields):
-        return jsonify({'error': 'Fehlende Eingaben!'}), 400
+        if not all(field in data for field in required_fields):
+            return jsonify({'error': 'Fehlende Eingaben!'}), 400
 
-    username, email, password = data["username"], data["email"], data["password"]
+        username, email, password = data["username"], data["email"], data["password"]
 
-    # Überprüfen, ob der Benutzername oder die E-Mail bereits existieren
-    if User.query.filter_by(username=username).first():
-        return jsonify({'error': 'Benutzername bereits vergeben!'}), 400
+        # Überprüfen, ob der Benutzername oder die E-Mail bereits existieren
+        if User.query.filter_by(username=username).first():
+            return jsonify({'error': 'Benutzername bereits vergeben!'}), 400
 
-    if User.query.filter_by(email=email).first():
-        return jsonify({'error': 'E-Mail bereits registriert!'}), 400
+        if User.query.filter_by(email=email).first():
+            return jsonify({'error': 'E-Mail bereits registriert!'}), 400
 
-    if not is_valid_email(email):
-        return jsonify({'error': 'Wrong Email format!'}), 400
+        if not is_valid_email(email):
+            return jsonify({'error': 'Wrong Email format!'}), 400
 
-    # Passwort-Checks
-    if len(password) < 8:
-        return jsonify({'error': 'Passwort muss mindestens 8 Zeichen lang sein!'}), 400
-    if not any(i.isdigit() for i in password):
-        return jsonify({'error': 'Passwort muss mindestens eine Zahl enthalten!'}), 400
-    if not any(i.isalpha() for i in password):
-        return jsonify({'error': 'Passwort muss mindestens einen Buchstaben enthalten!'}), 400
-    if not any(not i.isalnum() for i in password):
-        return jsonify({'error': 'Passwort muss mindestens ein Sonderzeichen enthalten!'}), 400
+        # Passwort-Checks
+        if len(password) < 8:
+            return jsonify({'error': 'Passwort muss mindestens 8 Zeichen lang sein!'}), 400
+        if not any(i.isdigit() for i in password):
+            return jsonify({'error': 'Passwort muss mindestens eine Zahl enthalten!'}), 400
+        if not any(i.isalpha() for i in password):
+            return jsonify({'error': 'Passwort muss mindestens einen Buchstaben enthalten!'}), 400
+        if not any(not i.isalnum() for i in password):
+            return jsonify({'error': 'Passwort muss mindestens ein Sonderzeichen enthalten!'}), 400
 
-    # Passwort verschlüsseln
-    hashed_password = generate_password_hash(password, method='pbkdf2:sha256')
+        # Passwort verschlüsseln
+        hashed_password = generate_password_hash(password, method='pbkdf2:sha256')
 
-    new_user = User(
-        **{key: data[key] for key in required_fields if key != "password"},
-                    password=hashed_password
-    )
+        new_user = User(
+            **{key: data[key] for key in required_fields if key != "password"},
+                        password=hashed_password
+        )
 
-    db.session.add(new_user)
-    db.session.commit()
+        db.session.add(new_user)
+        db.session.commit()
 
-    return jsonify({'message': 'Benutzer erfolgreich registriert!'}), 201
+        return jsonify({'message': 'Benutzer erfolgreich registriert!'}), 201
+
+    except Exception as e:  # Allgemeine Fehlerbehandlung
+        db.session.rollback()
+        return jsonify({'error': 'Ein unerwarteter Fehler ist aufgetreten', 'details': str(e)}), 500
 
 @app.route('/login', methods=['POST'])
 def login():
@@ -129,12 +134,6 @@ def delete_profile():
     user = current_user
 
     try:
-        # Lösche alle Destinationen und deren Aktivitäten des Benutzers
-        destinations = Destination.query.filter_by(user_id=user.id).all()
-        for destination in destinations:
-            Activity.query.filter_by(destination_id=destination.id).delete()
-            db.session.delete(destination)
-
         # Lösche den Benutzer
         db.session.delete(user)
         db.session.commit()
@@ -195,6 +194,26 @@ def reorder_destinations():
     new_order = data.get("destinations")
     return reorder_items(Destination, {"user_id": current_user.id}, new_order, "destinations")
 
+@app.route('/delete_destination/<int:destination_id>', methods=['DELETE'])
+@login_required  # Damit der User eingeloggt sein muss
+def delete_destination(destination_id):
+    # Hole die Destination anhand der ID
+    destination = Destination.query.filter_by(id=destination_id, user_id=current_user.id).first()
+
+    # Wenn die Destination nicht existiert, gib einen Fehler zurück
+    if destination is None:
+        return jsonify({'error': 'Destination not found!'}), 404
+    try:
+        # Lösche die Destination
+        db.session.delete(destination)
+        db.session.commit()
+
+        return jsonify({"message": "Destination deleted successfully"}), 200
+
+    except Exception as e:
+        db.session.rollback()
+        app.logger.error(f"Fehler beim Löschen der Destination {destination_id}: {e}")
+        return jsonify({'error': 'Fehler beim Löschen der Destination. Bitte später erneut versuchen.'}), 500
 
 '''
                 APIs FOR ACTIVITIES
@@ -266,6 +285,28 @@ def reorder_activities(destination_id):
     new_order = data.get("activities")
     return reorder_items(Activity, {"destination_id": destination_id}, new_order, "activities")
 
+@app.route('/delete_activity/<int:activity_id>', methods=['DELETE'])
+@login_required
+def delete_activity(activity_id):
+    activity = Activity.query.get(activity_id)
+
+    if activity is None:
+        return jsonify({'error': 'Activity not found'}), 404
+
+    # Prüfen, ob der aktuelle Benutzer der Besitzer der zugehörigen Destination ist
+    if activity.destination.user_id != current_user.id:
+        return jsonify({'error': 'You are not authorized to delete this activity'}), 403
+
+    try:
+        db.session.delete(activity)
+        db.session.commit()
+        return jsonify({'message': 'Activity deleted successfully'}), 200
+
+    except Exception as e:
+        db.session.rollback()
+        app.logger.error(f"Fehler beim Löschen der Activity {activity_id}: {e}")
+        return jsonify({'error': 'Fehler beim Löschen der Activity. Bitte später erneut versuchen.'}), 500
+
 '''
                 APIs FOR DESTINATIONS AND ACTIVITIES
 '''
@@ -296,10 +337,6 @@ def search():
 
 
 '''
-Profil löschen
-Destination löschen
-Activity löschen
-
 Wartungsmodus
 
 E-Mail verification für Registration

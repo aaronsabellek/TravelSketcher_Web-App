@@ -1,6 +1,6 @@
 import requests
 from app import app
-from models import User
+from models import User, Destination, Activity
 
 from .helping_variables import (
     url,
@@ -158,6 +158,26 @@ def test_reorder_destinations(setup_logged_in_user):
     # Nutzung der Hilfsfunktion
     reorder_items(setup_logged_in_user, destinations_url, reorder_url, "destinations")
 
+def test_delete_destination(setup_logged_in_user):
+    # Test, ob eine Destination mit der ID 1 gelöscht werden kann
+
+    # Zuerst sicherstellen, dass die Destination existiert
+    destination_id = 1
+    delete_dest_url = f'{url}/delete_destination/{destination_id}'
+
+    # API-Aufruf zum Löschen der Destination (DELETE-Request)
+    response = setup_logged_in_user.delete(delete_dest_url, json=destination_id)
+    print(f"Delete Response: {response.status_code} - {response.text}")
+    assert response.status_code == 200
+
+    # Überprüfen, dass die Nachricht "Destination deleted successfully" zurückgegeben wurde
+    json_data = response.json()
+    assert json_data['message'] == 'Destination deleted successfully'
+
+    # Sicherstellen, dass die Destination nun aus der Datenbank gelöscht ist
+    deleted_destination = Destination.query.filter_by(id=destination_id).first()
+    assert deleted_destination is None
+
 def test_add_activity(setup_logged_in_user):
     print("Test zum Hinzufügen einer Aktivität zu einer Destination")
 
@@ -215,6 +235,19 @@ def test_reorder_activities(setup_logged_in_user):
     # Nutzung der Hilfsfunktion
     destination_id = 1
     reorder_items(setup_logged_in_user, activities_url, reorder_url, "activities", destination_id=destination_id)
+
+def test_delete_activity(setup_logged_in_user):
+    # Teste das Löschen einer Activity (Erfolg)
+    activity_id = 1
+    delete_act_url = f'{url}/delete_activity/{activity_id}'
+
+    response = setup_logged_in_user.delete(delete_act_url, json=activity_id)
+    assert response.status_code == 200
+    assert response.json()['message'] == 'Activity deleted successfully'
+
+    # Teste, ob die Activity wirklich aus der Datenbank entfernt wurde
+    deleted_activity = Activity.query.filter_by(id=activity_id).first()
+    assert deleted_activity is None
 
 def test_search(setup_logged_in_user):
     print("Test: Suche nach Schlagwort in Destinations und Activities")
