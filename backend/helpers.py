@@ -1,8 +1,10 @@
 from flask import jsonify
 from sqlalchemy import func, String, Text
+from flask_login import logout_user
 
 import re
-from models import db, Destination, Activity
+from app import app, db
+from models import User, Destination, Activity
 
 
 def model_to_dict(model):
@@ -132,6 +134,24 @@ def reorder_items(model, filter_by, new_order, item_name):
     except Exception as e:  # Unerwarteter Fehler
         db.session.rollback()
         return jsonify({'error': 'Ein unerwarteter Fehler ist aufgetreten', 'details': str(e)}), 500
+
+def delete_item(model, item_id):
+    """Allgemeine Funktion zum Löschen von Entitäten (Destinations oder Activities)"""
+    item = model.query.get(item_id)
+
+    try:
+        db.session.delete(item)
+        db.session.commit()
+
+        if model == User:
+            logout_user()
+
+        return jsonify({'message': f'{model.__name__} deleted successfully'}), 200
+
+    except Exception as e:
+        db.session.rollback()
+        app.logger.error(f"Fehler beim Löschen der {model.__name__.lower()} {item_id}: {e}")
+        return jsonify({'error': f'Fehler beim Löschen der {model.__name__.lower()}. Bitte später erneut versuchen.'}), 500
 
 def create_search_query(model, search_query, exclude_fields):
     """

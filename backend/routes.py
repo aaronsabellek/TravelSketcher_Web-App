@@ -11,6 +11,7 @@ from helpers import (
     get_entry,
     edit_entry,
     reorder_items,
+    delete_item,
     search_resources
 )
 
@@ -131,21 +132,8 @@ def edit_username():
 @app.route('/delete_profile', methods=['DELETE'])
 @login_required
 def delete_profile():
-    user = current_user
-
-    try:
-        # Lösche den Benutzer
-        db.session.delete(user)
-        db.session.commit()
-
-        # Logge den Benutzer aus
-        logout_user()
-
-        return jsonify({'message': 'Benutzerprofil wurde erfolgreich gelöscht und Logout durchgeführt.'}), 200
-
-    except Exception as e:
-        db.session.rollback()
-        return jsonify({'error': f'Fehler beim Löschen des Profils: {str(e)}'}), 500
+    user_id = current_user.id
+    return delete_item(User, user_id)
 
 '''
                 APIs FOR DESTINATIONS
@@ -203,17 +191,8 @@ def delete_destination(destination_id):
     # Wenn die Destination nicht existiert, gib einen Fehler zurück
     if destination is None:
         return jsonify({'error': 'Destination not found!'}), 404
-    try:
-        # Lösche die Destination
-        db.session.delete(destination)
-        db.session.commit()
 
-        return jsonify({"message": "Destination deleted successfully"}), 200
-
-    except Exception as e:
-        db.session.rollback()
-        app.logger.error(f"Fehler beim Löschen der Destination {destination_id}: {e}")
-        return jsonify({'error': 'Fehler beim Löschen der Destination. Bitte später erneut versuchen.'}), 500
+    return delete_item(Destination, destination_id)
 
 '''
                 APIs FOR ACTIVITIES
@@ -297,15 +276,7 @@ def delete_activity(activity_id):
     if activity.destination.user_id != current_user.id:
         return jsonify({'error': 'You are not authorized to delete this activity'}), 403
 
-    try:
-        db.session.delete(activity)
-        db.session.commit()
-        return jsonify({'message': 'Activity deleted successfully'}), 200
-
-    except Exception as e:
-        db.session.rollback()
-        app.logger.error(f"Fehler beim Löschen der Activity {activity_id}: {e}")
-        return jsonify({'error': 'Fehler beim Löschen der Activity. Bitte später erneut versuchen.'}), 500
+    return delete_item(Activity, activity_id)
 
 '''
                 APIs FOR DESTINATIONS AND ACTIVITIES

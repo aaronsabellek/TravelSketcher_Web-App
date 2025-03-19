@@ -88,7 +88,7 @@ def test_delete_profile(setup_database):
     delete_response = session.delete(delete_url)
     print(f"Delete Response: {delete_response.status_code} - {delete_response.text}")
     assert delete_response.status_code == 200, "Profil konnte nicht gelöscht werden!"
-    assert delete_response.json()['message'] == 'Benutzerprofil wurde erfolgreich gelöscht und Logout durchgeführt.'
+    assert delete_response.json()['message'] == 'User deleted successfully'
 
     user_check = User.query.filter_by(username=dummy_data['user']['username']).first()
     assert user_check is None, "Benutzer wurde nicht aus der DB gelöscht!"
