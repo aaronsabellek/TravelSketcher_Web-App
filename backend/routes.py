@@ -123,6 +123,31 @@ def edit_username():
 
     return edit_entry(User, current_user.id, data)
 
+@app.route('/delete_profile', methods=['DELETE'])
+@login_required
+def delete_profile():
+    user = current_user
+
+    try:
+        # Lösche alle Destinationen und deren Aktivitäten des Benutzers
+        destinations = Destination.query.filter_by(user_id=user.id).all()
+        for destination in destinations:
+            Activity.query.filter_by(destination_id=destination.id).delete()
+            db.session.delete(destination)
+
+        # Lösche den Benutzer
+        db.session.delete(user)
+        db.session.commit()
+
+        # Logge den Benutzer aus
+        logout_user()
+
+        return jsonify({'message': 'Benutzerprofil wurde erfolgreich gelöscht und Logout durchgeführt.'}), 200
+
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'error': f'Fehler beim Löschen des Profils: {str(e)}'}), 500
+
 '''
                 APIs FOR DESTINATIONS
 '''
@@ -271,9 +296,6 @@ def search():
 
 
 '''
-create_db.py löschen
-Tests erweitern um Fälle, in denen falsche Daten eingegeben werden?
-
 Profil löschen
 Destination löschen
 Activity löschen

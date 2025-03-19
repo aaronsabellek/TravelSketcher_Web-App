@@ -4,6 +4,7 @@ from models import User
 
 from .helping_variables import (
     url,
+    dummy_data,
     registration_data,
     login_data_username,
     login_data_email,
@@ -77,6 +78,23 @@ def test_edit_profile(setup_logged_in_user):
     edit_url = f'{url}/edit_profile'
 
     edit_item(setup_logged_in_user, edit_url, updated_profile_data, 'user')
+
+def test_delete_profile(setup_database):
+    """Testet das Löschen des Benutzerprofils."""
+    session = session = requests.Session()
+    login(session)
+
+    delete_url = f'{url}/delete_profile'
+    delete_response = session.delete(delete_url)
+    print(f"Delete Response: {delete_response.status_code} - {delete_response.text}")
+    assert delete_response.status_code == 200, "Profil konnte nicht gelöscht werden!"
+    assert delete_response.json()['message'] == 'Benutzerprofil wurde erfolgreich gelöscht und Logout durchgeführt.'
+
+    user_check = User.query.filter_by(username=dummy_data['user']['username']).first()
+    assert user_check is None, "Benutzer wurde nicht aus der DB gelöscht!"
+
+    profile_response = session.get(f'{url}/profile')
+    assert profile_response.status_code in [401, 405], "Benutzer ist noch eingeloggt!" #401=Zugriff verweigert. 405=Weiterleitung an Login (post) mit get-Anfrage
 
 #Funktion zum Testen des Hinzufügens einer Destination
 def test_add_destination(setup_logged_in_user):
