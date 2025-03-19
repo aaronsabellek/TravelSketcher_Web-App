@@ -308,8 +308,6 @@ def search():
 
 
 '''
-Wartungsmodus
-
 E-Mail verification für Registration
 Email bearbeiten, wenn E-Mail-verification drin ist
 Passwort zurücksetzen, wenn E-Mail-verification drin ist
