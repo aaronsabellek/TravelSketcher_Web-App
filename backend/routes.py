@@ -1,19 +1,17 @@
 from flask import request, jsonify, url_for
 from flask_login import login_required, current_user, login_user, logout_user
 from werkzeug.security import generate_password_hash, check_password_hash
-from flask_mail import Message
-from itsdangerous import URLSafeTimedSerializer
 
 from models import User, Destination, Activity
-from app import app, db, login_manager, mail
+from app import app, db, login_manager
 from helpers import (
     serializer,
     models_to_list,
     is_valid_email,
+    validate_password,
     confirm_verification_token,
     send_verification_email,
-    validate_password,
-    send_password_change_notification,
+    send_email,
     create_entry,
     get_entry,
     edit_entry,
@@ -169,7 +167,9 @@ def edit_username():
 
     # Falls das Passwort geändert wurde, eine Bestätigungs-E-Mail senden
     if "password" in data:
-        send_password_change_notification(current_user.email)
+        subject = "Confirmation: Your passord has been changed"
+        body = "Hello,\n\n Your password has been changed successfully. If you didn't change the password by yourself, please contact us immediately.\n\nBest regards,\nYour Support-Team"
+        send_email(current_user.email, subject, body)
 
     return response
 
@@ -208,10 +208,9 @@ def request_password_reset():
     token = serializer.dumps(email, salt='password-reset')
     reset_url = url_for('reset_password', token=token, _external=True)
 
-    # E-Mail senden
-    msg = Message('Reset password', sender='your_email@example.com', recipients=[email])
-    msg.body = f'Click the link to reset your password: {reset_url}'
-    mail.send(msg)
+    subject = 'Reset password'
+    body = f'Click the link to reset your password: {reset_url}'
+    send_email(email, subject, body)
 
     return jsonify({'message': 'If E-Mail exists, a reset link has been sent.'}), 200
 

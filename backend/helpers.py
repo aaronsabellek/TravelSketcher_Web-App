@@ -5,14 +5,10 @@ from itsdangerous import URLSafeTimedSerializer
 from flask_mail import Message
 
 import re
-import smtplib
-from email.mime.text import MIMEText
-from email.mime.multipart import MIMEMultipart
 from app import app, db, mail
 from models import User, Destination, Activity
 
 
-# Helping serializer
 serializer = URLSafeTimedSerializer(app.secret_key)
 
 def model_to_dict(model):
@@ -31,6 +27,18 @@ def is_valid_email(email):
     # Überprüft, ob die E-Mail dem regulären Ausdruck entspricht
     return bool(re.match(regex, email))
 
+def validate_password(password):
+    """Prüft, ob das Passwort den Sicherheitsanforderungen entspricht."""
+    if len(password) < 8:
+        return jsonify({'error': 'Passwort muss mindestens 8 Zeichen lang sein!'}), 400
+    if not any(i.isdigit() for i in password):
+        return jsonify({'error': 'Passwort muss mindestens eine Zahl enthalten!'}), 400
+    if not any(i.isalpha() for i in password):
+        return jsonify({'error': 'Passwort muss mindestens einen Buchstaben enthalten!'}), 400
+    if not any(not i.isalnum() for i in password):
+        return jsonify({'error': 'Passwort muss mindestens ein Sonderzeichen enthalten!'}), 400
+    return None
+
 def generate_verification_token(email):
     return serializer.dumps(email, salt="email-confirmation")
 
@@ -47,54 +55,15 @@ def send_verification_email(user):
     subject = "Plese confirm your E-Mail"
     body = f"Click the following link to confirm your E-Mail: {verify_url}"
 
-    msg = Message(subject, recipients=[user.email], body=body)
-    mail.send(msg)
-
-def validate_password(password):
-    """Prüft, ob das Passwort den Sicherheitsanforderungen entspricht."""
-    if len(password) < 8:
-        return jsonify({'error': 'Passwort muss mindestens 8 Zeichen lang sein!'}), 400
-    if not any(i.isdigit() for i in password):
-        return jsonify({'error': 'Passwort muss mindestens eine Zahl enthalten!'}), 400
-    if not any(i.isalpha() for i in password):
-        return jsonify({'error': 'Passwort muss mindestens einen Buchstaben enthalten!'}), 400
-    if not any(not i.isalnum() for i in password):
-        return jsonify({'error': 'Passwort muss mindestens ein Sonderzeichen enthalten!'}), 400
-    return None
-
-def send_password_change_notification(email):
-    subject = "Confirmation: Your passord has been changed"
-    body = "Hello,\n\n Your password has been changed successfully. If you didn't change the password by yourself, please contact us immediately.\n\nBest regards,\nYour Support-Team"
-
-    send_email(email, subject, body)
+    send_email(user.email, subject, body)
 
 def send_email(to_email, subject, body):
     """ Sendet eine E-Mail unter Verwendung der Flask-App-Konfiguration """
-
     sender_email = current_app.config['MAIL_USERNAME']
-    sender_password = current_app.config['MAIL_PASSWORD']
-    smtp_server = current_app.config['MAIL_SERVER']
-    smtp_port = current_app.config['MAIL_PORT']
 
-    try:
-        msg = MIMEMultipart()
-        msg["From"] = sender_email
-        msg["To"] = to_email
-        msg["Subject"] = subject
-        msg.attach(MIMEText(body, "plain"))
+    msg = Message(subject, recipients=[to_email], body=body, sender=sender_email)
+    mail.send(msg)
 
-        server = smtplib.SMTP(smtp_server, smtp_port)
-        server.starttls()
-        server.login(sender_email, sender_password)
-        server.sendmail(sender_email, to_email, msg.as_string())
-        server.quit()
-
-        print(f"E-Mail erfolgreich an {to_email} gesendet.")
-
-    except Exception as e:
-        print(f"Fehler beim Senden der E-Mail: {e}")
-
-#Funktion zum Hinzufügen eines Objekts zur Datenbank (Destination oder Activity)
 def create_entry(model, data, user_id=None, destination_id=None):
 
     try:
