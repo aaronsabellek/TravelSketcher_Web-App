@@ -1,4 +1,4 @@
-from flask import jsonify, url_for, current_app
+from flask import jsonify, current_app
 from sqlalchemy import func, String, Text
 from flask_login import logout_user
 from itsdangerous import URLSafeTimedSerializer
@@ -51,8 +51,8 @@ def confirm_verification_token(token, expiration=3600):
 
 def send_verification_email(user):
     token = generate_verification_token(user.email)
-    verify_url = url_for('verify_email', token=token, _external=True)
-    subject = "Plese confirm your E-Mail"
+    verify_url = f"/verify_email/{token}"
+    subject = "Please confirm your E-Mail"
     body = f"Click the following link to confirm your E-Mail: {verify_url}"
 
     send_email(user.email, subject, body)

@@ -1,8 +1,9 @@
 import requests
-from app import app
 from models import User, Destination, Activity
+from app import mail
+from unittest.mock import patch
 
-from helpers import generate_verification_token
+from helpers import generate_verification_token, send_verification_email
 
 from .helping_variables import (
     url,
@@ -62,7 +63,7 @@ def test_login(setup_database):
     login(session, login_data_email)
     logout(session)
 
-def test_verification_route(setup_database):
+def test_verification_email(setup_database):
     # Annahme: Du hast einen User, der ein Verifikations-TOKEN benötigt
     user = User.query.filter_by(email=dummy_data['user']['email']).first()
     user.is_email_verified = False
@@ -74,6 +75,19 @@ def test_verification_route(setup_database):
     response = setup_database.get(verify_url)
     assert response.status_code == 200
     assert b"E-Mail confirmed successfully!" in response.data
+
+@patch('app.mail.send')
+def test_send_verification_email(mock_send, setup_database):
+    user = User.query.filter_by(email=dummy_data['user']['email']).first()
+    user.is_email_verified = False
+
+    send_verification_email(user)
+
+    # Überprüfe, ob mail.send aufgerufen wurde
+    mock_send.assert_called_once()
+    msg = mock_send.call_args[0][0]  # Zugriff auf das erste Argument der Funktion
+    assert msg.subject == "Please confirm your E-Mail"
+    assert msg.recipients == [user.email]
 
 # Funktion zum Testen der Anzeige der Profildaten
 def test_get_profile(setup_logged_in_user):
