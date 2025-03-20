@@ -1,6 +1,8 @@
 from flask import Flask, jsonify
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager
+from flask_mail import Mail
+from dotenv import load_dotenv
 
 from flask_cors import CORS
 from flask_migrate import Migrate
@@ -21,8 +23,11 @@ def load_config():
 # Konfiguration laden
 config = load_config()
 
-# Überprüfe, ob der Wartungsmodus aktiv ist
-MAINTENANCE_MODE = config.get('MAINTENANCE_MODE', False)
+# .env-Datei laden
+load_dotenv()
+
+# Wartungsmodus abrufen (Standardwert ist False)
+MAINTENANCE_MODE = os.getenv('MAINTENANCE_MODE', 'False') == 'True'
 
 # Vor jeder Anfrage prüfen, ob der Wartungsmodus aktiviert ist
 @app.before_request
@@ -44,6 +49,14 @@ migrate = Migrate(app, db)
 login_manager = LoginManager()
 login_manager.init_app(app)
 login_manager.login_view = 'login'
+
+app.config['MAIL_SERVER'] = os.getenv('MAIL_SERVER')
+app.config['MAIL_PORT'] = int(os.getenv('MAIL_PORT'))
+app.config['MAIL_USE_TLS'] = os.getenv('MAIL_USE_TLS') == 'True'
+app.config['MAIL_USERNAME'] = os.getenv('MAIL_USERNAME')
+app.config['MAIL_PASSWORD'] = os.getenv('MAIL_PASSWORD')
+
+mail = Mail(app)
 
 from routes import *
 

@@ -1,12 +1,17 @@
-from flask import request, jsonify
+from flask import request, jsonify, url_for
 from flask_login import login_required, current_user, login_user, logout_user
 from werkzeug.security import generate_password_hash, check_password_hash
+from flask_mail import Message
 
 from models import User, Destination, Activity
-from app import app, db, login_manager
+from app import app, db, login_manager, serializer, mail
 from helpers import (
     models_to_list,
     is_valid_email,
+    confirm_verification_token,
+    send_verification_email,
+    validate_password,
+    send_password_change_notification,
     create_entry,
     get_entry,
     edit_entry,
@@ -51,14 +56,9 @@ def register():
             return jsonify({'error': 'Wrong Email format!'}), 400
 
         # Passwort-Checks
-        if len(password) < 8:
-            return jsonify({'error': 'Passwort muss mindestens 8 Zeichen lang sein!'}), 400
-        if not any(i.isdigit() for i in password):
-            return jsonify({'error': 'Passwort muss mindestens eine Zahl enthalten!'}), 400
-        if not any(i.isalpha() for i in password):
-            return jsonify({'error': 'Passwort muss mindestens einen Buchstaben enthalten!'}), 400
-        if not any(not i.isalnum() for i in password):
-            return jsonify({'error': 'Passwort muss mindestens ein Sonderzeichen enthalten!'}), 400
+        password_validation = validate_password(password)
+        if password_validation:
+            return password_validation
 
         # Passwort verschlüsseln
         hashed_password = generate_password_hash(password, method='pbkdf2:sha256')
@@ -71,11 +71,31 @@ def register():
         db.session.add(new_user)
         db.session.commit()
 
+        send_verification_email(new_user)
+
         return jsonify({'message': 'Benutzer erfolgreich registriert!'}), 201
 
     except Exception as e:  # Allgemeine Fehlerbehandlung
         db.session.rollback()
         return jsonify({'error': 'Ein unerwarteter Fehler ist aufgetreten', 'details': str(e)}), 500
+
+@app.route('/verify_email/<token>', methods=['GET'])
+def verify_email(token):
+    email = confirm_verification_token(token)
+    if not email:
+        return jsonify({'error': 'Ungültiger oder abgelaufener Bestätigungslink!'}), 400
+
+    user = User.query.filter_by(email=email).first()
+    if not user:
+        return jsonify({'error': 'User not found!'}), 404
+
+    if user.is_email_verified:
+        return jsonify({'message': 'E-Mail has already been confirmed!'}), 200
+
+    user.is_email_verified = True
+    db.session.commit()
+
+    return jsonify({'message': 'E-Mail confirmed successfully!'}), 200
 
 @app.route('/login', methods=['POST'])
 def login():
@@ -96,11 +116,17 @@ def login():
         (User.email == identifier) | (User.username == identifier)
     ).first()
 
-    if user and check_password_hash(user.password, password):
-        login_user(user)
-        return jsonify({'message': 'Erfolgreich eingeloggt'}), 200
+    if not user:
+        return jsonify({'error': 'User not found!'}), 404
 
-    return jsonify({'error': 'Login fehlgeschlagen. Überprüfe deinen Benutzernamen und dein Passwort.'}), 401
+    if not check_password_hash(user.password, data['password']):
+        return jsonify({'error': 'Wrong password!'}), 400
+
+    if not user.is_email_verified:
+        return jsonify({'error': 'E-Mail has not been confirmed yet!'}), 403
+
+    login_user(user)
+    return jsonify({'message': 'Login erfolgreich!'}), 200
 
 @app.route('/logout', methods=['POST'])
 @login_required
@@ -123,11 +149,92 @@ def edit_username():
     if existing_username and existing_username.id != current_user.id:
         return jsonify({'error': 'Dieser Benutzername ist bereits vergeben'}), 400
 
-    existing_email = User.query.filter_by(email=data['email']).first()
-    if existing_email and existing_email.id != current_user.id:
-        return jsonify({'error': 'Diese Email ist bereits vergeben'}), 400
+    # Prüfen, ob das Passwort geändert wird
+    if "password" in data:
+        new_password = data["password"]
 
-    return edit_entry(User, current_user.id, data)
+        # Passwort-Validierung mit der vorhandenen Hilfsfunktion
+        password_validation = validate_password(new_password)
+        if password_validation:
+            return password_validation
+
+        # Neues Passwort hashen
+        hashed_password = generate_password_hash(new_password, method='pbkdf2:sha256')
+        data["password"] = hashed_password
+
+    # Änderungen speichern
+    response = edit_entry(User, current_user.id, data)
+
+    # Falls das Passwort geändert wurde, eine Bestätigungs-E-Mail senden
+    if "password" in data:
+        send_password_change_notification(current_user.email)
+
+    return response
+
+@app.route('/edit_email', methods=['POST'])
+@login_required
+def edit_email():
+    data = request.get_json()
+    new_email = data.get("email")
+
+    if not new_email:
+        return jsonify({'error': 'No E-Mail found!'}), 400
+
+    if not is_valid_email(new_email):
+        return jsonify({'error': 'Wrong Email format!'}), 400
+
+    if User.query.filter_by(email=new_email).first():
+        return jsonify({'error': 'E-Mail is already taken!'}), 400
+
+    # Temporär die neue E-Mail speichern
+    current_user.temp_email = new_email
+    db.session.commit()
+
+    send_verification_email(current_user)
+    return jsonify({'message': 'Verification E-Mail has been sent. Pleayse check your E-Mails.'}), 200
+
+@app.route('/request_password_reset', methods=['POST'])
+def request_password_reset():
+    data = request.get_json()
+    email = data.get('email')
+
+    user = User.query.filter_by(email=email).first()
+    if not user:
+        return jsonify({'message': 'If E-Mail exists, a reset link has been sent.'}), 200
+
+    # Token generieren
+    token = serializer.dumps(email, salt='password-reset')
+    reset_url = url_for('reset_password', token=token, _external=True)
+
+    # E-Mail senden
+    msg = Message('Reset password', sender='your_email@example.com', recipients=[email])
+    msg.body = f'Click the link to reset your password: {reset_url}'
+    mail.send(msg)
+
+    return jsonify({'message': 'If E-Mail exists, a reset link has been sent.'}), 200
+
+@app.route('/reset_password/<token>', methods=['POST'])
+def reset_password(token):
+    try:
+        email = serializer.loads(token, salt='password-reset', max_age=1800)  # 30 Min Gültigkeit
+    except:
+        return jsonify({'error': 'Invalid or expired Token'}), 400
+
+    data = request.get_json()
+    new_password = data.get('new_password')
+
+    password_validation = validate_password(new_password)
+    if password_validation:
+        return password_validation
+
+    user = User.query.filter_by(email=email).first()
+    if not user:
+        return jsonify({'error': 'User not found'}), 404
+
+    user.password = generate_password_hash(new_password, method='pbkdf2:sha256')
+    db.session.commit()
+
+    return jsonify({'message': 'Password updated successfully!'}), 200
 
 @app.route('/delete_profile', methods=['DELETE'])
 @login_required
@@ -306,21 +413,3 @@ def search():
 
     return jsonify(results=results_data), 200
 
-
-'''
-E-Mail verification für Registration
-Email bearbeiten, wenn E-Mail-verification drin ist
-Passwort zurücksetzen, wenn E-Mail-verification drin ist
-
-Überarbeiten der APIs für mehr Konsistenz
-
-Tests mit Pytest gründlich überarbeiten
-
-Frontend braucht API zu geonames, um Längen- und Breitengrad zu validieren und Städtenamen für spätere Links zu validieren
-Frontend braucht API zu AI, die bestimmte Felder selbstständig ausfüllt und destinations/activities selbst vorschlägt
-Frontend braucht API zu Restcountries, um currency zu bestimmen, die später in Preis-Icons dargestellt wird
-Frontend braucht Direktlinks zu externen Anbietern, die nach Funktion gegliedert sind:
-    Booking, AirBnB
-    Rome2Rio, Google Maps Routes
-    TripAdvisor
-'''

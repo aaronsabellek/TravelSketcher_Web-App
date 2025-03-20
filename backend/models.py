@@ -12,6 +12,7 @@ class User(UserMixin, db.Model):
     latitude = db.Column(db.String(20), nullable=False)
     country = db.Column(db.String(20), nullable=False)
     currency = db.Column(db.String(20), nullable=False)
+    is_email_verified = db.Column(db.Boolean, default=False)
 
     # Beziehung zu Reisezielen
     destinations = db.relationship('Destination', backref='owner', lazy=True, cascade="all, delete")
