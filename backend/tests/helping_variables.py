@@ -64,13 +64,19 @@ registration_data = {
 }
 
 updated_profile_data = {
-        "username": dummy_data['user']['username'],
+        "username": f"{uuid.uuid4().hex}",
         "email": f"{uuid.uuid4().hex}@example.com",
+        "password": dummy_data['user']['password'],
         "city": dummy_data['user']['city'],
         "longitude": dummy_data['user']['longitude'],
         "latitude": dummy_data['user']['latitude'],
         "country": dummy_data['user']['country'],
         "currency": dummy_data['user']['currency']
+}
+
+updated_password = {
+    'new_password_1': 'new_password123!',
+    'new_password_2': 'new_password123!'
 }
 
 login_data_username = {

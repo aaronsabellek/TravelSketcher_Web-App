@@ -1,9 +1,9 @@
-from flask import request, jsonify, url_for
+from flask import request, jsonify, url_for, current_app
 from flask_login import login_required, current_user, login_user, logout_user
 from werkzeug.security import generate_password_hash, check_password_hash
 
-from models import User, Destination, Activity
 from app import app, db, login_manager
+from models import User, Destination, Activity
 from helpers import (
     serializer,
     models_to_list,
@@ -25,152 +25,170 @@ from helpers import (
                 APIs FOR USERS
 '''
 
-# Benutzer laden
+# Load user
 @login_manager.user_loader
 def load_user(user_id):
     return User.query.get(int(user_id))
 
+# Home Route
 @app.route('/')
 def home():
-    return "Backend ist aktiv!"
+    return 'Backend is active!'
 
+# Register route
 @app.route('/register', methods=['POST'])
 def register():
     try:
+        # Get data
         data = request.get_json()
-        required_fields = ["username", "email", "password", "city", "longitude", "latitude", "country", "currency"]
 
+        # Check if all required fields are filled
+        required_fields = ["username", "email", "password", "city", "longitude", "latitude", "country", "currency"]
         if not all(field in data for field in required_fields):
             return jsonify({'error': 'Fehlende Eingaben!'}), 400
 
+        # Set variables for data that has to be checked
         username, email, password = data["username"], data["email"], data["password"]
 
-        # Überprüfen, ob der Benutzername oder die E-Mail bereits existieren
+        # Check if username already exists
         if User.query.filter_by(username=username).first():
             return jsonify({'error': 'Benutzername bereits vergeben!'}), 400
 
+        # Check if email already exists
         if User.query.filter_by(email=email).first():
             return jsonify({'error': 'E-Mail bereits registriert!'}), 400
 
+        # Check if email has the correct format
         if not is_valid_email(email):
             return jsonify({'error': 'Wrong Email format!'}), 400
 
-        # Passwort-Checks
+        # Check if password fits the requirements
         password_validation = validate_password(password)
         if password_validation:
             return password_validation
 
-        # Passwort verschlüsseln
+        # Hash password
         hashed_password = generate_password_hash(password, method='pbkdf2:sha256')
 
+        # Set user
         new_user = User(
             **{key: data[key] for key in required_fields if key != "password"},
                         password=hashed_password
         )
 
+        # Add user in db
         db.session.add(new_user)
         db.session.commit()
 
+        # Send confirmation email
         send_verification_email(new_user)
 
-        return jsonify({'message': 'Benutzer erfolgreich registriert!'}), 201
+        return jsonify({'message': 'A confirmation link has been sent to you!'}), 201
 
-    except Exception as e:  # Allgemeine Fehlerbehandlung
+    # Show error if registration route does not work as expected
+    except Exception as e:
         db.session.rollback()
-        return jsonify({'error': 'Ein unerwarteter Fehler ist aufgetreten', 'details': str(e)}), 500
+        return jsonify({'error': 'An unexpected error has occured', 'details': str(e)}), 500
 
+# Route to verify registration with email link
 @app.route('/verify_email/<token>', methods=['GET'])
 def verify_email(token):
-    email = confirm_verification_token(token)
-    if not email:
-        return jsonify({'error': 'Ungültiger oder abgelaufener Bestätigungslink!'}), 400
+    try:
+        # Check if verification works
+        email = confirm_verification_token(token)
+        if not email:
+            return jsonify({'error': 'Invalid or expired verification link!'}), 400
 
-    user = User.query.filter_by(email=email).first()
-    if not user:
-        return jsonify({'error': 'User not found!'}), 404
+        # Check if user with this email exists in db
+        user = User.query.filter_by(email=email).first()
+        if not user:
+            return jsonify({'error': 'User not found!'}), 404
 
-    if user.is_email_verified:
-        return jsonify({'message': 'E-Mail has already been confirmed!'}), 200
+        # Check if email is already verified
+        if user.is_email_verified:
+            return jsonify({'message': 'E-Mail has already been confirmed!'}), 200
 
-    user.is_email_verified = True
-    db.session.commit()
+        # Change verification status of user for login
+        user.is_email_verified = True
+        db.session.commit()
 
-    return jsonify({'message': 'E-Mail confirmed successfully!'}), 200
+        return jsonify({'message': 'E-Mail confirmed successfully!'}), 200
 
+    # Show error if verification route does not work as expected
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'error': 'An unexpected error has occured', 'details': str(e)}), 500
+
+# Login route
 @app.route('/login', methods=['POST'])
 def login():
-    # Wenn der Benutzer bereits eingeloggt ist, zurück zum Dashboard
+    # Check if user is already logged in
     if current_user.is_authenticated:
-        return jsonify({'message': 'Bereits eingeloggt'}), 200
+        return jsonify({'message': 'You are logged in already'}), 200
 
-    # JSON-Daten aus der Anfrage
+    # Get login data
     data = request.get_json()
     identifier = data.get('identifier')
     password = data.get('password')
 
+    # Check if data is complete
     if not identifier or not password:
-        return jsonify({'error': 'Benutzername oder Passwort fehlt!'}), 400
+        return jsonify({'error': 'Username or password is missing!'}), 400
 
-    # Suche nach Benutzer, entweder nach E-Mail oder Benutzername
+    # Search for identifier in db as username or email
     user = User.query.filter(
         (User.email == identifier) | (User.username == identifier)
     ).first()
 
+    # Check if user with given identifier exists
     if not user:
         return jsonify({'error': 'User not found!'}), 404
 
+    # Check if password is correct
     if not check_password_hash(user.password, data['password']):
         return jsonify({'error': 'Wrong password!'}), 400
 
+    # Check if user is already verified
     if not user.is_email_verified:
         return jsonify({'error': 'E-Mail has not been confirmed yet!'}), 403
 
+    # Login user
     login_user(user)
-    return jsonify({'message': 'Login erfolgreich!'}), 200
+    return jsonify({'message': 'Login successfull!'}), 200
 
+# Logout route
 @app.route('/logout', methods=['POST'])
 @login_required
 def logout():
     logout_user()
-    return jsonify({"message": "Erfolgreich abgemeldet"}), 200
+    return jsonify({"message": "Logout successfull!"}), 200
 
+# Route to show profile
 @app.route('/profile', methods=['GET'])
 @login_required
 def get_profile():
-    user_data = {key: value for key, value in current_user.__dict__.items() if key != 'password' and not key.startswith('_')}
+    # Show profile data except for password and data that was not logged in explicitly
+    user_data = {key: value for key, value in current_user.__dict__.items() if key not in ['password', 'is_email_verified'] and not key.startswith('_')}
     return jsonify(user_data), 200
 
+# Route to edit profile
 @app.route('/edit_profile', methods=['POST'])
 @login_required
-def edit_username():
+def edit_profile():
+    # Get data
     data = request.get_json()
+    new_email = data.get('email')
 
-    existing_username = User.query.filter_by(username=data['username']).first()
+    for key, value in data.items():
+        if not value or value == '':
+            return jsonify({'error': f'{key} not found!'}), 400
+
+    existing_username = User.query.filter_by(username=new_email).first()
     if existing_username and existing_username.id != current_user.id:
-        return jsonify({'error': 'Dieser Benutzername ist bereits vergeben'}), 400
-
-    # Prüfen, ob das Passwort geändert wird
-    if "password" in data:
-        new_password = data["password"]
-
-        # Passwort-Validierung mit der vorhandenen Hilfsfunktion
-        password_validation = validate_password(new_password)
-        if password_validation:
-            return password_validation
-
-        # Neues Passwort hashen
-        hashed_password = generate_password_hash(new_password, method='pbkdf2:sha256')
-        data["password"] = hashed_password
+        return jsonify({'error': 'This username is already assigned'}), 400
 
     # Änderungen speichern
     response = edit_entry(User, current_user.id, data)
-
-    # Falls das Passwort geändert wurde, eine Bestätigungs-E-Mail senden
-    if "password" in data:
-        subject = "Confirmation: Your passord has been changed"
-        body = "Hello,\n\n Your password has been changed successfully. If you didn't change the password by yourself, please contact us immediately.\n\nBest regards,\nYour Support-Team"
-        send_email(current_user.email, subject, body)
-
     return response
 
 @app.route('/edit_email', methods=['POST'])
@@ -194,6 +212,44 @@ def edit_email():
 
     send_verification_email(current_user)
     return jsonify({'message': 'Verification E-Mail has been sent. Pleayse check your E-Mails.'}), 200
+
+@app.route('/edit_password', methods=['POST'])
+@login_required
+def edit_password():
+    try:
+        data = request.get_json()
+
+        new_password_1 = data.get('new_password_1')
+        new_password_2 = data.get('new_password_2')
+
+        if not new_password_1 or not new_password_2:
+            return jsonify({'error': 'Password missing!'})
+
+        if new_password_1 != new_password_2:
+            return jsonify({'error': 'Passwords do not match!'}) # Welche error nummer?
+
+        password_validation = validate_password(new_password_1)
+        if password_validation:
+            return password_validation
+
+        hashed_password = generate_password_hash(new_password_1, method='pbkdf2:sha256')
+        current_user.password = hashed_password
+        db.session.commit()
+
+        subject = "Confirmation: Your passord has been changed"
+        body = "Hello,\n\n Your password has been changed successfully. If you didn't change the password by yourself, please contact us immediately.\n\nBest regards,\nYour Support-Team"
+
+        with current_app.app_context():
+            send_email(current_user.email, subject, body)
+
+        logout_user()
+
+        return jsonify({'message': 'Password has been changed. A confirmation mail has been sent.'}), 200
+
+    # Show error if verification route does not work as expected
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'error': 'An unexpected error has occured', 'details': str(e)}), 500
 
 @app.route('/request_password_reset', methods=['POST'])
 def request_password_reset():

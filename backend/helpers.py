@@ -59,7 +59,8 @@ def send_verification_email(user):
 
 def send_email(to_email, subject, body):
     """ Sendet eine E-Mail unter Verwendung der Flask-App-Konfiguration """
-    sender_email = current_app.config['MAIL_USERNAME']
+    with current_app.app_context():
+        sender_email = current_app.config['MAIL_DEFAULT_SENDER']
 
     msg = Message(subject, recipients=[to_email], body=body, sender=sender_email)
     mail.send(msg)

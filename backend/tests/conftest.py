@@ -66,9 +66,10 @@ def setup_database():
 @pytest.fixture(scope="function")
 def setup_logged_in_user(setup_database):
     """Fixture, die einen User einloggt und eine Requests-Session zurückgibt."""
-    session = requests.Session()
+    #session = requests.Session()
 
     with app.app_context():
+        session = requests.Session()
         user = User.query.filter_by(username=login_data_username['identifier']).first()
         assert user is not None, "User existiert nicht in der Datenbank!"
 
@@ -77,9 +78,10 @@ def setup_logged_in_user(setup_database):
     response_login = session.post(login_url, json=login_data_username)
     assert response_login.status_code == 200, f"Login fehlgeschlagen! Status: {response_login.status_code}, Antwort: {response_login.text}"
 
-    yield session  # Session für Tests bereitstellen
+    yield session
 
     # Logout
     logout_url = f'{url}/logout'
     response_logout = session.post(logout_url)
     assert response_logout.status_code == 200, f"Fehler beim Logout! Statuscode: {response_logout.status_code}, Antwort: {response_logout.text}"
+

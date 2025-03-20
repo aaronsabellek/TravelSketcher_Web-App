@@ -1,14 +1,15 @@
 import requests
 from models import User, Destination, Activity
-from app import mail
+from app import app
 from unittest.mock import patch
 
-from helpers import generate_verification_token, send_verification_email
+from helpers import send_email, generate_verification_token, send_verification_email
 
 from .helping_variables import (
     url,
     dummy_data,
     registration_data,
+    updated_password,
     login_data_username,
     login_data_email,
     updated_profile_data,
@@ -29,17 +30,17 @@ from .helping_functions import (
 
 
 # FUNKTIONEN ZUM TESTEN DER ROUTES
-'''
+
 # Funktion zum Testen der Registration
-def test_registration(setup_database):
+@patch('app.mail.send')
+def test_registration(mock_send, setup_database):
     print("Test: Benutzerregistrierung")
 
     register_url = f"{url}/register"
     user_data=registration_data
 
-    response = requests.post(register_url, json=user_data)
+    response = setup_database.post(register_url, json=user_data)
     assert response.status_code == 201, f"Fehler: Registrierung fehlgeschlagen! Status: {response.status_code}, Antwort: {response.text}"
-
     print("Benutzer erfolgreich registriert!")
 
     # Datenbankprüfung innerhalb des Kontextes
@@ -49,7 +50,13 @@ def test_registration(setup_database):
         ).first()
     assert user is not None, f"Fehler: Benutzer wurde nicht korrekt in der Datenbank gespeichert! Gesucht: {user_data}"
     print(f"Benutzer erfolgreich in der Datenbank gefunden: {user.username}")
-'''
+
+    # Überprüfe, ob die Verifizierungs-E-Mail gesendet wurde
+    mock_send.assert_called_once()  # Prüfe, ob mail.send aufgerufen wurde
+    msg = mock_send.call_args[0][0]  # Zugriff auf das erste Argument der Funktion
+    assert msg.subject == "Please confirm your E-Mail"  # Prüfe, ob der Betreff korrekt ist
+    assert msg.recipients == [user.email]  # Prüfe, ob die richtige E-Mail-Adresse verwendet wurde
+
 # Funktion zum Testen des Logins
 def test_login(setup_database):
     print("Test: Login mit Username und mit Email")
@@ -103,10 +110,30 @@ def test_get_profile(setup_logged_in_user):
 
 def test_edit_profile(setup_logged_in_user):
     print("Test des Bearbeitens des Profils")
-    print(f"Versuch, Email zu ändern in: {updated_profile_data['email']}")
+    print(f"Versuch, Username zu ändern in: {updated_profile_data['username']}")
     edit_url = f'{url}/edit_profile'
 
     edit_item(setup_logged_in_user, edit_url, updated_profile_data, 'user')
+
+@patch('routes.send_email')
+def test_edit_password(mock_send, setup_logged_in_user):
+
+    print("Test des Bearbeitens des Passwortes")
+    edit_url = f'{url}/edit_password'
+
+    with app.app_context():
+        response = setup_logged_in_user.post(edit_url, json=updated_password)
+    assert response.status_code == 200, f"Passwort ändern fehlgeschlagen! Status: {response.status_code}, Antwort: {response.text}"
+
+    # Überprüfen, ob `mail.send` aufgerufen wurde
+    mock_send.assert_called_once()
+    msg = mock_send.call_args[0][0]  # Zugriff auf das erste Argument der Funktion
+
+    assert msg.subject == "Confirmation: Your passord has been changed"
+    assert msg.recipients == [dummy_data.user.email]
+    print("Passwort erfolgreich geändert und Bestätigungs-Mail gesendet!")
+
+    print("send_email Mock erfolgreich!")
 
 def test_delete_profile(setup_database):
     """Testet das Löschen des Benutzerprofils."""
