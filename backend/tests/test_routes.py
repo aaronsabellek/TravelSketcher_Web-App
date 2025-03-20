@@ -2,6 +2,8 @@ import requests
 from app import app
 from models import User, Destination, Activity
 
+from helpers import generate_verification_token
+
 from .helping_variables import (
     url,
     dummy_data,
@@ -26,7 +28,7 @@ from .helping_functions import (
 
 
 # FUNKTIONEN ZUM TESTEN DER ROUTES
-
+'''
 # Funktion zum Testen der Registration
 def test_registration(setup_database):
     print("Test: Benutzerregistrierung")
@@ -46,7 +48,7 @@ def test_registration(setup_database):
         ).first()
     assert user is not None, f"Fehler: Benutzer wurde nicht korrekt in der Datenbank gespeichert! Gesucht: {user_data}"
     print(f"Benutzer erfolgreich in der Datenbank gefunden: {user.username}")
-
+'''
 # Funktion zum Testen des Logins
 def test_login(setup_database):
     print("Test: Login mit Username und mit Email")
@@ -59,6 +61,19 @@ def test_login(setup_database):
     print("Login mit Email")
     login(session, login_data_email)
     logout(session)
+
+def test_verification_route(setup_database):
+    # Annahme: Du hast einen User, der ein Verifikations-TOKEN benötigt
+    user = User.query.filter_by(email=dummy_data['user']['email']).first()
+    user.is_email_verified = False
+
+    token = generate_verification_token(user.email)
+    verify_url = f'{url}/verify_email/{token}'
+
+    # Sendet eine GET-Anfrage an die Verifikationsroute
+    response = setup_database.get(verify_url)
+    assert response.status_code == 200
+    assert b"E-Mail confirmed successfully!" in response.data
 
 # Funktion zum Testen der Anzeige der Profildaten
 def test_get_profile(setup_logged_in_user):

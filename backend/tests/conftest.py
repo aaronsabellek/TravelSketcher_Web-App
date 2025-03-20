@@ -27,7 +27,8 @@ def setup_database():
             longitude=dummy_data['user']['longitude'],
             latitude=dummy_data['user']['latitude'],
             country=dummy_data['user']['country'],
-            currency=dummy_data['user']['currency']
+            currency=dummy_data['user']['currency'],
+            is_email_verified=dummy_data['user']['is_email_verified']
         )
         db.session.add(user)
         db.session.commit()
@@ -54,7 +55,9 @@ def setup_database():
 
             db.session.commit()
 
-        yield db
+        with app.test_client() as client:
+            yield client
+        #yield db
 
         # Bereinigen der db
         db.session.remove()

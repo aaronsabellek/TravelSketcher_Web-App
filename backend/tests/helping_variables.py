@@ -14,7 +14,8 @@ dummy_data = {
         'longitude': '12.3731',
         'latitude': '51.3397',
         'country': 'Deutschland',
-        'currency': 'EUR'
+        'currency': 'EUR',
+        'is_email_verified': True
     },
     'destinations': [
         {
