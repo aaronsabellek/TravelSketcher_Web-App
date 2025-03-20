@@ -2,10 +2,12 @@ from flask import request, jsonify, url_for
 from flask_login import login_required, current_user, login_user, logout_user
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_mail import Message
+from itsdangerous import URLSafeTimedSerializer
 
 from models import User, Destination, Activity
-from app import app, db, login_manager, serializer, mail
+from app import app, db, login_manager, mail
 from helpers import (
+    serializer,
     models_to_list,
     is_valid_email,
     confirm_verification_token,

@@ -12,6 +12,9 @@ from app import app, db, mail
 from models import User, Destination, Activity
 
 
+# Helping serializer
+serializer = URLSafeTimedSerializer(app.secret_key)
+
 def model_to_dict(model):
     """Wandelt ein SQLAlchemy-Objekt in ein Dictionary um."""
     return {column.name: getattr(model, column.name) for column in model.__table__.columns}
@@ -27,8 +30,6 @@ def is_valid_email(email):
 
     # Überprüft, ob die E-Mail dem regulären Ausdruck entspricht
     return bool(re.match(regex, email))
-
-serializer = URLSafeTimedSerializer(app.secret_key)
 
 def generate_verification_token(email):
     return serializer.dumps(email, salt="email-confirmation")
