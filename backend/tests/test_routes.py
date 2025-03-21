@@ -69,11 +69,11 @@ def test_registration(setup_database, test_data):
 
     # Check if latest email fits the validation mail of the register route
     latest_email = response.json()['items'][0]
-    assert latest_email, f"Error: No E-Mail found in MailHog! Status: {response.status_code}, Text: {response.text}"
-    assert latest_email["Content"]["Headers"]["Subject"][0] == "Please confirm your E-Mail", \
-        f"Error: Subject of the latest Mail does not fit the validation mail! " \
-        f"Status: {response.status_code}, Text: {response.text}"
-'''
+    assert latest_email, f'Error: No E-Mail found in MailHog! Status: {response.status_code}, Text: {response.text}'
+    assert latest_email['Content']['Headers']['Subject'][0] == 'Please confirm your E-Mail', \
+        f'Error: Subject of the latest Mail does not fit the validation mail!' \
+        f'Status: {response.status_code}, Text: {response.text}'
+
 # TEST OF EMAIL VERIFICATION ROUTE
 @pytest.mark.parametrize('test_data', verification_data)
 def test_verifify_email(setup_database, test_data):
@@ -107,7 +107,10 @@ def test_verifify_email(setup_database, test_data):
 
     # If email has not been already confirmed before, check if it is confirmed now
     if not 'E-Mail has already been confirmed!' in response.text:
-        assert user.is_email_verified == True, f"Error: User still not verified in database! Status: {response.status_code}, Text: {response.text}"
+        assert user.is_email_verified == True, f'Error: User still not verified in database! Status: {response.status_code}, Text: {response.text}'
+'''
+
+# Funktion zum Testen der Wiederversendung eines verification links
 
 '''
 # Funktion zum Testen des Logins

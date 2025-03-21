@@ -56,14 +56,14 @@ dummy_data = {
 }
 
 registration_base_data = {
-        "username": f"test_user_registration",
-        "email": f"registration@example.com",
-        "password": "testpassword123!",
-        "city": "Leipzig",
-        "longitude": "12.3731",
-        "latitude": "51.3397",
-        "country": "Deutschland",
-        "currency": "EUR"
+        'username': 'test_user_registration',
+        'email': 'registration@example.com',
+        'password': dummy_data['user']['password'],
+        'city': dummy_data['user']['city'],
+        'longitude': dummy_data['user']['longitude'],
+        'latitude': dummy_data['user']['latitude'],
+        'country': dummy_data['user']['country'],
+        'currency': dummy_data['user']['currency']
 }
 
 registration_data = [

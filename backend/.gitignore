@@ -4,6 +4,8 @@ instance/
 migrations/
 config/
 
+config.py
+
 .pytest_cache
 
 *.env

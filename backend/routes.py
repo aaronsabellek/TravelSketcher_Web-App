@@ -38,87 +38,97 @@ def home():
 # Register route
 @app.route('/register', methods=['POST'])
 def register():
-    try:
-        data = request.get_json() # Get data
 
-        # Check if all required fields are filled
-        required_fields = ["username", "email", "password", "city", "longitude", "latitude", "country", "currency"]
-        for field in required_fields:
-            if not data[field] or data[field] == '':
-                return jsonify({'error': 'Field(s) missing!'}), 400
+    data = request.get_json()
 
-        # Set variables for data that has to be checked
-        username, email, password = data["username"], data["email"], data["password"]
+    # Check if all required fields are filled
+    required_fields = ['username', 'email', 'password', 'city', 'longitude', 'latitude', 'country', 'currency']
+    for field in required_fields:
+        if not data[field] or data[field] == '':
+            return jsonify({'error': 'Field(s) missing!'}), 400
 
-        # Check if email has the correct format
-        if not is_valid_email(email):
-            return jsonify({'error': 'Wrong Email format!'}), 400
+    # Set variables for data that has to be checked
+    username, email, password = data['username'], data['email'], data['password']
 
-        # Check if password fits the requirements
-        password_validation = validate_password(password)
-        if password_validation:
-            return password_validation
+    # Check if email has the correct format
+    if not is_valid_email(email):
+        return jsonify({'error': 'Wrong Email format!'}), 400
 
-        # Check if username already exists
-        if User.query.filter_by(username=username).first():
-            return jsonify({'error': 'Username is already taken!'}), 400
+    # Check if password fits the requirements
+    password_validation = validate_password(password)
+    if password_validation:
+        return password_validation
 
-        # Check if email already exists
-        if User.query.filter_by(email=email).first():
-            return jsonify({'error': 'Email is already taken!'}), 400
+    # Check if username already exists
+    if User.query.filter_by(username=username).first():
+        return jsonify({'error': 'Username is already taken!'}), 400
 
-        # Hash password
-        hashed_password = generate_password_hash(password, method='pbkdf2:sha256')
+    # Check if email already exists
+    if User.query.filter_by(email=email).first():
+        return jsonify({'error': 'Email is already taken!'}), 400
 
-        # Set user
-        new_user = User(
-            **{key: data[key] for key in required_fields if key != "password"},
-                        password=hashed_password
-        )
+    # Hash password
+    hashed_password = generate_password_hash(password, method='pbkdf2:sha256')
 
-        # Add user in db
-        db.session.add(new_user)
-        db.session.commit()
+    # Set user
+    new_user = User(
+        **{key: data[key] for key in required_fields if key != 'password'},
+                    password=hashed_password
+    )
 
-        send_verification_email(new_user) # Send validation email
+    # Add user in db
+    db.session.add(new_user)
+    db.session.commit()
 
-        return jsonify({'message': 'Registration was successfull! A confirmation link has been sent.'}), 201
+    send_verification_email(new_user) # Send validation email
 
-    # Show error if route does not work as expected
-    except Exception as e:
-        db.session.rollback()
-        return jsonify({'error': 'An unexpected error has occured', 'details': str(e)}), 500
+    return jsonify({'message': 'Registration was successfull! A confirmation link has been sent.'}), 201
 
 # Verification route
 @app.route('/verify_email/<token>', methods=['GET'])
 def verify_email(token):
-    try:
-        # Verify email
-        email = confirm_verification_token(token)
 
-        # Check if varification has worked
-        if not email:
-            return jsonify({'error': 'Invalid or expired token!'}), 400
+    # Verify email
+    email = confirm_verification_token(token)
 
-        # Check if user with this email exists in db
-        user = User.query.filter_by(email=email).first()
-        if not user:
-            return jsonify({'error': 'User not found!'}), 404
+    # Check if varification has worked
+    if not email:
+        return jsonify({'error': 'Invalid or expired token!'}), 400
 
-        # Check if email is already verified
-        if user.is_email_verified == True:
-            return jsonify({'message': 'E-Mail has already been confirmed!'}), 200
+    # Check if user with this email exists in db
+    user = User.query.filter_by(email=email).first()
+    if not user:
+        return jsonify({'error': 'User not found!'}), 404
 
-        # Change verification status of user in db
-        user.is_email_verified = True
-        db.session.commit()
+    # Check if email is already verified
+    if user.is_email_verified == True:
+        return jsonify({'message': 'E-Mail has already been confirmed!'}), 200
 
-        return jsonify({'message': 'E-Mail confirmed successfully!'}), 200
+    # Change verification status of user in db
+    user.is_email_verified = True
+    db.session.commit()
 
-    # Show error if verification route does not work as expected
-    except Exception as e:
-        db.session.rollback()
-        return jsonify({'error': 'An unexpected error has occured', 'details': str(e)}), 500
+    return jsonify({'message': 'E-Mail confirmed successfully!'}), 200
+
+# Resend verification route
+@app.route('/resend_verification', methods=['POST'])
+def resend_verification():
+
+    data = request.get_json()
+    email = data.get('email')
+
+    # Check if user exists in db
+    user = User.query.filter_by(email=email).first()
+    if not user:
+        return jsonify({'error': 'User not found!'}), 404
+
+    # Check if user is already verified
+    if user.is_email_verified:
+        return jsonify({'message': 'E-Mail is already verified!'}), 200
+
+    # Send new verification mail
+    send_verification_email(user)
+    return jsonify({'message': 'New verification link has been sent!'}), 200
 
 # Login route
 @app.route('/login', methods=['POST'])
@@ -216,41 +226,36 @@ def edit_email():
 @app.route('/edit_password', methods=['POST'])
 @login_required
 def edit_password():
-    try:
-        data = request.get_json()
 
-        new_password_1 = data.get('new_password_1')
-        new_password_2 = data.get('new_password_2')
+    data = request.get_json()
 
-        if not new_password_1 or not new_password_2:
-            return jsonify({'error': 'Password missing!'})
+    new_password_1 = data.get('new_password_1')
+    new_password_2 = data.get('new_password_2')
 
-        if new_password_1 != new_password_2:
-            return jsonify({'error': 'Passwords do not match!'}) # Welche error nummer?
+    if not new_password_1 or not new_password_2:
+        return jsonify({'error': 'Password missing!'})
 
-        password_validation = validate_password(new_password_1)
-        if password_validation:
-            return password_validation
+    if new_password_1 != new_password_2:
+        return jsonify({'error': 'Passwords do not match!'}) # Welche error nummer?
 
-        hashed_password = generate_password_hash(new_password_1, method='pbkdf2:sha256')
-        current_user.password = hashed_password
-        db.session.commit()
+    password_validation = validate_password(new_password_1)
+    if password_validation:
+        return password_validation
 
-        subject = "Confirmation: Your passord has been changed"
-        body = "Hello,\n\n Your password has been changed successfully. If you didn't change the password by yourself, please contact us immediately.\n\nBest regards,\nYour Support-Team"
+    hashed_password = generate_password_hash(new_password_1, method='pbkdf2:sha256')
+    current_user.password = hashed_password
+    db.session.commit()
 
-        with current_app.app_context():
-            send_email(current_user.email, subject, body) # Auch Verification Mails werden hier gesendet, selbst wenn ich sie mocken will
-                                                            # Warum ist das in den APIs weiter oben anders?
+    subject = "Confirmation: Your passord has been changed"
+    body = "Hello,\n\n Your password has been changed successfully. If you didn't change the password by yourself, please contact us immediately.\n\nBest regards,\nYour Support-Team"
 
-        #logout_user()
+    with current_app.app_context():
+        send_email(current_user.email, subject, body) # Auch Verification Mails werden hier gesendet, selbst wenn ich sie mocken will
+                                                        # Warum ist das in den APIs weiter oben anders?
 
-        return jsonify({'message': 'Password has been changed. A confirmation mail has been sent.'}), 200
+    #logout_user()
 
-    # Show error if verification route does not work as expected
-    except Exception as e:
-        db.session.rollback()
-        return jsonify({'error': 'An unexpected error has occured', 'details': str(e)}), 500
+    return jsonify({'message': 'Password has been changed. A confirmation mail has been sent.'}), 200
 
 @app.route('/request_password_reset', methods=['POST'])
 def request_password_reset():
