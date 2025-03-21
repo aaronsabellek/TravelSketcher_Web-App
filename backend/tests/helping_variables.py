@@ -88,7 +88,17 @@ registration_data = [
     {**registration_base_data, 'expected_status': 201, 'expected_message': 'Registration was successfull! A confirmation link has been sent.'}
 ]
 
+verification_data = [
+    # Email does not exist in db
+    {'email': 'wrong_email@test-com', 'is_email_verified': False, 'token': True, 'expected_status': 404, 'expected_message': 'User not found!'},
+    # User is already verified
+    {'email': dummy_data['user']['email'], 'is_email_verified': True, 'token': True, 'expected_status': 200, 'expected_message': 'E-Mail has already been confirmed!'},
+    # Token is wrong
+    {'email': dummy_data['user']['email'], 'is_email_verified': False, 'token': False, 'expected_status': 400, 'expected_message': 'Invalid or expired token!'},
 
+    # Successfull test case
+    {'email': dummy_data['user']['email'], 'is_email_verified': False, 'token': True, 'expected_status': 200, 'expected_message': 'E-Mail confirmed successfully!'}
+]
 
 updated_profile_data = {
         "username": f"{uuid.uuid4().hex}",

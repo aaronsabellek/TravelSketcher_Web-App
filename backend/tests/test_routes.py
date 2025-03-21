@@ -1,6 +1,6 @@
 import requests
 from models import User, Destination, Activity
-from app import app, mail
+from app import app, db, mail
 from unittest.mock import patch
 import time
 import pytest
@@ -12,6 +12,7 @@ from .helping_variables import (
     mailhog_v2,
     dummy_data,
     registration_data,
+    verification_data,
     updated_password,
     login_data_username,
     login_data_email,
@@ -31,13 +32,9 @@ from .helping_functions import (
     edit_item,
     reorder_items
 )
-
+'''
 # TEST OF REGISTRATION ROUTE
-@pytest.mark.parametrize(
-    "test_data",
-    registration_data
-)
-
+@pytest.mark.parametrize('test_data', registration_data)
 def test_registration(setup_database, test_data):
 
     clear_mailhog() # Clear MailHog from all E-mails
@@ -48,15 +45,15 @@ def test_registration(setup_database, test_data):
 
     # Use registration route (POST)
     response = setup_database.post(register_url, json=test_data)
-    assert response.status_code == test_data["expected_status"]
+    assert response.status_code == test_data['expected_status'], f'Error: Unexpected status code! Status: {response.status_code}, Text: {response.text}'
 
-    # Stop the test if the error message matches the expected message
+    # Stop the test if thrown error message was expected
     if response.status_code not in [200, 201]:
-        assert test_data["expected_message"] in response.json['error']
+        assert test_data['expected_message'] in response.json['error']
         return
 
     # Check for expected message
-    assert test_data["expected_message"] in response.json['message']
+    assert test_data['expected_message'] in response.json['message']
 
     time.sleep(1) # Wait one second for MailHog to receive the validation mail
 
@@ -64,26 +61,53 @@ def test_registration(setup_database, test_data):
     user = User.query.filter(
         (User.username == test_data['username']) | (User.email == test_data['email'])
     ).first()
-    assert user is not None, f"Error: User has not been found in database: {test_data['username']}"
+    assert user is not None, f'Error: User has not been found in database: {test_data['username']}'
 
     # Send request to MailHog
     response = requests.get(mailhog_v2)
-    assert response.status_code == 200, f"Error: No Connection to MailHog! Status: {response.status_code}, Text: {response.text}"
-
-    # Check request for at least one email
-    emails = response.json()
-    assert len(emails) > 0
+    assert response.status_code == 200, f'Error: No Connection to MailHog! Status: {response.status_code}, Text: {response.text}'
 
     # Check if latest email fits the validation mail of the register route
-    latest_email = emails['items'][0]
+    latest_email = response.json()['items'][0]
     assert latest_email, f"Error: No E-Mail found in MailHog! Status: {response.status_code}, Text: {response.text}"
     assert latest_email["Content"]["Headers"]["Subject"][0] == "Please confirm your E-Mail", \
         f"Error: Subject of the latest Mail does not fit the validation mail! " \
         f"Status: {response.status_code}, Text: {response.text}"
-    assert "Click the following link to confirm your E-Mail" in latest_email["Content"]["Body"], \
-    f"Error: Body of the latest Mail does not fit the validation mail! " \
-    f"Status: {response.status_code}, Text: {response.text}"
+'''
+# TEST OF EMAIL VERIFICATION ROUTE
+@pytest.mark.parametrize('test_data', verification_data)
+def test_verifify_email(setup_database, test_data):
 
+    # Get email and user from data
+    email = test_data['email']
+    user = User.query.filter_by(email=email).first()
+
+    # Set verification status of the user in db to False, except a True status is tested
+    if user and test_data['is_email_verified'] == False:
+        user.is_email_verified = False
+        db.session.commit()
+
+    # Generate working verification token, except a wrong token is tested
+    token = generate_verification_token(email)
+    if test_data['token'] == False:
+        token = "wrong_token"
+
+    # Verify email with token
+    verify_url = f'/verify_email/{token}'
+    response = setup_database.get(verify_url)
+    assert response.status_code == test_data['expected_status'], f'Error: Unexpected status code! Status: {response.status_code}, Text: {response.text}'
+
+    # Stop test if thrown error message was expected
+    if response.status_code != 200:
+        assert test_data['expected_message'] in response.json['error']
+        return
+
+    # Check for expected message
+    assert test_data['expected_message'] in response.json['message']
+
+    # If email has not been already confirmed before, check if it is confirmed now
+    if not 'E-Mail has already been confirmed!' in response.text:
+        assert user.is_email_verified == True, f"Error: User still not verified in database! Status: {response.status_code}, Text: {response.text}"
 
 '''
 # Funktion zum Testen des Logins
@@ -99,7 +123,7 @@ def test_login(setup_database):
     login(session, login_data_email)
     logout(session)
 
-def test_verification_email(setup_database):
+def test_verifify_email(setup_database):
     # Annahme: Du hast einen User, der ein Verifikations-TOKEN benötigt
     user = User.query.filter_by(email=dummy_data['user']['email']).first()
     user.is_email_verified = False

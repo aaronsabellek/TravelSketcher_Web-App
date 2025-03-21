@@ -89,14 +89,16 @@ def register():
         db.session.rollback()
         return jsonify({'error': 'An unexpected error has occured', 'details': str(e)}), 500
 
-# Route to verify registration with email link
+# Verification route
 @app.route('/verify_email/<token>', methods=['GET'])
 def verify_email(token):
     try:
-        # Check if verification works
+        # Verify email
         email = confirm_verification_token(token)
+
+        # Check if varification has worked
         if not email:
-            return jsonify({'error': 'Invalid or expired verification link!'}), 400
+            return jsonify({'error': 'Invalid or expired token!'}), 400
 
         # Check if user with this email exists in db
         user = User.query.filter_by(email=email).first()
@@ -104,10 +106,10 @@ def verify_email(token):
             return jsonify({'error': 'User not found!'}), 404
 
         # Check if email is already verified
-        if user.is_email_verified:
+        if user.is_email_verified == True:
             return jsonify({'message': 'E-Mail has already been confirmed!'}), 200
 
-        # Change verification status of user for login
+        # Change verification status of user in db
         user.is_email_verified = True
         db.session.commit()
 
@@ -127,8 +129,7 @@ def login():
 
     # Get login data
     data = request.get_json()
-    identifier = data.get('identifier')
-    password = data.get('password')
+    identifier, password = data.get('identifier'), data.get('password')
 
     # Check if data is complete
     if not identifier or not password:

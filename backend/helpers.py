@@ -36,9 +36,11 @@ def validate_password(password):
         return jsonify({'error': 'Passwort has to have at least one special character!'}), 400
     return None
 
+# Generate verificatoin token
 def generate_verification_token(email):
     return serializer.dumps(email, salt="email-confirmation")
 
+# Confirm verification token
 def confirm_verification_token(token, expiration=3600):
     try:
         email = serializer.loads(token, salt="email-confirmation", max_age=expiration)

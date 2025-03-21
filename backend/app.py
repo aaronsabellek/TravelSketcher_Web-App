@@ -63,6 +63,7 @@ class TestMail:
         return self.sent_messages
 
 '''
+# Data for email service
 app.config['MAIL_PORT'] = 465
 app.config['MAIL_USE_SSL'] = True
 app.config['MAIL_USE_TLS'] = False
@@ -72,7 +73,8 @@ app.config['MAIL_USERNAME'] = os.getenv('MAIL_USERNAME')
 app.config['MAIL_PASSWORD'] = os.getenv('MAIL_PASSWORD')
 app.config['MAIL_DEFAULT_SENDER'] = os.getenv('MAIL_DEFAULT_SENDER')
 '''
-#app.config['MAIL_SUPPRESS_SEND'] = True
+
+# Fake Mailserver with MailHog for testing
 app.config["MAIL_SERVER"] = "localhost"
 app.config["MAIL_PORT"] = 1025  # MailHog SMTP Port
 app.config["MAIL_USE_TLS"] = False
