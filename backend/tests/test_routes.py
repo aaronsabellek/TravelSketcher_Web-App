@@ -43,7 +43,7 @@ def test_registration(setup_database, test_data):
     register_url = '/register'
     #user_data=registration_data
 
-    # Use registration route (POST)
+    # Use registration route
     response = setup_database.post(register_url, json=test_data)
     assert response.status_code == test_data['expected_status'], f'Error: Unexpected status code! Status: {response.status_code}, Text: {response.text}'
 
