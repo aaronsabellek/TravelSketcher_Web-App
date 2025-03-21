@@ -19,24 +19,21 @@ def models_to_list(models):
     """Wandelt eine Liste von SQLAlchemy-Objekten in eine Liste von Dictionaries um."""
     return [model_to_dict(model) for model in models]
 
-
+# Check if email has a valid format
 def is_valid_email(email):
-    # Regulärer Ausdruck für eine einfache E-Mail-Validierung
-    regex = r'^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$'
+    regex = r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,7}\b'
+    return re.match(regex, email)
 
-    # Überprüft, ob die E-Mail dem regulären Ausdruck entspricht
-    return bool(re.match(regex, email))
-
+# Check if password fits the requirements
 def validate_password(password):
-    """Prüft, ob das Passwort den Sicherheitsanforderungen entspricht."""
     if len(password) < 8:
-        return jsonify({'error': 'Passwort muss mindestens 8 Zeichen lang sein!'}), 400
+        return jsonify({'error': 'Passwort has to have at least 8 characters!'}), 400
     if not any(i.isdigit() for i in password):
-        return jsonify({'error': 'Passwort muss mindestens eine Zahl enthalten!'}), 400
+        return jsonify({'error': 'Passwort has to have at least one digit!'}), 400
     if not any(i.isalpha() for i in password):
-        return jsonify({'error': 'Passwort muss mindestens einen Buchstaben enthalten!'}), 400
+        return jsonify({'error': 'Passwort has to have at least one letter!'}), 400
     if not any(not i.isalnum() for i in password):
-        return jsonify({'error': 'Passwort muss mindestens ein Sonderzeichen enthalten!'}), 400
+        return jsonify({'error': 'Passwort has to have at least one special character!'}), 400
     return None
 
 def generate_verification_token(email):

@@ -39,24 +39,16 @@ def home():
 @app.route('/register', methods=['POST'])
 def register():
     try:
-        # Get data
-        data = request.get_json()
+        data = request.get_json() # Get data
 
         # Check if all required fields are filled
         required_fields = ["username", "email", "password", "city", "longitude", "latitude", "country", "currency"]
-        if not all(field in data for field in required_fields):
-            return jsonify({'error': 'Fehlende Eingaben!'}), 400
+        for field in required_fields:
+            if not data[field] or data[field] == '':
+                return jsonify({'error': 'Field(s) missing!'}), 400
 
         # Set variables for data that has to be checked
         username, email, password = data["username"], data["email"], data["password"]
-
-        # Check if username already exists
-        if User.query.filter_by(username=username).first():
-            return jsonify({'error': 'Benutzername bereits vergeben!'}), 400
-
-        # Check if email already exists
-        if User.query.filter_by(email=email).first():
-            return jsonify({'error': 'E-Mail bereits registriert!'}), 400
 
         # Check if email has the correct format
         if not is_valid_email(email):
@@ -66,6 +58,14 @@ def register():
         password_validation = validate_password(password)
         if password_validation:
             return password_validation
+
+        # Check if username already exists
+        if User.query.filter_by(username=username).first():
+            return jsonify({'error': 'Username is already taken!'}), 400
+
+        # Check if email already exists
+        if User.query.filter_by(email=email).first():
+            return jsonify({'error': 'Email is already taken!'}), 400
 
         # Hash password
         hashed_password = generate_password_hash(password, method='pbkdf2:sha256')
@@ -80,12 +80,11 @@ def register():
         db.session.add(new_user)
         db.session.commit()
 
-        # Send confirmation email
-        send_verification_email(new_user)
+        send_verification_email(new_user) # Send validation email
 
-        return jsonify({'message': 'A confirmation link has been sent to you!'}), 201
+        return jsonify({'message': 'Registration was successfull! A confirmation link has been sent.'}), 201
 
-    # Show error if registration route does not work as expected
+    # Show error if route does not work as expected
     except Exception as e:
         db.session.rollback()
         return jsonify({'error': 'An unexpected error has occured', 'details': str(e)}), 500
@@ -240,9 +239,10 @@ def edit_password():
         body = "Hello,\n\n Your password has been changed successfully. If you didn't change the password by yourself, please contact us immediately.\n\nBest regards,\nYour Support-Team"
 
         with current_app.app_context():
-            send_email(current_user.email, subject, body)
+            send_email(current_user.email, subject, body) # Auch Verification Mails werden hier gesendet, selbst wenn ich sie mocken will
+                                                            # Warum ist das in den APIs weiter oben anders?
 
-        logout_user()
+        #logout_user()
 
         return jsonify({'message': 'Password has been changed. A confirmation mail has been sent.'}), 200
 

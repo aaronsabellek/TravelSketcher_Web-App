@@ -1,7 +1,8 @@
 import pytest
 import requests
+from flask_mail import Mail
 
-from app import app, db
+from app import app, db, mail
 from models import User, Destination, Activity
 from werkzeug.security import generate_password_hash
 
@@ -84,4 +85,5 @@ def setup_logged_in_user(setup_database):
     logout_url = f'{url}/logout'
     response_logout = session.post(logout_url)
     assert response_logout.status_code == 200, f"Fehler beim Logout! Statuscode: {response_logout.status_code}, Antwort: {response_logout.text}"
+
 

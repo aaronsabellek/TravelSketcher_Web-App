@@ -3,6 +3,7 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager
 from flask_mail import Mail
 from dotenv import load_dotenv
+from flask_mail import Message
 
 from flask_cors import CORS
 from flask_migrate import Migrate
@@ -49,7 +50,19 @@ login_manager = LoginManager()
 login_manager.init_app(app)
 login_manager.login_view = 'login'
 
+class TestMail:
+    def __init__(self):
+        self.sent_messages = []
 
+    def send(self, message: Message):
+        """Anstatt die E-Mail zu senden, wird sie in einer Liste gespeichert."""
+        self.sent_messages.append(message)
+
+    def get_sent_messages(self):
+        """Gibt alle gespeicherten Nachrichten zurück."""
+        return self.sent_messages
+
+'''
 app.config['MAIL_PORT'] = 465
 app.config['MAIL_USE_SSL'] = True
 app.config['MAIL_USE_TLS'] = False
@@ -58,6 +71,15 @@ app.config['MAIL_SERVER'] = os.getenv('MAIL_SERVER')
 app.config['MAIL_USERNAME'] = os.getenv('MAIL_USERNAME')
 app.config['MAIL_PASSWORD'] = os.getenv('MAIL_PASSWORD')
 app.config['MAIL_DEFAULT_SENDER'] = os.getenv('MAIL_DEFAULT_SENDER')
+'''
+#app.config['MAIL_SUPPRESS_SEND'] = True
+app.config["MAIL_SERVER"] = "localhost"
+app.config["MAIL_PORT"] = 1025  # MailHog SMTP Port
+app.config["MAIL_USE_TLS"] = False
+app.config["MAIL_USE_SSL"] = False
+app.config["MAIL_USERNAME"] = None
+app.config["MAIL_PASSWORD"] = None
+app.config['MAIL_DEFAULT_SENDER'] = "noreply@example.com"
 
 
 mail = Mail(app)

@@ -1,7 +1,11 @@
-from .helping_variables import url, login_data_username
+from .helping_variables import url, mailhog_v2, mailhog_v1, login_data_username
+import requests
 
 
 # HILFSFUNKTIONEN FÜR DIE TESTS
+
+def clear_mailhog():
+    requests.delete(mailhog_v1)
 
 #Login mit einem bestimmten Datenpaket
 def login(session, login_data=None):

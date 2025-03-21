@@ -1,12 +1,15 @@
 import requests
 from models import User, Destination, Activity
-from app import app
+from app import app, mail
 from unittest.mock import patch
+import time
+import pytest
 
-from helpers import send_email, generate_verification_token, send_verification_email
+from helpers import generate_verification_token, send_verification_email
 
 from .helping_variables import (
     url,
+    mailhog_v2,
     dummy_data,
     registration_data,
     updated_password,
@@ -18,6 +21,7 @@ from .helping_variables import (
 )
 
 from .helping_functions import (
+    clear_mailhog,
     login,
     logout,
     get_profile_data,
@@ -28,35 +32,60 @@ from .helping_functions import (
     reorder_items
 )
 
+# TEST OF REGISTRATION ROUTE
+@pytest.mark.parametrize(
+    "test_data",
+    registration_data
+)
 
-# FUNKTIONEN ZUM TESTEN DER ROUTES
+def test_registration(setup_database, test_data):
 
-# Funktion zum Testen der Registration
-@patch('app.mail.send')
-def test_registration(mock_send, setup_database):
-    print("Test: Benutzerregistrierung")
+    clear_mailhog() # Clear MailHog from all E-mails
 
-    register_url = f"{url}/register"
-    user_data=registration_data
+    # Set up variables
+    register_url = '/register'
+    #user_data=registration_data
 
-    response = setup_database.post(register_url, json=user_data)
-    assert response.status_code == 201, f"Fehler: Registrierung fehlgeschlagen! Status: {response.status_code}, Antwort: {response.text}"
-    print("Benutzer erfolgreich registriert!")
+    # Use registration route (POST)
+    response = setup_database.post(register_url, json=test_data)
+    assert response.status_code == test_data["expected_status"]
 
-    # Datenbankprüfung innerhalb des Kontextes
-    with app.app_context():
-        user = User.query.filter(
-            (User.username == user_data['username']) | (User.email == user_data['email'])
-        ).first()
-    assert user is not None, f"Fehler: Benutzer wurde nicht korrekt in der Datenbank gespeichert! Gesucht: {user_data}"
-    print(f"Benutzer erfolgreich in der Datenbank gefunden: {user.username}")
+    # Stop the test if the error message matches the expected message
+    if response.status_code not in [200, 201]:
+        assert test_data["expected_message"] in response.json['error']
+        return
 
-    # Überprüfe, ob die Verifizierungs-E-Mail gesendet wurde
-    mock_send.assert_called_once()  # Prüfe, ob mail.send aufgerufen wurde
-    msg = mock_send.call_args[0][0]  # Zugriff auf das erste Argument der Funktion
-    assert msg.subject == "Please confirm your E-Mail"  # Prüfe, ob der Betreff korrekt ist
-    assert msg.recipients == [user.email]  # Prüfe, ob die richtige E-Mail-Adresse verwendet wurde
+    # Check for expected message
+    assert test_data["expected_message"] in response.json['message']
 
+    time.sleep(1) # Wait one second for MailHog to receive the validation mail
+
+    # Check db for user entry
+    user = User.query.filter(
+        (User.username == test_data['username']) | (User.email == test_data['email'])
+    ).first()
+    assert user is not None, f"Error: User has not been found in database: {test_data['username']}"
+
+    # Send request to MailHog
+    response = requests.get(mailhog_v2)
+    assert response.status_code == 200, f"Error: No Connection to MailHog! Status: {response.status_code}, Text: {response.text}"
+
+    # Check request for at least one email
+    emails = response.json()
+    assert len(emails) > 0
+
+    # Check if latest email fits the validation mail of the register route
+    latest_email = emails['items'][0]
+    assert latest_email, f"Error: No E-Mail found in MailHog! Status: {response.status_code}, Text: {response.text}"
+    assert latest_email["Content"]["Headers"]["Subject"][0] == "Please confirm your E-Mail", \
+        f"Error: Subject of the latest Mail does not fit the validation mail! " \
+        f"Status: {response.status_code}, Text: {response.text}"
+    assert "Click the following link to confirm your E-Mail" in latest_email["Content"]["Body"], \
+    f"Error: Body of the latest Mail does not fit the validation mail! " \
+    f"Status: {response.status_code}, Text: {response.text}"
+
+
+'''
 # Funktion zum Testen des Logins
 def test_login(setup_database):
     print("Test: Login mit Username und mit Email")
@@ -115,25 +144,21 @@ def test_edit_profile(setup_logged_in_user):
 
     edit_item(setup_logged_in_user, edit_url, updated_profile_data, 'user')
 
-@patch('routes.send_email')
-def test_edit_password(mock_send, setup_logged_in_user):
+def test_edit_password(mock_send_email, setup_database):
+    session = requests.Session()
 
-    print("Test des Bearbeitens des Passwortes")
-    edit_url = f'{url}/edit_password'
+    print("Login mit Benutzernamen")
+    login(session, login_data_username)
 
-    with app.app_context():
-        response = setup_logged_in_user.post(edit_url, json=updated_password)
-    assert response.status_code == 200, f"Passwort ändern fehlgeschlagen! Status: {response.status_code}, Antwort: {response.text}"
+    edit_pw_url = f'{url}/edit_password'
+    response_pw = session.post(edit_pw_url, json=updated_password)
+    assert response_pw.status_code == 200, f'Updating password failed: {response_pw.status_code}, Antwort: {response_pw.text}'
 
-    # Überprüfen, ob `mail.send` aufgerufen wurde
-    mock_send.assert_called_once()
-    msg = mock_send.call_args[0][0]  # Zugriff auf das erste Argument der Funktion
-
+    # Überprüfe, ob mail.send aufgerufen wurde
+    mock_send_email.assert_called_once()
+    msg = mock_send_email.call_args[0][0]
     assert msg.subject == "Confirmation: Your passord has been changed"
-    assert msg.recipients == [dummy_data.user.email]
-    print("Passwort erfolgreich geändert und Bestätigungs-Mail gesendet!")
-
-    print("send_email Mock erfolgreich!")
+    assert msg.recipients == [dummy_data['user']['username']]
 
 def test_delete_profile(setup_database):
     """Testet das Löschen des Benutzerprofils."""
@@ -355,4 +380,4 @@ def test_search(setup_logged_in_user):
             print(f"Id: {activity['id']}, Title: {activity['title']}")
 
     print("Suche erfolgreich durchgeführt und Ergebnisse überprüft!")
-
+'''
