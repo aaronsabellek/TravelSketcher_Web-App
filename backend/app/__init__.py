@@ -7,6 +7,8 @@ from werkzeug.exceptions import HTTPException
 from sqlalchemy.exc import SQLAlchemyError
 from itsdangerous import URLSafeTimedSerializer
 
+import logging
+from logging.handlers import RotatingFileHandler
 from flask_cors import CORS
 from flask_migrate import Migrate
 import os
@@ -27,6 +29,22 @@ def create_app(config_class=Config):
     app = Flask(__name__)
     load_dotenv()
     app.config.from_object(config_class)
+
+    # Logger für die Entwicklungsumgebung
+    if app.debug:
+        # Logge auf der Konsole
+        handler = logging.StreamHandler()
+        handler.setLevel(logging.DEBUG)
+        formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+        handler.setFormatter(formatter)
+        app.logger.addHandler(handler)
+    else:
+        # Logge in eine Datei für die Produktionsumgebung
+        handler = RotatingFileHandler('app.log', maxBytes=10240, backupCount=3)
+        handler.setLevel(logging.INFO)
+        formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+        handler.setFormatter(formatter)
+        app.logger.addHandler(handler)
 
     # Erweiterungen mit der App verknüpfen
     app.config['SERIALIZER'] = URLSafeTimedSerializer(app.secret_key)
