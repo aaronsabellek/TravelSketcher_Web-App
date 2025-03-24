@@ -39,7 +39,7 @@ def test_registration(setup_database, test_data):
     clear_mailhog() # Clear MailHog from all E-mails
 
     # Set up variables
-    register_url = f'{url}/register'
+    register_url = f'{url}/auth/register'
     #user_data=registration_data
 
     # Use registration route
@@ -92,7 +92,7 @@ def test_verifify_email(setup_database, test_data):
         token = "wrong_token"
 
     # Verify email with token
-    verify_url = f'{url}/verify_email/{token}'
+    verify_url = f'{url}/auth/verify_email/{token}'
     response = setup_database.get(verify_url)
     assert response.status_code == test_data['expected_status'], f'Error: Unexpected status code! Status: {response.status_code}, Text: {response.text}'
 

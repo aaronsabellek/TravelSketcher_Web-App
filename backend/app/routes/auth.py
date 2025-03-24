@@ -13,7 +13,7 @@ from app.routes.helpers import (
 )
 
 
-auth_bp = Blueprint('auth', __name__)
+auth_bp = Blueprint('auth', __name__, url_prefix='/auth')
 
 # Load user
 @login_manager.user_loader

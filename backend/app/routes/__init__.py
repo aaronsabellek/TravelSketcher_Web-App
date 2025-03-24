@@ -1,4 +1,3 @@
-from flask import Blueprint
 from app.routes.auth import auth_bp
 from app.routes.user import user_bp
 from app.routes.destination import destination_bp

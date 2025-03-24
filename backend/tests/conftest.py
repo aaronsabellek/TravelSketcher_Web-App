@@ -1,12 +1,10 @@
-from app import create_app
-import pytest
 import requests
-from flask_mail import Mail
+import pytest
+
 from werkzeug.security import generate_password_hash
 
-from app import db, mail
+from app import create_app, db
 from app.models import User, Destination, Activity
-
 from .helping_variables import url, dummy_data, login_data_username
 
 @pytest.fixture(scope="function")
