@@ -5,11 +5,12 @@ from itsdangerous import URLSafeTimedSerializer
 from flask_mail import Message
 
 import re
-from app import app, db, mail
-from models import User, Destination, Activity
+from app import db, mail
+from app.models import User, Destination, Activity
 
 
-serializer = URLSafeTimedSerializer(app.secret_key)
+
+#serializer = URLSafeTimedSerializer(current_app.secret_key)
 
 # Change Model to dict
 def model_to_dict(model):
@@ -38,11 +39,13 @@ def validate_password(password):
 
 # Generate verificatoin token
 def generate_verification_token(email):
+    serializer = current_app.config['SERIALIZER']
     return serializer.dumps(email, salt='email-confirmation')
 
 # Confirm verification token
 def confirm_verification_token(token, expiration=3600):
     try:
+        serializer = current_app.config['SERIALIZER']
         email = serializer.loads(token, salt='email-confirmation', max_age=expiration)
         return email
     except:

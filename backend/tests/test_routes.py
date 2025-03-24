@@ -1,6 +1,7 @@
 import requests
+from backend import app
 from models import User, Destination, Activity
-from app import app, db, mail
+from app import db, mail
 from unittest.mock import patch
 import time
 import pytest

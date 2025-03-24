@@ -1,10 +1,11 @@
+from app import create_app
 import pytest
 import requests
 from flask_mail import Mail
-
-from app import app, db, mail
-from models import User, Destination, Activity
 from werkzeug.security import generate_password_hash
+
+from app import db, mail
+from app.models import User, Destination, Activity
 
 from .helping_variables import url, dummy_data, login_data_username
 
@@ -12,6 +13,7 @@ from .helping_variables import url, dummy_data, login_data_username
 def setup_database():
     """Fixture zur Vorbereitung der Testdatenbank und Session."""
     # Setze den Application Context
+    app = create_app()
     with app.app_context():
         # Leere die Datenbank
         db.drop_all()
@@ -68,7 +70,7 @@ def setup_database():
 def setup_logged_in_user(setup_database):
     """Fixture, die einen User einloggt und eine Requests-Session zurückgibt."""
     #session = requests.Session()
-
+    app = create_app()
     with app.app_context():
         session = requests.Session()
         user = User.query.filter_by(username=login_data_username['identifier']).first()
