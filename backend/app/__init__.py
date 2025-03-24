@@ -1,4 +1,8 @@
-from flask import Flask, jsonify
+import logging
+import os
+
+from flask import Flask, jsonify, current_app, request
+from flask_talisman import Talisman
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager
 from flask_mail import Mail
@@ -6,15 +10,12 @@ from dotenv import load_dotenv
 from werkzeug.exceptions import HTTPException
 from sqlalchemy.exc import SQLAlchemyError
 from itsdangerous import URLSafeTimedSerializer
-
-import logging
 from logging.handlers import RotatingFileHandler
 from flask_cors import CORS
 from flask_migrate import Migrate
-import os
 
-from app.errors import handle_exception, handle_http_exception, handle_db_error
-from app.config import Config
+from app.errors import handle_exception, handle_http_exception, handle_db_error, page_not_found, method_not_allowed
+from app.config import DevelopmentConfig, ProductionConfig
 
 
 # Flask Extensions
@@ -24,11 +25,24 @@ login_manager = LoginManager()
 mail = Mail()
 
 
-def create_app(config_class=Config):
+def create_app(config_class=DevelopmentConfig):
     """App Factory: Erstellt und konfiguriert die Flask-App"""
     app = Flask(__name__)
     load_dotenv()
     app.config.from_object(config_class)
+
+    # Einschränken der Ausgabe im Productionmode
+    app.config['PROPAGATE_EXCEPTIONS'] = app.config['DEBUG']
+
+    # Erzwungene Nutzung von HTTPS in der Produktion
+    if not app.debug:
+        Talisman(app, force_https=True)
+
+    # Sichere Cookies für Sessions in der Produktion
+    app.config['SESSION_COOKIE_SECURE'] = True
+    app.config['REMEMBER_COOKIE_SECURE'] = True
+    app.config['SESSION_COOKIE_HTTPONLY'] = True
+    app.config['SESSION_COOKIE_SAMESITE'] = 'Strict'  # oder 'Lax' je nach Bedarf
 
     # Logger für die Entwicklungsumgebung
     if app.debug:
@@ -38,13 +52,19 @@ def create_app(config_class=Config):
         formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
         handler.setFormatter(formatter)
         app.logger.addHandler(handler)
+
     else:
         # Logge in eine Datei für die Produktionsumgebung
-        handler = RotatingFileHandler('app.log', maxBytes=10240, backupCount=3)
-        handler.setLevel(logging.INFO)
-        formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
-        handler.setFormatter(formatter)
-        app.logger.addHandler(handler)
+        if not any(isinstance(h, RotatingFileHandler) for h in app.logger.handlers):
+            handler = RotatingFileHandler('app.log', maxBytes=10240, backupCount=3)
+            handler.setLevel(logging.INFO)
+            formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+            handler.setFormatter(formatter)
+            app.logger.addHandler(handler)
+
+    @app.before_request
+    def log_request_info():
+        current_app.logger.info(f"Neue Anfrage: {request.method} {request.url}")
 
     # Erweiterungen mit der App verknüpfen
     app.config['SERIALIZER'] = URLSafeTimedSerializer(app.secret_key)
@@ -56,11 +76,14 @@ def create_app(config_class=Config):
     CORS(app)  # Falls CORS benötigt wird
 
     app.config['MAINTENANCE_MODE'] = os.getenv('MAINTENANCE_MODE', False) == 'True'
+    app.config['MAINTENANCE_MESSAGE'] = os.getenv('MAINTENANCE_MESSAGE', 'This Website is currently in Maintainance mode. Please try again later.')
     @app.before_request
     def check_maintenance_mode():
         if app.config['MAINTENANCE_MODE']:
-            return jsonify({'error': 'Die Website befindet sich im Wartungsmodus. Bitte versuche es später erneut.'}), 503
+            return jsonify({'error': app.config['MAINTAINANCE_MESSAGE']}), 503
 
+    app.errorhandler(404)(page_not_found)
+    app.errorhandler(405)(method_not_allowed)
     app.errorhandler(Exception)(handle_exception)
     app.errorhandler(HTTPException)(handle_http_exception)
     app.errorhandler(SQLAlchemyError)(handle_db_error)

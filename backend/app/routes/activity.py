@@ -11,6 +11,7 @@ from app.routes.helpers import (
     delete_item,
 )
 
+
 activity_bp = Blueprint('activity', __name__, url_prefix='/activity')
 
 @activity_bp.route('/add', methods=['POST'])

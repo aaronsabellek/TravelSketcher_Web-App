@@ -13,6 +13,7 @@ from app.routes.helpers import (
     delete_item,
 )
 
+
 user_bp = Blueprint('user', __name__, url_prefix='/user')
 
 # Route to show profile

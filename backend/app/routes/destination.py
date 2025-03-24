@@ -11,6 +11,7 @@ from app.routes.helpers import (
     reorder_items
 )
 
+
 destination_bp = Blueprint('destination', __name__, url_prefix='/destination')
 
 @destination_bp.route('/add', methods=['POST'])

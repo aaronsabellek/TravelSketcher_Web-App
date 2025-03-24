@@ -1,6 +1,12 @@
 from flask import jsonify, current_app
 
 
+def page_not_found(e):
+    return jsonify({'error': 'Page not found', 'details': str(e)}), 404
+
+def method_not_allowed(e):
+    return jsonify({'error': 'Method not allowed', 'details': str(e)}), 405
+
 # Global errors
 def handle_exception(e):
     current_app.logger.error(f"Unexpected error: {str(e)}")
@@ -15,3 +21,5 @@ def handle_http_exception(e):
 def handle_db_error(e):
     current_app.logger.error(f"Database error: {str(e)}")
     return jsonify({'error': 'A database error occurred', 'details': str(e)}), 500
+
+

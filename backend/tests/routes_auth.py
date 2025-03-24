@@ -40,7 +40,6 @@ def test_registration(setup_database, test_data):
 
     # Set up variables
     register_url = f'{url}/auth/register'
-    #user_data=registration_data
 
     # Use registration route
     response = setup_database.post(register_url, json=test_data)

@@ -1,16 +1,14 @@
+import re
+
 from flask import jsonify, current_app
 from sqlalchemy import func, String, Text
 from flask_login import logout_user
 from itsdangerous import URLSafeTimedSerializer
 from flask_mail import Message
 
-import re
 from app import db, mail
 from app.models import User, Destination, Activity
 
-
-
-#serializer = URLSafeTimedSerializer(current_app.secret_key)
 
 # Change Model to dict
 def model_to_dict(model):

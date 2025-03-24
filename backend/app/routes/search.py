@@ -4,6 +4,7 @@ from flask_login import login_required
 from app.models import Destination, Activity
 from app.routes.helpers import search_resources
 
+
 search_bp = Blueprint('search', __name__)
 
 @search_bp.route('/search', methods=['GET'])
