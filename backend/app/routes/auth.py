@@ -13,6 +13,7 @@ from app.routes.helpers import (
 )
 
 
+# Create blueprint for auth-routes
 auth_bp = Blueprint('auth', __name__, url_prefix='/auth')
 
 # Load user
@@ -39,6 +40,10 @@ def register():
 
     # Set variables for data that has to be checked
     username, email, password = data['username'], data['email'], data['password']
+
+    # Check if '@' is not in username
+    if '@' in username:
+        return jsonify({'error': "'@' in username is not allowed!"}), 400
 
     # Check if email has the correct format
     if not is_valid_email(email):
@@ -161,4 +166,5 @@ def login():
 @login_required
 def logout():
     logout_user()
-    return jsonify({"message": "Logout successfull!"}), 200
+    return jsonify({'message': 'Logout successfull!'}), 200
+

@@ -1,4 +1,4 @@
-from models import User, Destination, Activity
+from app.models import User, Destination, Activity
 
 # ÜBERARBEITEN: DATEN DIREKT AUS DUMMY DATA EXTRAHIEREN
 

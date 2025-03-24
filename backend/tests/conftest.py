@@ -74,7 +74,7 @@ def setup_logged_in_user(setup_database):
         user = User.query.filter_by(username=login_data_username['identifier']).first()
         assert user is not None, "User existiert nicht in der Datenbank!"
 
-    login_url = f'{url}/login'
+    login_url = f'{url}/auth/login'
 
     response_login = session.post(login_url, json=login_data_username)
     assert response_login.status_code == 200, f"Login fehlgeschlagen! Status: {response_login.status_code}, Antwort: {response_login.text}"

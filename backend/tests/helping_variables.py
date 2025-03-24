@@ -2,13 +2,14 @@ import uuid
 
 
 # HILFSVARIABLEN UND -FUNKTIONEN FÜR DIE TESTS
-
+# Standard URL
 url = 'http://127.0.0.1:5000'
 
+# Mailhog URLs
 mailhog_v2 = 'http://localhost:8025/api/v2/messages'
-
 mailhog_v1 = 'http://localhost:8025/api/v1/messages'
 
+# Dummy data for conftest
 dummy_data = {
     'user': {
         'username': 'test_user',
@@ -55,50 +56,25 @@ dummy_data = {
     ]
 }
 
-registration_base_data = {
-        'username': 'test_user_registration',
-        'email': 'registration@example.com',
-        'password': dummy_data['user']['password'],
-        'city': dummy_data['user']['city'],
-        'longitude': dummy_data['user']['longitude'],
-        'latitude': dummy_data['user']['latitude'],
-        'country': dummy_data['user']['country'],
-        'currency': dummy_data['user']['currency']
+# Exportable variables for dummy data fields
+username = dummy_data['user']['username']
+email = dummy_data['user']['email']
+password = dummy_data['user']['password']
+city = dummy_data['user']['city']
+longitude = dummy_data['user']['longitude']
+latitude = dummy_data['user']['latitude']
+country = dummy_data['user']['country']
+currency = dummy_data['user']['currency']
+is_email_verified = dummy_data['user']['is_email_verified']
+
+# Login data with username
+login_data_username = {
+    'identifier': dummy_data['user']['username'],
+    'password': dummy_data['user']['password']
 }
 
-registration_data = [
-    # Empty required field
-    {**registration_base_data, 'country': '', 'expected_status': 400, 'expected_message': 'Field(s) missing!'},
-    # Wrong Email format
-    {**registration_base_data, 'email': 'testemail', 'expected_status': 400, 'expected_message': 'Wrong Email format!'},
-    # Short password
-    {**registration_base_data, 'password': 's1!', 'expected_status': 400, 'expected_message': 'Passwort has to have at least 8 characters!'},
-    # Password has no letter
-    {**registration_base_data, 'password': '12345678!', 'expected_status': 400, 'expected_message': 'Passwort has to have at least one letter!'},
-    # Password has no digit
-    {**registration_base_data, 'password': 'testpassword!', 'expected_status': 400, 'expected_message': 'Passwort has to have at least one digit!'},
-    # Password has no special character
-    {**registration_base_data, 'password': 'testpassword123', 'expected_status': 400, 'expected_message': 'Passwort has to have at least one special character!'},
-    # Existing username
-    {**registration_base_data, 'username': dummy_data['user']['username'], 'expected_status': 400, 'expected_message': 'Username is already taken!'},
-    # Existing email
-    {**registration_base_data, 'email': dummy_data['user']['email'], 'expected_status': 400, 'expected_message': 'Email is already taken!'},
 
-    # Successfull test case
-    {**registration_base_data, 'expected_status': 201, 'expected_message': 'Registration was successfull! A confirmation link has been sent.'}
-]
 
-verification_data = [
-    # Email does not exist in db
-    {'email': 'wrong_email@test-com', 'is_email_verified': False, 'token': True, 'expected_status': 404, 'expected_message': 'User not found!'},
-    # User is already verified
-    {'email': dummy_data['user']['email'], 'is_email_verified': True, 'token': True, 'expected_status': 200, 'expected_message': 'E-Mail has already been confirmed!'},
-    # Token is wrong
-    {'email': dummy_data['user']['email'], 'is_email_verified': False, 'token': False, 'expected_status': 400, 'expected_message': 'Invalid or expired token!'},
-
-    # Successfull test case
-    {'email': dummy_data['user']['email'], 'is_email_verified': False, 'token': True, 'expected_status': 200, 'expected_message': 'E-Mail confirmed successfully!'}
-]
 
 updated_profile_data = {
         "username": f"{uuid.uuid4().hex}",
