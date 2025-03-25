@@ -5,7 +5,7 @@ from werkzeug.security import generate_password_hash
 
 from app import create_app, db
 from app.models import User, Destination, Activity
-from .helping_variables import url, dummy_data, login_data_username
+from .helping_variables import url, dummy_data, login_data_username, username
 
 @pytest.fixture(scope="function")
 def setup_database():
@@ -32,6 +32,20 @@ def setup_database():
             is_email_verified=dummy_data['user']['is_email_verified']
         )
         db.session.add(user)
+        db.session.commit()
+
+        second_user = User(
+            username=dummy_data['second_user']['username'],
+            email=dummy_data['second_user']['email'],
+            password=hashed_password,
+            city=dummy_data['second_user']['city'],
+            longitude=dummy_data['second_user']['longitude'],
+            latitude=dummy_data['second_user']['latitude'],
+            country=dummy_data['second_user']['country'],
+            currency=dummy_data['second_user']['currency'],
+            is_email_verified=dummy_data['second_user']['is_email_verified']
+        )
+        db.session.add(second_user)
         db.session.commit()
 
         # Erstelle die Destinations und Activities und verknüpfe sie mit dem User
@@ -68,22 +82,21 @@ def setup_database():
 def setup_logged_in_user(setup_database):
     """Fixture, die einen User einloggt und eine Requests-Session zurückgibt."""
     #session = requests.Session()
-    app = create_app()
-    with app.app_context():
-        session = requests.Session()
-        user = User.query.filter_by(username=login_data_username['identifier']).first()
-        assert user is not None, "User existiert nicht in der Datenbank!"
+    #app = create_app()
+    #with app.app_context():
+    session = requests.Session()
+    user = User.query.filter_by(username=username).first()
+    assert user is not None, "User existiert nicht in der Datenbank!"
 
     login_url = f'{url}/auth/login'
-
     response_login = session.post(login_url, json=login_data_username)
     assert response_login.status_code == 200, f"Login fehlgeschlagen! Status: {response_login.status_code}, Antwort: {response_login.text}"
 
     yield session
 
     # Logout
-    logout_url = f'{url}/logout'
+    logout_url = f'{url}/auth/logout'
     response_logout = session.post(logout_url)
-    assert response_logout.status_code == 200, f"Fehler beim Logout! Statuscode: {response_logout.status_code}, Antwort: {response_logout.text}"
+    assert response_logout.status_code == 200, f'Error: Logout failed! Status: {response_logout.status_code}, Text: {response_logout.text}'
 
 

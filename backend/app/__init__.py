@@ -39,7 +39,6 @@ def create_app(config_class=DevelopmentConfig):
         Talisman(app, force_https=True)
 
     # Sichere Cookies für Sessions in der Produktion
-    app.config['SESSION_COOKIE_SECURE'] = True
     app.config['REMEMBER_COOKIE_SECURE'] = True
     app.config['SESSION_COOKIE_HTTPONLY'] = True
     app.config['SESSION_COOKIE_SAMESITE'] = 'Strict'  # oder 'Lax' je nach Bedarf
@@ -71,7 +70,7 @@ def create_app(config_class=DevelopmentConfig):
     db.init_app(app)
     migrate.init_app(app, db)
     login_manager.init_app(app)  # Hier initialisieren!
-    login_manager.login_view = 'login'
+    login_manager.login_view = 'auth.login'
     mail.init_app(app)
     CORS(app)  # Falls CORS benötigt wird
 

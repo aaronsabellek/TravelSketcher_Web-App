@@ -1,9 +1,9 @@
 import requests
-from app import db
-from app.models import User
 import time
 import pytest
 
+from app import db
+from app.models import User
 from app.routes.helpers import generate_verification_token
 from tests.helping_functions import clear_mailhog
 
@@ -28,10 +28,8 @@ def test_registration(setup_database, test_data):
 
     clear_mailhog() # Clear MailHog from all E-mails
 
-    # Set up variables
-    register_url = f'{url}/auth/register'
-
     # Use registration route
+    register_url = f'{url}/auth/register'
     response = setup_database.post(register_url, json=test_data)
     assert response.status_code == test_data['expected_status'], f'Error: Unexpected status code! Status: {response.status_code}, Text: {response.text}'
 
@@ -175,7 +173,8 @@ def test_login(setup_database, test_data):
         assert test_data['expected_message'] in response.json['error'], f'Error: Unexpected error message. Status: {response.status_code}, Text: {response.text}'
 
 # TEST LOGOUT
-def test_login(setup_database):
+def test_logout(setup_database):
+
     login_url = f'{url}/auth/login'
     logout_url = f'{url}/auth/logout'
 

@@ -33,7 +33,7 @@ from .helping_functions import (
     edit_item,
     reorder_items
 )
-'''
+
 # TEST OF REGISTRATION ROUTE
 @pytest.mark.parametrize('test_data', registration_data)
 def test_registration(setup_database, test_data):
@@ -408,4 +408,4 @@ def test_search(setup_logged_in_user):
             print(f"Id: {activity['id']}, Title: {activity['title']}")
 
     print("Suche erfolgreich durchgeführt und Ergebnisse überprüft!")
-'''
+

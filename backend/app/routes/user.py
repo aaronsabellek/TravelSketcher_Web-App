@@ -28,21 +28,32 @@ def get_profile():
 @user_bp.route('/edit', methods=['POST'])
 @login_required
 def edit_profile():
+
     # Get data
     data = request.get_json()
-    new_email = data.get('email')
+    new_username = data.get('username')
 
+    # Set allowed fields
+    allowed_fields = ['username', 'city', 'longitude', 'latitude', 'country', 'currency']
+
+    # Check if every value is set
     for key, value in data.items():
-        if not value or value == '':
+        if value == '':
             return jsonify({'error': f'{key} not found!'}), 400
 
-    existing_username = User.query.filter_by(username=new_email).first()
+    # Check if username already exist from different user
+    existing_username = User.query.filter_by(username=new_username).first()
     if existing_username and existing_username.id != current_user.id:
-        return jsonify({'error': 'This username is already assigned'}), 400
+        return jsonify({'error': 'This username already exists!'}), 400
 
-    # Änderungen speichern
-    response = edit_entry(User, current_user.id, data)
-    return response
+    # Commit entries in db
+    response = edit_entry(User, current_user.id, data, allowed_fields)
+    response_json = response.get_json()
+
+    # Return allowed fields only
+    user_data = response_json.get('user', {})
+    filtered_data = {key: value for key, value in user_data.items() if key in allowed_fields}
+    return jsonify({'message': response_json.get('message'), 'user': filtered_data})
 
 @user_bp.route('/edit_email', methods=['POST'])
 @login_required

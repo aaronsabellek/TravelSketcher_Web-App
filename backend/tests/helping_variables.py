@@ -22,6 +22,17 @@ dummy_data = {
         'currency': 'EUR',
         'is_email_verified': True
     },
+    'second_user': {
+        'username': 'second_user',
+        'email': 'second_user@example.com',
+        'password': 'testpassword123!',
+        'city': 'Dresden',
+        'longitude': '13.7372',
+        'latitude': '51.0504',
+        'country': 'Deutschland',
+        'currency': 'EUR',
+        'is_email_verified': True
+    },
     'destinations': [
         {
             'title': 'Paris',
@@ -56,7 +67,9 @@ dummy_data = {
     ]
 }
 
-# Exportable variables for dummy data fields
+# Variables for dummy user
+user = dummy_data['user']
+
 username = dummy_data['user']['username']
 email = dummy_data['user']['email']
 password = dummy_data['user']['password']
@@ -67,6 +80,9 @@ country = dummy_data['user']['country']
 currency = dummy_data['user']['currency']
 is_email_verified = dummy_data['user']['is_email_verified']
 
+# Variable for dummy second_user
+second_user = dummy_data['second_user']
+
 # Login data with username
 login_data_username = {
     'identifier': dummy_data['user']['username'],
@@ -74,18 +90,6 @@ login_data_username = {
 }
 
 
-
-
-updated_profile_data = {
-        "username": f"{uuid.uuid4().hex}",
-        "email": f"{uuid.uuid4().hex}@example.com",
-        "password": dummy_data['user']['password'],
-        "city": dummy_data['user']['city'],
-        "longitude": dummy_data['user']['longitude'],
-        "latitude": dummy_data['user']['latitude'],
-        "country": dummy_data['user']['country'],
-        "currency": dummy_data['user']['currency']
-}
 
 updated_password = {
     'new_password_1': 'new_password123!',

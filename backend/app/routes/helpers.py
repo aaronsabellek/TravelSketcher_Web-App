@@ -116,27 +116,25 @@ def get_entry(model, entry_id):
 
     return entry_data, 200
 
-def edit_entry(model, entry_id, data):
+def edit_entry(model, entry_id, data, allowed_fields):
     """ Bearbeitet einen bestehenden Datenbankeintrag """
     query = model.query.filter_by(id=entry_id)
     entry = query.first()
 
-    # Falls kein Eintrag gefunden oder keine Berechtigung, Fehler zurückgeben
+    # Check for given entry
     if not entry:
         return jsonify({'error': f'{model.__name__} nicht gefunden oder keine Berechtigung'}), 403
 
-    # Erlaubte Felder abrufen
-    allowed_fields = {column.name for column in model.__table__.columns}
-
-    # Nur erlaubte Werte aktualisieren
+    # Edit allowed fields only
     for key, value in data.items():
         if key in allowed_fields:
             setattr(entry, key, value)
 
-    # Änderungen speichern
+    # Commit changings in db
     db.session.commit()
 
-    return jsonify({'message': f'{model.__name__} erfolgreich aktualisiert!', model.__name__.lower(): model_to_dict(entry)})
+    # Return edited entry as dict
+    return jsonify({'message': f'Updated {model.__name__} successfully!', model.__name__.lower(): model_to_dict(entry)})
 
 def reorder_items(model, filter_by, new_order, item_name):
     """Allgemeine Funktion zur Neuanordnung von Objekten in einer bestimmten Reihenfolge."""

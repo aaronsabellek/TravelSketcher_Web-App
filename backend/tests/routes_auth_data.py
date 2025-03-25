@@ -1,25 +1,16 @@
 from tests.helping_variables import (
+    user,
     username,
     email,
-    password,
-    city,
-    longitude,
-    latitude,
-    country,
-    currency,
+    password
 )
 
 
 # Base data for registration
 registration_base_data = {
+        **user,
         'username': 'test_user_registration',
         'email': 'registration@example.com',
-        'password': password,
-        'city': city,
-        'longitude': longitude,
-        'latitude': latitude,
-        'country': country,
-        'currency': currency
 }
 
 # Test data for registration
