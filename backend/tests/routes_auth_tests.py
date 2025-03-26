@@ -4,7 +4,7 @@ import pytest
 
 from app import db
 from app.models import User
-from app.routes.helpers import generate_verification_token
+from app.routes.helpers import generate_token
 from tests.helping_functions import clear_mailhog
 
 from tests.helping_variables import (
@@ -79,7 +79,7 @@ def test_verifify_email(setup_database, test_data):
         db.session.commit()
 
     # Generate working verification token, except a wrong token is tested
-    token = generate_verification_token(email)
+    token = generate_token(email, salt='account-verification')
     for data in test_data:
         if 'token' in data:
             token = 'wrong_token'
@@ -87,15 +87,16 @@ def test_verifify_email(setup_database, test_data):
     # Verify email with token
     verify_url = f'{url}/auth/verify_email/{token}'
     response = setup_database.get(verify_url)
+    response_data = response.json
     assert response.status_code == test_data['expected_status'], f'Error: Unexpected status code! Status: {response.status_code}, Text: {response.text}'
 
     # Stop test if thrown error message was expected
     if response.status_code != 200:
-        assert test_data['expected_message'] in response.json['error'], f'Error: Unexpected error message. Status: {response.status_code}, Text: {response.text}'
+        assert test_data['expected_message'] in response_data['error'], f'Error: Unexpected error message. Status: {response.status_code}, Text: {response.text}'
         return
 
     # Check for expected message
-    assert test_data['expected_message'] in response.json['message'], f'Error: Unecpected message. Status: {response.status_code}, Text: {response.text}'
+    assert test_data['expected_message'] in response_data['message'], f'Error: Unecpected message. Status: {response.status_code}, Text: {response.text}'
 
     # If email has not been already confirmed before, check if it is confirmed now
     if not 'E-Mail has already been confirmed!' in response.text:

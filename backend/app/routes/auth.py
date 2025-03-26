@@ -8,7 +8,7 @@ from app.models import User
 from app.routes.helpers import (
     is_valid_email,
     validate_password,
-    confirm_verification_token,
+    confirm_token,
     send_verification_email,
 )
 
@@ -84,7 +84,7 @@ def register():
 def verify_email(token):
 
     # Verify email
-    email = confirm_verification_token(token)
+    email = confirm_token(token, salt='account-verification')
 
     # Check if varification has worked
     if not email:

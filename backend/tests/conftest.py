@@ -17,7 +17,7 @@ def setup_database():
         db.drop_all()
         db.create_all()
 
-        hashed_password = generate_password_hash(dummy_data['user']['password'])
+        hashed_password = generate_password_hash(dummy_data['user']['password'], method='pbkdf2:sha256')
 
         # Erstelle den Benutzer
         user = User(
@@ -98,5 +98,4 @@ def setup_logged_in_user(setup_database):
     logout_url = f'{url}/auth/logout'
     response_logout = session.post(logout_url)
     assert response_logout.status_code == 200, f'Error: Logout failed! Status: {response_logout.status_code}, Text: {response_logout.text}'
-
 

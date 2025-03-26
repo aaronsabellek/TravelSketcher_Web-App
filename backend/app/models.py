@@ -7,6 +7,7 @@ class User(UserMixin, db.Model):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(20), unique=True, nullable=False)
     email = db.Column(db.String(50), unique=True, nullable=False)
+    temp_email = db.Column(db.String(50), unique=True, nullable=True)
     password = db.Column(db.String(50), nullable=False)
     city = db.Column(db.String(20), nullable=False)
     longitude = db.Column(db.String(20), nullable=False)

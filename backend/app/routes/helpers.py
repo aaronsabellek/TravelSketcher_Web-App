@@ -5,6 +5,7 @@ from sqlalchemy import func, String, Text
 from flask_login import logout_user
 from itsdangerous import URLSafeTimedSerializer
 from flask_mail import Message
+from werkzeug.security import generate_password_hash
 
 from app import db, mail
 from app.models import User, Destination, Activity
@@ -36,22 +37,22 @@ def validate_password(password):
     return None
 
 # Generate verificatoin token
-def generate_verification_token(email):
+def generate_token(email, salt):
     serializer = current_app.config['SERIALIZER']
-    return serializer.dumps(email, salt='email-confirmation')
+    return serializer.dumps(email, salt=salt)
 
 # Confirm verification token
-def confirm_verification_token(token, expiration=3600):
+def confirm_token(token, salt, expiration=3600):
     try:
         serializer = current_app.config['SERIALIZER']
-        email = serializer.loads(token, salt='email-confirmation', max_age=expiration)
+        email = serializer.loads(token, salt=salt, max_age=expiration)
         return email
     except:
         return None
 
 # Send email for verification
 def send_verification_email(user):
-    token = generate_verification_token(user.email)
+    token = generate_token(user.email, salt='email confirmation')
     verify_url = f'/verify_email/{token}'
     subject = 'Please confirm your E-Mail'
     body = f'Click the following link to confirm your E-Mail: {verify_url}'
@@ -64,6 +65,31 @@ def send_email(to_email, subject, body):
         sender_email = current_app.config['MAIL_DEFAULT_SENDER']
     msg = Message(subject, recipients=[to_email], body=body, sender=sender_email)
     mail.send(msg)
+
+# Update password
+def update_password(user, new_password_1, new_password_2):
+
+    # Check for password in two fields
+    if not new_password_1 or not new_password_2:
+        return jsonify({'error': 'Password missing!'}), 400
+
+    # Check if passwords match
+    if new_password_1 != new_password_2:
+        return jsonify({'error': 'Passwords do not match!'}), 400
+
+    # Check if password matches the requirements
+    password_validation = validate_password(new_password_1)
+    if password_validation:
+        return password_validation
+
+    # Hash password
+    hashed_password = generate_password_hash(new_password_1, method='pbkdf2:sha256')
+
+    # Update hashed password in db
+    user.password = hashed_password
+    db.session.commit()
+
+    return jsonify({'message': 'Password updated successfully!'}), 200
 
 # Create entry (User, Destination or Activity)
 def create_entry(model, data, user_id=None, destination_id=None):
@@ -116,14 +142,16 @@ def get_entry(model, entry_id):
 
     return entry_data, 200
 
+# Edit entry in db
 def edit_entry(model, entry_id, data, allowed_fields):
-    """ Bearbeitet einen bestehenden Datenbankeintrag """
+
+    # Get entry from
     query = model.query.filter_by(id=entry_id)
     entry = query.first()
 
     # Check for given entry
     if not entry:
-        return jsonify({'error': f'{model.__name__} nicht gefunden oder keine Berechtigung'}), 403
+        return jsonify({'error': f'{model.__name__} not found or no permission'}), 403
 
     # Edit allowed fields only
     for key, value in data.items():
@@ -133,8 +161,10 @@ def edit_entry(model, entry_id, data, allowed_fields):
     # Commit changings in db
     db.session.commit()
 
-    # Return edited entry as dict
-    return jsonify({'message': f'Updated {model.__name__} successfully!', model.__name__.lower(): model_to_dict(entry)})
+    # Filter only allowed fields
+    filtered_data = {key: getattr(entry, key) for key in allowed_fields}
+
+    return jsonify({'message': f'Updated {model.__name__} successfully!', model.__name__.lower(): filtered_data}), 200
 
 def reorder_items(model, filter_by, new_order, item_name):
     """Allgemeine Funktion zur Neuanordnung von Objekten in einer bestimmten Reihenfolge."""
@@ -159,13 +189,17 @@ def reorder_items(model, filter_by, new_order, item_name):
     db.session.commit()
     return jsonify({"message": f"{item_name.capitalize()} erfolgreich umsortiert!"}), 200
 
+# Delete item
 def delete_item(model, item_id):
-    """Allgemeine Funktion zum Löschen von Entitäten (Destinations oder Activities)"""
-    item = model.query.get(item_id)
 
+    # Get item by id
+    item = model.query.filter_by(id=item_id).first()
+
+    # Delete item in db
     db.session.delete(item)
     db.session.commit()
 
+    # Logout if item is user
     if model == User:
         logout_user()
 

@@ -1,4 +1,4 @@
-from flask import Blueprint, request, jsonify, url_for, current_app
+from flask import Blueprint, request, jsonify, current_app
 from flask_login import login_required, current_user
 from werkzeug.security import generate_password_hash
 
@@ -7,8 +7,11 @@ from app.models import User
 from app.routes.helpers import (
     is_valid_email,
     validate_password,
+    generate_token,
+    confirm_token,
     send_verification_email,
     send_email,
+    update_password,
     edit_entry,
     delete_item,
 )
@@ -41,120 +44,146 @@ def edit_profile():
         if value == '':
             return jsonify({'error': f'{key} not found!'}), 400
 
+    # Check for '@' in username
+    if '@' in new_username:
+        return jsonify({'error': "'@' in username is not allowed!"}), 400
+
     # Check if username already exist from different user
     existing_username = User.query.filter_by(username=new_username).first()
     if existing_username and existing_username.id != current_user.id:
         return jsonify({'error': 'This username already exists!'}), 400
 
-    # Commit entries in db
-    response = edit_entry(User, current_user.id, data, allowed_fields)
-    response_json = response.get_json()
+    # Edit entries in db
+    response, status_code = edit_entry(User, current_user.id, data, allowed_fields)
 
-    # Return allowed fields only
-    user_data = response_json.get('user', {})
-    filtered_data = {key: value for key, value in user_data.items() if key in allowed_fields}
-    return jsonify({'message': response_json.get('message'), 'user': filtered_data})
+    return response, status_code
 
+# Route to edit user email
 @user_bp.route('/edit_email', methods=['POST'])
 @login_required
 def edit_email():
-    data = request.get_json()
-    new_email = data.get("email")
 
-    if not new_email:
+    # Get new email
+    data = request.get_json()
+    new_email = data.get('email')
+
+    # Check for new email
+    if not new_email or new_email == '':
         return jsonify({'error': 'No E-Mail found!'}), 400
 
+    # Check if email has correct format
     if not is_valid_email(new_email):
         return jsonify({'error': 'Wrong Email format!'}), 400
 
+    # Check if email already exists in db
     if User.query.filter_by(email=new_email).first():
         return jsonify({'error': 'E-Mail is already taken!'}), 400
 
-    # Temporär die neue E-Mail speichern
+    # Safe new email temporarily
     current_user.temp_email = new_email
     db.session.commit()
 
-    send_verification_email(current_user)
-    return jsonify({'message': 'Verification E-Mail has been sent. Pleayse check your E-Mails.'}), 200
+    # Send verification mail
+    send_verification_email(current_user, salt='email-confirmation')
 
+    return jsonify({'message': 'Verification e-mail has been sent.'}), 200
+
+# Route to verify new email
+@user_bp.route('/verify_email/<token>', methods=['GET'])
+def verify_email(token):
+
+    # Confirm token
+    new_email = confirm_token(token, salt='email-confirmation')
+
+    # Check if token is valid
+    if not new_email:
+        return jsonify({'error': 'Invalid or expired token'}), 400
+
+    # Check user in db
+    user = User.query.filter_by(temp_email=new_email).first()
+    if not user:
+        return jsonify({'error': 'Request to edit email not found.'}), 404
+
+    # Edit user email in db
+    user.email = new_email
+    user.temp_email = None
+    db.session.commit()
+
+    return jsonify({'message': 'Email verification successful!'}), 200
+
+# Route to edit user password
 @user_bp.route('/edit_password', methods=['POST'])
 @login_required
 def edit_password():
 
+    # Get new passwords
     data = request.get_json()
-
     new_password_1 = data.get('new_password_1')
     new_password_2 = data.get('new_password_2')
 
-    if not new_password_1 or not new_password_2:
-        return jsonify({'error': 'Password missing!'})
+    # Update password
+    response, status_code = update_password(current_user, new_password_1, new_password_2)
 
-    if new_password_1 != new_password_2:
-        return jsonify({'error': 'Passwords do not match!'}) # Welche error nummer?
+    # Send confirmation mail after successful password update
+    if response.status_code == 200:
+        subject = 'Confirmation: Your password has been changed'
+        body = "Hello,\n\n Your password has been changed successfully. If you didn't change the password by yourself, please contact us immediately.\n\nBest regards,\nYour Support-Team"
+        send_email(current_user.email, subject, body)
 
-    password_validation = validate_password(new_password_1)
-    if password_validation:
-        return password_validation
+    return response, status_code
 
-    hashed_password = generate_password_hash(new_password_1, method='pbkdf2:sha256')
-    current_user.password = hashed_password
-    db.session.commit()
-
-    subject = "Confirmation: Your passord has been changed"
-    body = "Hello,\n\n Your password has been changed successfully. If you didn't change the password by yourself, please contact us immediately.\n\nBest regards,\nYour Support-Team"
-
-    with current_app.app_context():
-        send_email(current_user.email, subject, body) # Auch Verification Mails werden hier gesendet, selbst wenn ich sie mocken will
-                                                        # Warum ist das in den APIs weiter oben anders?
-
-    #logout_user()
-
-    return jsonify({'message': 'Password has been changed. A confirmation mail has been sent.'}), 200
-
+# Route to request password reset
 @user_bp.route('/request_password_reset', methods=['POST'])
 def request_password_reset():
+
+    # Get email
     data = request.get_json()
     email = data.get('email')
 
+    if not email:
+        return jsonify({'error': 'Email missing!'}), 400
+
+    # Check if email is in db
     user = User.query.filter_by(email=email).first()
     if not user:
-        return jsonify({'message': 'If E-Mail exists, a reset link has been sent.'}), 200
+        return jsonify({'error': 'E-Mail not found!'}), 404
 
-    # Token generieren
-    serializer = current_app.config['SERIALIZER']
-    token = serializer.dumps(email, salt='password-reset')
-    reset_url = url_for('reset_password', token=token, _external=True)
+    # Generate token
+    token = generate_token(email, salt='reset-password')
+    reset_url = f'/user/reset_token/{token}'
 
+    # Send reset mail
     subject = 'Reset password'
     body = f'Click the link to reset your password: {reset_url}'
     send_email(email, subject, body)
 
-    return jsonify({'message': 'If E-Mail exists, a reset link has been sent.'}), 200
+    return jsonify({'message': 'A reset link has been sent.'}), 200
 
+# Route to reset password
 @user_bp.route('/reset_password/<token>', methods=['POST'])
 def reset_password(token):
-    try:
-        serializer = current_app.config['SERIALIZER']
-        email = serializer.loads(token, salt='password-reset', max_age=1800)  # 30 Min Gültigkeit
-    except:
-        return jsonify({'error': 'Invalid or expired Token'}), 400
 
-    data = request.get_json()
-    new_password = data.get('new_password')
+    # Confirm token
+    email = confirm_token(token, salt='reset-password', expiration=1800)  # 30 Min gültig
 
-    password_validation = validate_password(new_password)
-    if password_validation:
-        return password_validation
+    # Check if token is valid
+    if not email:
+        return jsonify({'error': 'Invalid or expired token'}), 400
 
+    # Check user in db
     user = User.query.filter_by(email=email).first()
     if not user:
         return jsonify({'error': 'User not found'}), 404
 
-    user.password = generate_password_hash(new_password, method='pbkdf2:sha256')
-    db.session.commit()
+    # Get new password
+    data = request.get_json()
+    new_password_1 = data.get('new_password_1')
+    new_password_2 = data.get('new_password_2')
 
-    return jsonify({'message': 'Password updated successfully!'}), 200
+    # Update password in db
+    return update_password(user, new_password_1, new_password_2)
 
+# Route to delete user
 @user_bp.route('/delete', methods=['DELETE'])
 @login_required
 def delete_profile():
