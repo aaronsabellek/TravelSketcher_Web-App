@@ -9,6 +9,11 @@ from tests.helping_variables import (
 )
 
 
+# Variables for test dicts
+new_password = 'New_password_123!'
+wrong_password = 'newpassword123'
+new_email= 'new_email@mail.com'
+
 # Base data for profile edit
 updated_profile= {
     'username': 'new_username',
@@ -18,12 +23,6 @@ updated_profile= {
     'country': country,
     'currency': currency
 }
-
-
-# Variables for password tests
-new_password = 'New_password_123!'
-wrong_password = 'newpassword123'
-new_email= 'new_email@mail.com'
 
 # Test data for profile edit
 edit_data = [
@@ -52,7 +51,7 @@ edit_email = [
     {'email': dummy_data['second_user']['email'], 'expected_status': 400, 'expected_message': 'E-Mail is already taken!'},
 
     # Successfull test case
-    {'email': new_email, 'expected_status': 200, 'expected_message': 'Verification E-Mail has been sent. Pleayse check your E-Mails.'}
+    {'email': new_email, 'expected_status': 200, 'expected_message': 'Verification e-mail has been sent.'}
 ]
 
 reset_email= [

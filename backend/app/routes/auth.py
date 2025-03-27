@@ -75,7 +75,7 @@ def register():
     db.session.add(new_user)
     db.session.commit()
 
-    send_verification_email(new_user) # Send validation email
+    send_verification_email(new_user, salt='account-verification') # Send validation email
 
     return jsonify({'message': 'Registration was successfull! A confirmation link has been sent.'}), 201
 
@@ -122,7 +122,7 @@ def resend_verification():
         return jsonify({'message': 'E-Mail is already verified!'}), 200
 
     # Send new verification mail
-    send_verification_email(user)
+    send_verification_email(user, salt='account-verification')
     return jsonify({'message': 'New verification link has been sent!'}), 200
 
 # Login route

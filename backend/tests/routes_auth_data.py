@@ -2,16 +2,10 @@ from tests.helping_variables import (
     user,
     username,
     email,
-    password
+    password,
+    registration_base_data
 )
 
-
-# Base data for registration
-registration_base_data = {
-        **user,
-        'username': 'test_user_registration',
-        'email': 'registration@example.com',
-}
 
 # Test data for registration
 registration_data = [
@@ -45,7 +39,7 @@ verification_data = [
     # User is already verified
     {'email': email, 'is_email_verified': True, 'expected_status': 200, 'expected_message': 'E-Mail has already been confirmed!'},
     # Token is wrong
-    {'email': email, 'token': True, 'expected_status': 400, 'expected_message': 'Invalid or expired token!'},
+    {'email': email, 'invalid_token': True, 'expected_status': 400, 'expected_message': 'Invalid or expired token!'},
 
     # Successfull test case
     {'email': email, 'expected_status': 200, 'expected_message': 'E-Mail confirmed successfully!'}

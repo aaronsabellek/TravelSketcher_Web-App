@@ -1,21 +1,16 @@
-import requests
-import time
 import pytest
 
 from werkzeug.security import check_password_hash
 
 from app import db
 from app.models import User
-from app.routes.helpers import generate_token
-from tests.helping_functions import clear_mailhog
-
-from tests.helping_variables import (
-    url,
-    email,
-    mailhog_v2,
-    login_data_username,
+from tests.helping_variables import url, email, username
+from tests.helping_functions import (
+    request_and_validate,
+    check_for_mail,
+    create_test_token,
+    login
 )
-
 from tests.routes_user_data import (
     new_email,
     edit_data,
@@ -23,11 +18,11 @@ from tests.routes_user_data import (
     reset_email,
     edit_password,
     request_password_reset,
-    reset_password
+    reset_password,
 )
 
 
-# TEST PROFILE
+# Test profile
 def test_profile(setup_logged_in_user):
 
     # User profile route
@@ -41,25 +36,16 @@ def test_profile(setup_logged_in_user):
     assert 'password' not in response_data, f'Password should not be shown!'
     assert 'is_email_verified' not in response_data, f'Verification status should not be shown'
 
-# TEST EDIT
+# Test edit profile
 @pytest.mark.parametrize('test_data', edit_data)
 def test_edit(setup_logged_in_user, test_data):
 
-    # Use edit route
-    edit_url = f'{url}/user/edit'
-    response = setup_logged_in_user.post(edit_url, json=test_data)
-    response_data = response.json()
-    assert response.status_code == test_data['expected_status'], f'Error: Unexpected status code! Status: {response.status_code}, Text: {response.text}'
-
-    # Stop the test if thrown error message was expected
-    if response.status_code != 200:
-        assert test_data['expected_message'] in response_data['error'], f'Error: Unexpected message. Status: {response.status_code}, Text: {response.text}'
+    # Use and validate route
+    response = request_and_validate(client=setup_logged_in_user, endpoint='user/edit', test_data=test_data, json_method=True)
+    if response.status_code not in [200, 201]:
         return
 
-    # Check for expected message
-    assert test_data['expected_message'] in response_data['message'], f'Error: Unexpected message. Status: {response.status_code}, Text: {response.text}'
-
-    # Get edited user data drom db as dict
+    # Get edited user data from db as dict
     user = User.query.filter_by(username=test_data['username']).first()
     assert user, f'Error: User not found!'
     db.session.refresh(user)
@@ -78,179 +64,89 @@ def test_edit(setup_logged_in_user, test_data):
         if key == 'password':
             assert user_data['password'] != test_data['password'], f'Unexpected error: Data should not have been changed: {test_data['password']}'
 
-# TEST EDIT MAILS
+# Test edit email
 @pytest.mark.parametrize('test_data', edit_email)
 def test_edit_email(setup_logged_in_user, test_data):
 
-    clear_mailhog() # Clear MailHog from all E-mails
-
-    # User edit email route
-    edit_url = f'{url}/user/edit_email'
-    response = setup_logged_in_user.post(edit_url, json=test_data)
-    response_data = response.json()
-    assert response.status_code == test_data['expected_status'], f'Error: Unexpected status code! Status: {response.status_code}, Text: {response.text}'
-
-    # Stop the test if thrown error message was expected
-    if response.status_code != 200:
-        assert test_data['expected_message'] in response_data['error'], f'Error: Unexpected message. Status: {response.status_code}, Text: {response.text}'
+    # Use and validate route
+    response = request_and_validate(client=setup_logged_in_user, endpoint='user/edit_email', test_data=test_data, json_method=True)
+    if response.status_code not in [200, 201]:
         return
 
-    # Check for expected message
-    assert test_data['expected_message'] in response_data['message'], f'Error: Unexpected message. Status: {response.status_code}, Text: {response.text}'
+    check_for_mail('Please confirm your E-Mail') # Check for email by subject
 
-    time.sleep(1) # Wait one second for MailHog to receive the validation mail
-
-    # Send request to MailHog
-    response_email = requests.get(mailhog_v2)
-    assert response_email.status_code == 200, f'Error: No Connection to MailHog! Status: {response_email.status_code}, Text: {response_email.text}'
-
-    # Check if latest email fits the validation mail
-    latest_email = response_email.json()['items'][0]
-    assert latest_email, f'Error: No E-Mail found in MailHog! Status: {response_email.status_code}, Text: {response_email.text}'
-    assert latest_email['Content']['Headers']['Subject'][0] == 'Please confirm your E-Mail', \
-        f'Error: Subject of the latest Mail does not fit the validation mail!' \
-        f'Status: {response_email.status_code}, Text: {response_email.text}'
-
-# TEST NEW EMAIL VERIFICATION
+# Test new email verification
 @pytest.mark.parametrize('test_data', reset_email)
 def test_reset_password(setup_database, test_data):
 
-    user = User.query.filter_by(id=1).first()
+    # Get user
+    user = User.query.filter_by(username=username).first()
     user.temp_email = new_email
     db.session.commit()
 
+    # Create test token
     email = test_data['email']
+    token = create_test_token(test_data, 'email-confirmation', email=email)
 
-    token = generate_token(email, salt='email-confirmation')
-    for data in test_data:
-        if 'token' in data:
-            token = 'wrong_token'
-
-    # Use reset password route
-    verify_url = f'{url}/user/verify_email/{token}'
-    response = setup_database.get(verify_url)
-    response_data = response.json
-
-    # Stop test if thrown error message was expected
-    if response.status_code != 200:
-        assert test_data['expected_message'] in response_data['error'], f'Error: Unexpected error message. Status: {response.status_code}, Text: {response.text}'
+    # Use and validate route
+    response = request_and_validate(client=setup_database, endpoint=f'user/verify_email/{token}', test_data=test_data, method='GET')
+    if response.status_code not in [200, 201]:
         return
 
-    # Check for expected message
-    assert test_data['expected_message'] in response_data['message'], f'Error: Unecpected message. Status: {response.status_code}, Text: {response.text}'
-
+    # Check new email in db
     updated_user = User.query.filter_by(email=email).first()
     assert updated_user is not None, f"User with email {email} should be in DB"
 
-# TEST EDIT PASSWORD
+# Test edit password
 @pytest.mark.parametrize('test_data', edit_password)
 def test_edit_password(setup_logged_in_user, test_data):
 
-    clear_mailhog() # Clear MailHog from all E-mails
-
-    # User edit email route
-    edit_url = f'{url}/user/edit_password'
-    response = setup_logged_in_user.post(edit_url, json=test_data)
-    response_data = response.json()
-    assert response.status_code == test_data['expected_status'], f'Error: Unexpected status code! Status: {response.status_code}, Text: {response.text}'
-
-    # Stop the test if thrown error message was expected
-    if response.status_code != 200:
-        assert test_data['expected_message'] in response_data['error'], f'Error: Unexpected message. Status: {response.status_code}, Text: {response.text}'
+    # Use and validate route
+    response = request_and_validate(client=setup_logged_in_user, endpoint='user/edit_password', test_data=test_data, json_method=True)
+    if response.status_code not in [200, 201]:
         return
 
-    # Check for expected message
-    assert test_data['expected_message'] in response_data['message'], f'Error: Unexpected message. Status: {response.status_code}, Text: {response.text}'
+    check_for_mail('Confirmation: Your password has been changed') # Check for email by subject
 
-    time.sleep(1) # Wait one second for MailHog to receive the validation mail
-
-    # Send request to MailHog
-    response_email = requests.get(mailhog_v2)
-    assert response_email.status_code == 200, f'Error: No Connection to MailHog! Status: {response_email.status_code}, Text: {response_email.text}'
-
-    # Check if latest email fits the validation mail
-    latest_email = response_email.json()['items'][0]
-    assert latest_email, f'Error: No E-Mail found in MailHog! Status: {response_email.status_code}, Text: {response_email.text}'
-    assert latest_email['Content']['Headers']['Subject'][0] == 'Confirmation: Your password has been changed', \
-        f'Error: Subject of the latest Mail does not fit the validation mail!' \
-        f'Status: {response_email.status_code}, Text: {response_email.text}'
-
-# TEST PASSWORD RESET REQUEST
+# Test password reset request
 @pytest.mark.parametrize('test_data', request_password_reset)
 def test_edit_email(setup_database, test_data):
 
-    clear_mailhog() # Clear MailHog from all E-mails
-
-    # User edit email route
-    edit_url = f'{url}/user/request_password_reset'
-    response = setup_database.post(edit_url, json=test_data)
-    response_data = response.json
-
-    assert response.status_code == test_data['expected_status'], f'Error: Unexpected status code! Status: {response.status_code}, Text: {response.text}'
-
-    # Stop the test if thrown error message was expected
-    if response.status_code != 200:
-        assert test_data['expected_message'] in response_data['error'], f'Error: Unexpected message. Status: {response.status_code}, Text: {response.text}'
+    # Use and validate route
+    response = request_and_validate(client=setup_database, endpoint='user/request_password_reset', test_data=test_data)
+    if response.status_code not in [200, 201]:
         return
 
-    # Check for expected message
-    assert test_data['expected_message'] in response_data['message'], f'Error: Unexpected message. Status: {response.status_code}, Text: {response.text}'
+    check_for_mail('Reset password') # Check for email by subject
 
-    time.sleep(1) # Wait one second for MailHog to receive the validation mail
-
-    # Send request to MailHog
-    response_email = requests.get(mailhog_v2)
-    assert response_email.status_code == 200, f'Error: No Connection to MailHog! Status: {response_email.status_code}, Text: {response_email.text}'
-
-    # Check if latest email fits the validation mail
-    latest_email = response_email.json()['items'][0]
-    assert latest_email, f'Error: No E-Mail found in MailHog! Status: {response_email.status_code}, Text: {response_email.text}'
-    assert latest_email['Content']['Headers']['Subject'][0] == 'Reset password', \
-        f'Error: Subject of the latest Mail does not fit the validation mail!' \
-        f'Status: {response_email.status_code}, Text: {response_email.text}'
-
-# TEST PASSWORD RESET
+# Test password reset
 @pytest.mark.parametrize('test_data', reset_password)
 def test_reset_password(setup_database, test_data):
 
-    # Generate token
-    token = generate_token(email, salt='reset-password')
+    token = create_test_token(test_data, 'reset-password') # Create test token
 
-    # Set token as invalid if this should be tested
-    for data in test_data:
-        if 'invalid_token' in data:
-            token = 'invalid_token'
-
-    # Use reset password route
-    reset_url = f'{url}/user/reset_password/{token}'
-    response = setup_database.post(reset_url, json=test_data)
-    response_data = response.json
-
-    # Check status code
-    assert response.status_code == test_data['expected_status'], f'Unexpected status code! Status: {response.status_code}, Text: {response.text}'
-
-    # Stop the test if thrown error message was expected
-    if response.status_code != 200:
-        assert test_data['expected_message'] in response_data['error'], f'Error: Unexpected message. Status: {response.status_code}, Text: {response.text}'
+    # Use and validate route
+    response = request_and_validate(client=setup_database, endpoint=f'user/reset_password/{token}', test_data=test_data)
+    if response.status_code not in [200, 201]:
         return
-
-    # Check for expected message
-    assert test_data['expected_message'] in response_data['message'], f'Error: Unexpected message. Status: {response.status_code}, Text: {response.text}'
 
     # Check if the password is correctly updated in the database
     user = User.query.filter_by(email=email).first()
     assert user is not None, f'User with email {email} not found in the database'
     assert check_password_hash(user.password, test_data['new_password_1']), 'Password was not correctly hashed and saved in the database'
 
+# Test delete user
 def test_delete(setup_database):
 
-    login_url = f'{url}/auth/login'
-    login_response = setup_database.post(login_url, json=login_data_username)
-    assert login_response.status_code == 200, f'Error: Login failed! Status: {login_response.status_code}, Text: {login_response.text}'
+    client = login(setup_database) # Login
 
+    # Delete current user
     delete_url = f'{url}/user/delete'
-    response = setup_database.delete(delete_url)
-
+    response = client.delete(delete_url)
     assert response.status_code == 200, f'Error: Deletion of user failed! Status: {response.status_code}, Text: {response.text}'
     assert response.json['message'] == 'User deleted successfully', f'Error: Unecpected message. Status: {response.status_code}, Text: {response.text}'
+
+    # Check for user in db
+    user = User.query.filter_by(username=username).first()
+    assert user is None, f'Error: User can still be found in db'
 

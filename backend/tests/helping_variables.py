@@ -80,6 +80,13 @@ country = dummy_data['user']['country']
 currency = dummy_data['user']['currency']
 is_email_verified = dummy_data['user']['is_email_verified']
 
+# Variables for registration
+registration_base_data = {
+        **user,
+        'username': 'test_user_registration',
+        'email': 'registration@example.com',
+}
+
 # Variable for dummy second_user
 second_user = dummy_data['second_user']
 

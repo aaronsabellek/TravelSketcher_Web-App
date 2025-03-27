@@ -1,12 +1,10 @@
-from flask import Blueprint, request, jsonify, current_app
+from flask import Blueprint, request, jsonify
 from flask_login import login_required, current_user
-from werkzeug.security import generate_password_hash
 
 from app import db
 from app.models import User
 from app.routes.helpers import (
     is_valid_email,
-    validate_password,
     generate_token,
     confirm_token,
     send_verification_email,
@@ -19,15 +17,19 @@ from app.routes.helpers import (
 
 user_bp = Blueprint('user', __name__, url_prefix='/user')
 
-# Route to show profile
+# Allowed fields for user display
+allowed_fields = ['username', 'city', 'longitude', 'latitude', 'country', 'currency']
+
+# Show profile route
 @user_bp.route('/profile', methods=['GET'])
 @login_required
 def get_profile():
+
     # Show profile data except for password and data that was not logged in explicitly
-    user_data = {key: value for key, value in current_user.__dict__.items() if key not in ['password', 'is_email_verified'] and not key.startswith('_')}
+    user_data = {key: value for key, value in current_user.__dict__.items() if key in allowed_fields}
     return jsonify(user_data), 200
 
-# Route to edit profile
+# Edit user route
 @user_bp.route('/edit', methods=['POST'])
 @login_required
 def edit_profile():
@@ -58,7 +60,7 @@ def edit_profile():
 
     return response, status_code
 
-# Route to edit user email
+# Edit email route
 @user_bp.route('/edit_email', methods=['POST'])
 @login_required
 def edit_email():
@@ -88,7 +90,7 @@ def edit_email():
 
     return jsonify({'message': 'Verification e-mail has been sent.'}), 200
 
-# Route to verify new email
+# Verify email route
 @user_bp.route('/verify_email/<token>', methods=['GET'])
 def verify_email(token):
 
@@ -111,7 +113,7 @@ def verify_email(token):
 
     return jsonify({'message': 'Email verification successful!'}), 200
 
-# Route to edit user password
+# Edit password route
 @user_bp.route('/edit_password', methods=['POST'])
 @login_required
 def edit_password():
@@ -132,7 +134,7 @@ def edit_password():
 
     return response, status_code
 
-# Route to request password reset
+# Request password reset route
 @user_bp.route('/request_password_reset', methods=['POST'])
 def request_password_reset():
 
@@ -159,7 +161,7 @@ def request_password_reset():
 
     return jsonify({'message': 'A reset link has been sent.'}), 200
 
-# Route to reset password
+# Reset password route
 @user_bp.route('/reset_password/<token>', methods=['POST'])
 def reset_password(token):
 
@@ -183,7 +185,7 @@ def reset_password(token):
     # Update password in db
     return update_password(user, new_password_1, new_password_2)
 
-# Route to delete user
+# Delete user route
 @user_bp.route('/delete', methods=['DELETE'])
 @login_required
 def delete_profile():

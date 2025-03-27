@@ -51,8 +51,8 @@ def confirm_token(token, salt, expiration=3600):
         return None
 
 # Send email for verification
-def send_verification_email(user):
-    token = generate_token(user.email, salt='email confirmation')
+def send_verification_email(user, salt):
+    token = generate_token(user.email, salt=salt)
     verify_url = f'/verify_email/{token}'
     subject = 'Please confirm your E-Mail'
     body = f'Click the following link to confirm your E-Mail: {verify_url}'
@@ -91,8 +91,9 @@ def update_password(user, new_password_1, new_password_2):
 
     return jsonify({'message': 'Password updated successfully!'}), 200
 
-# Create entry (User, Destination or Activity)
+# Create entry
 def create_entry(model, data, user_id=None, destination_id=None):
+
     # Erlaubte Felder aus dem Model holen und nur gültige Felder aus `data` übernehmen
     allowed_fields = {column.name for column in model.__table__.columns}
     data = {key: value for key, value in data.items() if key in allowed_fields}
