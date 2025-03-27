@@ -12,6 +12,7 @@ from app.routes.helpers import (
 )
 
 
+# Set blueprint
 activity_bp = Blueprint('activity', __name__, url_prefix='/activity')
 
 @activity_bp.route('/add', methods=['POST'])

@@ -1,6 +1,5 @@
 import requests
 import time
-import pytest
 
 from app.routes.helpers import generate_token
 from tests.helping_variables import (
@@ -100,20 +99,7 @@ def register(client):
 
 
 
-
-
 '''
-
-#Login mit einem bestimmten Datenpaket
-def login(session, login_data=None):
-    login_url = f'{url}/login'
-    login_data = login_data or login_data_username
-
-    response = session.post(login_url, json=login_data)
-    assert response.status_code == 200, f"Login fehlgeschlagen! Status: {response.status_code}, Antwort: {response.text}"
-
-    print('Login erfolgreich!')
-
 #Hilfsfunktion zum Logout
 def logout(session):
     logout_url = f'{url}/logout'

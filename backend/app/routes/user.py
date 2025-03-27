@@ -15,9 +15,10 @@ from app.routes.helpers import (
 )
 
 
+# Set blueprint
 user_bp = Blueprint('user', __name__, url_prefix='/user')
 
-# Allowed fields for user display
+# Set allowed fields for user display
 allowed_fields = ['username', 'city', 'longitude', 'latitude', 'country', 'currency']
 
 # Show profile route

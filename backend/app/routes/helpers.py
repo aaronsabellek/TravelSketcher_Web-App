@@ -113,7 +113,7 @@ def create_entry(model, data, user_id=None, destination_id=None):
     new_position = (highest_position + 1) if highest_position is not None else 1
     data['position'] = new_position
 
-    # Benutzer- oder Destination-ID setzen
+    # Benutzer- oder Destination-ID zuweisen
     if user_id:
         data['user_id'] = user_id
     if destination_id:

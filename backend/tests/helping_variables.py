@@ -96,6 +96,25 @@ login_data_username = {
     'password': dummy_data['user']['password']
 }
 
+new_destination = {
+    'title': 'Helsinki',
+    'country': 'Finland',
+    'img_link': 'https://pictures.com/helsinki',
+    'duration': '5-7 days',
+    'tags': 'Capital,Nordic Country,Sauna,Archipelago',
+    'status': 'Planned',
+    'time': 'May-September',
+    'accomodation_link': 'https://accomodation-link.com',
+    'pricing': '3',
+    'trip_pricing_flight': '40-80 EUR',
+    'trip_pricing_no_flight': '300-450 EUR',
+    'travel_duration_flight': '2-3h',
+    'travel_duration_no_flight': '15-18h',
+    'longitude': '24.9458',
+    'latitude': '60.1920',
+    'description': 'Capital of Finland',
+    'free_text': 'Booking infos on AirBnB'
+}
 
 
 updated_password = {

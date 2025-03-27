@@ -13,7 +13,7 @@ from app.routes.helpers import (
 )
 
 
-# Create blueprint for auth-routes
+# Set blueprint
 auth_bp = Blueprint('auth', __name__, url_prefix='/auth')
 
 # Load user

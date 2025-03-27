@@ -12,11 +12,14 @@ from app.routes.helpers import (
 )
 
 
+# Set blueprint
 destination_bp = Blueprint('destination', __name__, url_prefix='/destination')
 
+# Add destination route
 @destination_bp.route('/add', methods=['POST'])
 @login_required
 def add_destination():
+
     data = request.get_json()
     return create_entry(Destination, data, user_id=current_user.id)
 
