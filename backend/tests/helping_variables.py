@@ -64,6 +64,39 @@ dummy_data = {
                 {'title': 'Mount Fuji', 'country': 'Japan', 'position': 2}
             ]
         }
+    ],
+    # Hier die Daten noch einmal neu generieren lassen
+    'second_destinations': [
+        {
+            'title': 'Paris',
+            'country': 'Frankreich',
+            'position': 1,
+            'activities': [
+                {'title': 'Eiffelturm besuchen', 'country': 'Frankreich', 'position': 1},
+                {'title': 'Louvre Museum', 'country': 'Frankreich', 'position': 2},
+                {'title': 'Notre-Dame Cathedral besichtigen', 'country': 'Frankreich', 'position': 3},
+                {'title': 'Bootsfahrt auf der Seine', 'country': 'Frankreich', 'position': 4},
+                {'title': 'Champs-Élysées spazieren', 'country': 'Frankreich', 'position': 5}
+            ]
+        },
+        {
+            'title': 'New York',
+            'country': 'USA',
+            'position': 2,
+            'activities': [
+                {'title': 'Central Park', 'country': 'USA', 'position': 1},
+                {'title': 'Statue of Liberty', 'country': 'USA', 'position': 2}
+            ]
+        },
+        {
+            'title': 'Tokyo',
+            'country': 'Japan',
+            'position': 3,
+            'activities': [
+                {'title': 'Shibuya Crossing', 'country': 'Japan', 'position': 1},
+                {'title': 'Mount Fuji', 'country': 'Japan', 'position': 2}
+            ]
+        }
     ]
 }
 

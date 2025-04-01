@@ -23,20 +23,30 @@ def add_destination():
     data = request.get_json()
     return create_entry(Destination, data, user_id=current_user.id)
 
-@destination_bp.route('/get_destinations', methods=['GET'])
+# Get all destinations route
+@destination_bp.route('/get_all', methods=['GET'])
 @login_required
 def get_destinations():
+
     destinations = Destination.query.filter_by(user_id=current_user.id).all()
 
     return jsonify(models_to_list(destinations))
 
+# Get specific destination route
 @destination_bp.route('/get/<int:destination_id>', methods=['GET'])
 @login_required
 def get_destination(destination_id):
+
+    # Get destination by ID
     destination_data, status_code = get_entry(Destination, destination_id)
 
-    if status_code != 200:
-        return jsonify({'error': 'Destination nicht gefunden oder nicht berechtigt'}), status_code
+    # Check if destination could be found in db
+    if status_code == 404:
+        return jsonify({'error': 'Destination not found'}), status_code
+
+    # Check if destination belongs to the user
+    if destination_data['user_id'] != current_user.id:
+        return jsonify({'error': 'Destination not permitted'}), 400
 
     return jsonify(destination_data), status_code
 

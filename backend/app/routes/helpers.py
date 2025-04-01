@@ -129,14 +129,15 @@ def create_entry(model, data, user_id=None, destination_id=None):
     # JSON-Antwort mit den erstellten Daten zurückgeben
     return jsonify({'message': f'{model.__name__} added successfully!', model.__name__.lower(): model_to_dict(new_entry)}), 201
 
+# Get entry by ID
 def get_entry(model, entry_id):
-    """Hilfsfunktion, um die Daten eines Eintrags zu erhalten und zurückzugeben"""
 
+    # Get entry
     entry = model.query.filter_by(id=entry_id).first()
     if not entry:
         return None, 404
 
-    # Daten extrahieren
+    # Get data as dict
     entry_data = {
         key: getattr(entry, key) for key in model.__table__.columns.keys() if not key.startswith('_')
     }

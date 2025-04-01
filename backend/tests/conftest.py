@@ -48,7 +48,7 @@ def setup_database():
         db.session.add(second_user)
         db.session.commit()
 
-        # Erstelle die Destinations und Activities und verknüpfe sie mit dem User
+        # Erstelle die Destinations und Activities und verknüpfe sie mit den Usern
         for destination_data in dummy_data['destinations']:
             destination = Destination(
                 title=destination_data['title'],
@@ -65,6 +65,28 @@ def setup_database():
                     country=activity_data['country'],
                     position=activity_data['position'],
                     destination_id=destination.id
+                )
+                db.session.add(activity)
+
+            db.session.commit()
+
+        # Das gleiche für zweiten User
+        for second_destination_data in dummy_data['second_destinations']:
+            second_destination = Destination(
+                title=destination_data['title'],
+                country=destination_data['country'],
+                position=destination_data['position'],
+                user_id=second_user.id
+            )
+            db.session.add(second_destination)
+            db.session.commit()
+
+            for activity_data in second_destination_data['activities']:
+                activity = Activity(
+                    title=activity_data['title'],
+                    country=activity_data['country'],
+                    position=activity_data['position'],
+                    destination_id=second_destination.id
                 )
                 db.session.add(activity)
 
