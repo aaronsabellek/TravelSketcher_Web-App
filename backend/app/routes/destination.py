@@ -29,7 +29,6 @@ def add_destination():
 def get_destinations():
 
     destinations = Destination.query.filter_by(user_id=current_user.id).all()
-
     return jsonify(models_to_list(destinations))
 
 # Get specific destination route
@@ -37,38 +36,38 @@ def get_destinations():
 @login_required
 def get_destination(destination_id):
 
-    # Get destination by ID
-    destination_data, status_code = get_entry(Destination, destination_id)
+    # Check if destination exists and belongs to user
+    destination = Destination.query.filter_by(id=destination_id, user_id=current_user.id).first()
+    if not destination:
+        return jsonify({'error': 'Destination not found or not permitted'}), 403
 
-    # Check if destination could be found in db
-    if status_code == 404:
-        return jsonify({'error': 'Destination not found'}), status_code
+    # Return relevant data
+    return jsonify({key: getattr(destination, key) for key in Destination.__table__.columns.keys() if not key.startswith('_')}), 200
 
-    # Check if destination belongs to the user
-    if destination_data['user_id'] != current_user.id:
-        return jsonify({'error': 'Destination not permitted'}), 400
-
-    return jsonify(destination_data), status_code
-
+# Edit destination route
 @destination_bp.route('/edit/<int:destination_id>', methods=['POST'])
 @login_required
 def edit_destination(destination_id):
-    data = request.get_json()
 
-    # Sicherstellen, dass die Destination dem aktuellen Benutzer gehört
+    data = request.get_json() # Get data
+
+    # Check if destination belongs to user
     destination = Destination.query.filter_by(id=destination_id, user_id=current_user.id).first()
-
     if not destination:
-        return jsonify({'error': 'Destination nicht gefunden oder nicht berechtigt'}), 403
+        return jsonify({'error': 'Destination not found or not permitted'}), 403
 
     return edit_entry(Destination, destination_id, data)
 
+# Reorder destinations route
 @destination_bp.route('/reorder', methods=['POST'])
 @login_required
 def reorder_destinations():
+
+    # Get new order from data
     data = request.get_json()
-    new_order = data.get("destinations")
-    return reorder_items(Destination, {"user_id": current_user.id}, new_order, "destinations")
+    new_order = data.get('new_order')
+
+    return reorder_items(Destination, {'user_id': current_user.id}, new_order, 'destinations')
 
 @destination_bp.route('/delete/<int:destination_id>', methods=['DELETE'])
 @login_required  # Damit der User eingeloggt sein muss

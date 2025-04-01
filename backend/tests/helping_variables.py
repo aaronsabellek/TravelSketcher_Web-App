@@ -123,6 +123,9 @@ registration_base_data = {
 # Variable for dummy second_user
 second_user = dummy_data['second_user']
 
+# Variable for first destination
+destination = dummy_data['destinations'][0]
+
 # Login data with username
 login_data_username = {
     'identifier': dummy_data['user']['username'],
@@ -130,42 +133,6 @@ login_data_username = {
 }
 
 new_destination = {
-    'title': 'Helsinki',
-    'country': 'Finland',
-    'img_link': 'https://pictures.com/helsinki',
-    'duration': '5-7 days',
-    'tags': 'Capital,Nordic Country,Sauna,Archipelago',
-    'status': 'Planned',
-    'time': 'May-September',
-    'accomodation_link': 'https://accomodation-link.com',
-    'pricing': '3',
-    'trip_pricing_flight': '40-80 EUR',
-    'trip_pricing_no_flight': '300-450 EUR',
-    'travel_duration_flight': '2-3h',
-    'travel_duration_no_flight': '15-18h',
-    'longitude': '24.9458',
-    'latitude': '60.1920',
-    'description': 'Capital of Finland',
-    'free_text': 'Booking infos on AirBnB'
-}
-
-
-updated_password = {
-    'new_password_1': 'new_password123!',
-    'new_password_2': 'new_password123!'
-}
-
-login_data_username = {
-    'identifier': dummy_data['user']['username'],
-    'password': dummy_data['user']['password']
-}
-
-login_data_email = {
-    'identifier': dummy_data['user']['email'],
-    'password': dummy_data['user']['password']
-}
-
-destination_data = {
     'title': 'Helsinki',
     'country': 'Finland',
     'img_link': 'https://example.com/helsinki.jpg',
@@ -183,6 +150,22 @@ destination_data = {
     'latitude': '60.173',
     'description': 'Experience the Nordic charm of Helsinki with its unique mix of modern architecture and historical sites.',
     'free_text': 'Don’t miss the Suomenlinna sea fortress and the traditional Finnish saunas!'
+}
+
+
+updated_password = {
+    'new_password_1': 'new_password123!',
+    'new_password_2': 'new_password123!'
+}
+
+login_data_username = {
+    'identifier': dummy_data['user']['username'],
+    'password': dummy_data['user']['password']
+}
+
+login_data_email = {
+    'identifier': dummy_data['user']['email'],
+    'password': dummy_data['user']['password']
 }
 
 activity_data = {

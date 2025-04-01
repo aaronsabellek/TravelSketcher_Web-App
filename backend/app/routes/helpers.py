@@ -130,12 +130,13 @@ def create_entry(model, data, user_id=None, destination_id=None):
     return jsonify({'message': f'{model.__name__} added successfully!', model.__name__.lower(): model_to_dict(new_entry)}), 201
 
 # Get entry by ID
+''' Is this needed? '''
 def get_entry(model, entry_id):
 
     # Get entry
     entry = model.query.filter_by(id=entry_id).first()
     if not entry:
-        return None, 404
+        return jsonify({'error': f'{model.__name__} not found'}), 404
 
     # Get data as dict
     entry_data = {
@@ -145,7 +146,11 @@ def get_entry(model, entry_id):
     return entry_data, 200
 
 # Edit entry in db
-def edit_entry(model, entry_id, data, allowed_fields):
+def edit_entry(model, entry_id, data, allowed_fields=None):
+
+    # Set allowed fields to standard value
+    if allowed_fields is None:
+        allowed_fields = [key for key in data.keys() if not key.startswith('_')]
 
     # Get entry from
     query = model.query.filter_by(id=entry_id)
@@ -154,6 +159,10 @@ def edit_entry(model, entry_id, data, allowed_fields):
     # Check for given entry
     if not entry:
         return jsonify({'error': f'{model.__name__} not found or no permission'}), 403
+
+    # CHeck for required title
+    if not data.get('title') or data['title'] == '':
+        return jsonify({'error': 'Title is required'}), 400
 
     # Edit allowed fields only
     for key, value in data.items():
@@ -164,32 +173,34 @@ def edit_entry(model, entry_id, data, allowed_fields):
     db.session.commit()
 
     # Filter only allowed fields
-    filtered_data = {key: getattr(entry, key) for key in allowed_fields}
+    edited_entry = {key: getattr(entry, key) for key in allowed_fields}
 
-    return jsonify({'message': f'Updated {model.__name__} successfully!', model.__name__.lower(): filtered_data}), 200
+    return jsonify({'message': f'Updated {model.__name__} successfully!', model.__name__.lower(): edited_entry}), 200
 
+# Reorder items
 def reorder_items(model, filter_by, new_order, item_name):
-    """Allgemeine Funktion zur Neuanordnung von Objekten in einer bestimmten Reihenfolge."""
+
+    # Check if there is new order from data
     if not new_order:
-        return jsonify({"error": f"Die Liste {item_name} fehlt"}), 400
+        return jsonify({'error': f'The list of {item_name} is missing'}), 400
 
-    # Hole alle Objekte basierend auf dem Filter
+    # Get all items needed as dict
     items = model.query.filter_by(**filter_by).all()
-
-    # Erstelle ein Dictionary für schnellen Zugriff
     item_dict = {item.id: item for item in items}
 
-    # Überprüfe, ob alle angegebenen IDs existieren
+    # Check if all the IDs exist
     if set(map(int, new_order)) != set(item_dict.keys()):
-        return jsonify({"error": f"Ungültige oder fehlende {item_name}-IDs"}), 400
+        return jsonify({'error': f'Invalid or missing IDs of {item_name}'}), 400
 
-    # Aktualisiere die Positionen
+    # Reorder items
     for new_position, item_id in enumerate(new_order, start=1):
         item = item_dict[int(item_id)]
         item.position = new_position
 
+    # Update db
     db.session.commit()
-    return jsonify({"message": f"{item_name.capitalize()} erfolgreich umsortiert!"}), 200
+
+    return jsonify({'message': f'Reordered {item_name.capitalize()} successfully!'}), 200
 
 # Delete item
 def delete_item(model, item_id):

@@ -29,7 +29,7 @@ def request_and_validate(client, endpoint, test_data, method='POST', json_method
         response = client.post(response_url, json=test_data)
 
     # Set response data
-    if json_method == True:
+    if callable(response.json):
         response_data = response.json()
     else:
         response_data = response.json
@@ -43,9 +43,8 @@ def request_and_validate(client, endpoint, test_data, method='POST', json_method
         return response
 
     # Check for expected message if there is one
-    for key, value in response_data.items():
-        if key == 'message':
-            assert test_data['expected_message'] in value, f'Error: Unexpected message. Status: {response.status_code}, Text: {response.text}'
+    if 'message' in response_data:
+        assert test_data['expected_message'] in response_data['message'], f'Error: Unexpected message. Status: {response.status_code}, Text: {response.text}'
 
     return response
 
