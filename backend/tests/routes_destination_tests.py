@@ -16,10 +16,12 @@ from tests.routes_destination_data import (
 @pytest.mark.parametrize('test_data', add_destination)
 def test_add(setup_logged_in_user, test_data):
 
+    # Use and validate route
     response = request_and_validate(setup_logged_in_user, 'destination/add', test_data, json_method=True)
     if response.status_code not in [200, 201]:
         return
 
+    # Check for destination in db
     destination = Destination.query.filter_by(title=test_data['title']).first()
     assert destination is not None, f'Error: Destination not found in db'
     assert destination.id == 7, f'Error: ID expected: 4, but got: {destination.id}'
@@ -29,10 +31,12 @@ def test_add(setup_logged_in_user, test_data):
 # Test get all destinations of user
 def test_get_all(setup_logged_in_user):
 
+    # Use route
     get_url = f'{url}/destination/get_all'
     response = setup_logged_in_user.get(get_url)
     response_data = response.json()
 
+    # Check for errors
     assert response.status_code == 200, f'Unexpected Error! Status: {response.status_code}, Text: {response.text}'
     assert len(response_data) >= 0, f'Unexpected Error: No destinations found!'
     assert response_data[2]['title'] == 'Tokyo', f'Unexpected Error: Title not found!'

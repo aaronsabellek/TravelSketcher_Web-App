@@ -1,14 +1,4 @@
-from tests.helping_variables import (
-    dummy_data,
-    email,
-    city,
-    longitude,
-    latitude,
-    country,
-    currency,
-    destination,
-    new_destination
-)
+from tests.helping_variables import new_destination
 
 
 # Test add destination

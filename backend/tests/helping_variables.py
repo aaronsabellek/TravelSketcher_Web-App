@@ -150,6 +150,24 @@ new_destination = {
     'free_text': 'Don’t miss the Suomenlinna sea fortress and the traditional Finnish saunas!'
 }
 
+new_activity = {
+    'title': 'Suomenlina Fortress',
+    'country': 'Finland',
+    'duration': '3-6h',
+    'pricing': 'Free',
+    'status': 'Planned',
+    'web_link': 'https://suomenlina.fi',
+    'img_link': 'https://suomenlina.fi/img',
+    'tags': 'Fortress,Military,Island',
+    'trip_duration': '0,5h',
+    'trip_pricing': '5 EUR',
+    'longitude': '24.59',
+    'latitude': '60.852',
+    'description': 'Old fortress in the Baltic Sea',
+    'free_text': 'Combine with boat tour through the Archipelago',
+    'destination_id': 1
+}
+
 
 updated_password = {
     'new_password_1': 'new_password123!',

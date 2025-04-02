@@ -4,6 +4,7 @@ from flask_login import login_required, current_user
 from app.models import Destination, Activity
 from app.helpers.helpers import models_to_list
 from app.helpers.helpers_entries import (
+    check_existence_and_permission,
     create_entry,
     get_entry,
     edit_entry,
@@ -18,13 +19,16 @@ activity_bp = Blueprint('activity', __name__, url_prefix='/activity')
 @activity_bp.route('/add', methods=['POST'])
 @login_required
 def add_activity():
-    data = request.get_json()
+
+    data = request.get_json() # Get data
+
+    # Check if destination of activity exists and belongs to user
     destination_id = data.get('destination_id')
+    destination = check_existence_and_permission(Destination, destination_id, current_user.id)
+    if isinstance(destination, tuple):
+        return destination
 
-    if not Destination.query.get(destination_id):
-        return jsonify({'error': 'Destination not found'}), 404
-
-    return create_entry(Activity, data, destination_id=destination_id)
+    return create_entry(Activity, data, destination_id=data.get('destination_id'))
 
 @activity_bp.route('/get_activities/<int:destination_id>', methods=['GET'])
 @login_required
