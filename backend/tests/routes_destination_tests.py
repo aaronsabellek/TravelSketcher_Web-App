@@ -1,6 +1,5 @@
 import pytest
 
-from app import db
 from app.models import Destination
 from tests.helping_variables import url
 from tests.helping_functions import request_and_validate
@@ -12,7 +11,7 @@ from tests.routes_destination_data import (
     delete_destination
 )
 
-'''
+
 # Test add destination
 @pytest.mark.parametrize('test_data', add_destination)
 def test_add(setup_logged_in_user, test_data):
@@ -44,7 +43,7 @@ def test_get_destination(setup_logged_in_user, test_data):
 
     # Use route
     request_and_validate(client=setup_logged_in_user, endpoint=f'destination/get/{test_data['destination_id']}', test_data=test_data, json_method=True, method='GET')
-'''
+
 # Test edit destination
 @pytest.mark.parametrize('test_data', edit_destination)
 def test_edit(setup_logged_in_user, test_data):
@@ -57,7 +56,7 @@ def test_edit(setup_logged_in_user, test_data):
     # Check for updates in db
     destination = Destination.query.filter_by(id=1).first()
     assert destination.title == test_data['title'], f'Unexpedted Error: Destination not edited in db'
-'''
+
 # Test reorder destinations
 @pytest.mark.parametrize('test_data', reorder_destinations)
 def test_reorder(setup_logged_in_user, test_data):
@@ -84,4 +83,4 @@ def test_delete(setup_logged_in_user, test_data):
     # Check if destination got deleted in db
     destination = Destination.query.filter_by(user_id=test_data['destination_id']).first()
     assert destination, f'Error: Destination still found in database'
-'''
+
