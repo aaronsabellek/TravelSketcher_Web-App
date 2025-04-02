@@ -56,7 +56,7 @@ edit_email = [
 
 reset_email= [
     # Wrong email adress
-    {'email': email, 'expected_status': 404, 'expected_message': 'Request to edit email not found.'},
+    {'email': email, 'expected_status': 404, 'expected_message': 'Request to edit email not found'},
 
     # Successfull test case
     {'email': new_email, 'expected_status': 200, 'expected_message': 'Email verification successful!'}

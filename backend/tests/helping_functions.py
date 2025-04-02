@@ -17,7 +17,7 @@ def clear_mailhog():
     requests.delete(mailhog_v1)
 
 # Send request and validate output
-def request_and_validate(client, endpoint, test_data, method='POST', json_method=None):
+def request_and_validate(client, endpoint, test_data, method='POST'):
 
     # Set url
     response_url = f'{url}/{endpoint}'

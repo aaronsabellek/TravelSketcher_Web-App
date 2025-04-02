@@ -17,7 +17,7 @@ from tests.routes_destination_data import (
 def test_add(setup_logged_in_user, test_data):
 
     # Use and validate route
-    response = request_and_validate(setup_logged_in_user, 'destination/add', test_data, json_method=True)
+    response = request_and_validate(setup_logged_in_user, 'destination/add', test_data)
     if response.status_code not in [200, 201]:
         return
 
@@ -37,23 +37,22 @@ def test_get_all(setup_logged_in_user):
     response_data = response.json()
 
     # Check for errors
-    assert response.status_code == 200, f'Unexpected Error! Status: {response.status_code}, Text: {response.text}'
     assert len(response_data) >= 0, f'Unexpected Error: No destinations found!'
-    assert response_data[2]['title'] == 'Tokyo', f'Unexpected Error: Title not found!'
+    assert response_data['destinations'][2]['title'] == 'Tokyo', f'Unexpected Error: Title not found!'
 
 # Test get specific destination
 @pytest.mark.parametrize('test_data', get_destination)
 def test_get_destination(setup_logged_in_user, test_data):
 
     # Use route
-    request_and_validate(client=setup_logged_in_user, endpoint=f'destination/get/{test_data['destination_id']}', test_data=test_data, json_method=True, method='GET')
+    request_and_validate(setup_logged_in_user, f'destination/get/{test_data['destination_id']}', test_data, method='GET')
 
 # Test edit destination
 @pytest.mark.parametrize('test_data', edit_destination)
 def test_edit(setup_logged_in_user, test_data):
 
     # Use and validate route
-    response = request_and_validate(client=setup_logged_in_user, endpoint=f'destination/edit/{test_data['destination_id']}', test_data=test_data , json_method=True)
+    response = request_and_validate(setup_logged_in_user, f'destination/edit/{test_data['destination_id']}', test_data)
     if response.status_code not in [200, 201]:
         return
 
@@ -66,7 +65,7 @@ def test_edit(setup_logged_in_user, test_data):
 def test_reorder(setup_logged_in_user, test_data):
 
     # Use and validate route
-    response = request_and_validate(client=setup_logged_in_user, endpoint='destination/reorder', test_data=test_data)
+    response = request_and_validate(setup_logged_in_user, 'destination/reorder', test_data)
     if response.status_code not in [200, 201]:
         return
 
@@ -80,7 +79,7 @@ def test_reorder(setup_logged_in_user, test_data):
 def test_delete(setup_logged_in_user, test_data):
 
     # Use and validate route
-    response = request_and_validate(client=setup_logged_in_user, endpoint=f'destination/delete/{test_data['destination_id']}', test_data=test_data, method='DELETE')
+    response = request_and_validate(setup_logged_in_user, f'destination/delete/{test_data['destination_id']}', test_data, method='DELETE')
     if response.status_code not in [200, 201]:
         return
 

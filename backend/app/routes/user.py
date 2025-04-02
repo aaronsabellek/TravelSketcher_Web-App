@@ -58,10 +58,7 @@ def edit_profile():
     if existing_username and existing_username.id != current_user.id:
         return jsonify({'error': 'This username already exists!'}), 400
 
-    # Edit entries in db
-    response, status_code = edit_entry(User, current_user.id, data, allowed_fields=allowed_fields)
-
-    return response, status_code
+    return edit_entry(User, current_user.id, data, allowed_fields=allowed_fields)
 
 # Edit email route
 @user_bp.route('/edit_email', methods=['POST'])
@@ -107,7 +104,7 @@ def verify_email(token):
     # Check user in db
     user = User.query.filter_by(temp_email=new_email).first()
     if not user:
-        return jsonify({'error': 'Request to edit email not found.'}), 404
+        return jsonify({'error': 'Request to edit email not found'}), 404
 
     # Edit user email in db
     user.email = new_email
@@ -130,7 +127,7 @@ def edit_password():
     response, status_code = update_password(current_user, new_password_1, new_password_2)
 
     # Send confirmation mail after successful password update
-    if response.status_code == 200:
+    if status_code == 200:
         subject = 'Confirmation: Your password has been changed'
         body = "Hello,\n\n Your password has been changed successfully. If you didn't change the password by yourself, please contact us immediately.\n\nBest regards,\nYour Support-Team"
         send_email(current_user.email, subject, body)
@@ -145,6 +142,7 @@ def request_password_reset():
     data = request.get_json()
     email = data.get('email')
 
+    # Check email in data
     if not email:
         return jsonify({'error': 'Email missing!'}), 400
 

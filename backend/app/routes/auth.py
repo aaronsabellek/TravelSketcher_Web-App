@@ -29,7 +29,7 @@ def home():
 @auth_bp.route('/register', methods=['POST'])
 def register():
 
-    data = request.get_json()
+    data = request.get_json() # Get data
 
     # Check if all required fields are filled
     required_fields = ['username', 'email', 'password', 'city', 'longitude', 'latitude', 'country', 'currency']

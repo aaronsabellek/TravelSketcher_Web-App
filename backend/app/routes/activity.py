@@ -2,11 +2,10 @@ from flask import Blueprint, request, jsonify
 from flask_login import login_required, current_user
 
 from app.models import Destination, Activity
-from app.helpers.helpers import models_to_list
+from app.helpers.helpers import models_to_list, model_to_dict
 from app.helpers.helpers_entries import (
     check_existence_and_permission,
     create_entry,
-    get_entry,
     edit_entry,
     reorder_items,
     delete_item
@@ -16,6 +15,7 @@ from app.helpers.helpers_entries import (
 # Set blueprint
 activity_bp = Blueprint('activity', __name__, url_prefix='/activity')
 
+# Add activity route
 @activity_bp.route('/add', methods=['POST'])
 @login_required
 def add_activity():
@@ -24,47 +24,45 @@ def add_activity():
 
     # Check if destination of activity exists and belongs to user
     destination_id = data.get('destination_id')
-    destination = check_existence_and_permission(Destination, destination_id, current_user.id)
+    destination = check_existence_and_permission(Destination, destination_id)
     if isinstance(destination, tuple):
         return destination
 
     return create_entry(Activity, data, destination_id=data.get('destination_id'))
 
-@activity_bp.route('/get_activities/<int:destination_id>', methods=['GET'])
+@activity_bp.route('/get_all/<int:destination_id>', methods=['GET'])
 @login_required
 def get_activities(destination_id):
 
+    # Check existence and permission of activity
+    entry = check_existence_and_permission(Destination, destination_id)
+    if isinstance(entry, tuple):
+        return entry
+
+    # Set destination and activities
     destination = Destination.query.get(destination_id)
-
-    if not destination:
-        return jsonify({'error': 'Destination not found'}), 404
-
-    # Überprüfen, ob der aktuelle Benutzer der Besitzer der Destination ist
-    if destination.user_id != current_user.id:
-        return jsonify({'error': 'Keine Berechtigung für diese Destination'}), 403
-
     activities = Activity.query.filter_by(destination_id=destination_id).all()
+
+    # Check if activities of destination are empty
+    if not activities:
+        return jsonify({'message': f"Destination '{destination.title}' has no activities yet"}), 200
 
     return jsonify({
         'destination': destination.title,
-        'activities': models_to_list(activities)  # Kein manuelles Mapping mehr nötig!
+        'activities': models_to_list(activities)
     })
 
+# Get activity route
 @activity_bp.route('/get/<int:activity_id>', methods=['GET'])
 @login_required
 def get_activity(activity_id):
-    # Benutze die Hilfsfunktion, um die Activity-Daten zu holen
-    activity_data, status_code = get_entry(Activity, activity_id)
 
-    if status_code != 200:
-        return jsonify({'error': 'Activity nicht gefunden'}), status_code
+    # Check existence and permission of activity
+    entry = check_existence_and_permission(Activity, activity_id)
+    if isinstance(entry, tuple):
+        return entry
 
-    # Sicherstellen, dass der Benutzer Zugriff auf die Activity hat
-    activity = Activity.query.get(activity_id)
-    if activity.destination.owner.id != current_user.id:
-        return jsonify({'error': 'Nicht autorisiert'}), 403
-
-    return jsonify(activity_data), status_code
+    return jsonify({'activity': model_to_dict(entry)}), 200
 
 @activity_bp.route('/edit/<int:activity_id>', methods=['POST'])
 @login_required

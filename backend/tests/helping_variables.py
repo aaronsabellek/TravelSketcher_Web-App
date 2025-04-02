@@ -57,10 +57,7 @@ dummy_data = {
             'title': 'Tokyo',
             'country': 'Japan',
             'position': 3,
-            'activities': [
-                {'title': 'Shibuya Crossing', 'country': 'Japan', 'position': 1},
-                {'title': 'Mount Fuji', 'country': 'Japan', 'position': 2}
-            ]
+            'activities': []
         }
     ],
     # Hier die Daten noch einmal neu generieren lassen

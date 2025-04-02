@@ -1,5 +1,5 @@
 from flask import jsonify
-from flask_login import logout_user
+from flask_login import logout_user, current_user
 
 from app import db
 from app.models import User, Destination, Activity
@@ -7,7 +7,7 @@ from app.helpers.helpers import model_to_dict
 
 
 # Check existence and persmission of entry
-def check_existence_and_permission(model, entry_id, user_id):
+def check_existence_and_permission(model, entry_id):
 
     # Check if entry exists
     entry = model.query.filter_by(id=entry_id).first()
@@ -15,8 +15,12 @@ def check_existence_and_permission(model, entry_id, user_id):
             return {'error': f'{model.__name__} not found'}, 404
 
     # Check permission of user
-    entry = model.query.filter_by(id=entry_id, user_id=user_id).first()
-    if not entry:
+    if model == Destination:
+        owner_id = entry.owner.id
+    elif model == Activity:
+        owner_id = entry.destination.owner.id
+
+    if owner_id != current_user.id:
         return {'error': f'{model.__name__} not permitted'}, 403
 
     return entry
@@ -58,22 +62,17 @@ def create_entry(model, data, user_id=None, destination_id=None):
 
     return jsonify({'message': f'{model.__name__} added successfully!', model.__name__.lower(): model_to_dict(new_entry)}), 201
 
-# Get entry by ID
-def get_entry(model, entry_id, user_id):
-
-    # Get entry and return error if one is thrown
-    entry = check_existence_and_permission(model, entry_id, user_id)
-    if isinstance(entry, tuple):
-        return entry
-
-    return model_to_dict(entry), 200
-
 # Edit entry in db
-def edit_entry(model, entry_id, data, allowed_fields=None, user_id=None):
+def edit_entry(model, entry_id, data, allowed_fields=None):
 
     # Set allowed fields to standard value
     if allowed_fields is None:
         allowed_fields = [key for key in data.keys() if not key.startswith('_')]
+
+    # If not user: Check for required title
+    if model != User:
+        if not data.get('title') or data['title'] == '':
+            return jsonify({'error': 'Title is required'}), 400
 
     # Get entry
     entry = model.query.filter_by(id=entry_id).first()

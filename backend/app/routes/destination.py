@@ -2,13 +2,12 @@ from flask import Blueprint, request, jsonify
 from flask_login import login_required, current_user
 
 from app.models import Destination
-from app.helpers.helpers import models_to_list
+from app.helpers.helpers import models_to_list, model_to_dict
 from app.helpers.helpers_entries import (
     check_existence_and_permission,
     create_entry,
     edit_entry,
     delete_item,
-    get_entry,
     reorder_items
 )
 
@@ -30,15 +29,23 @@ def add_destination():
 def get_destinations():
 
     destinations = Destination.query.filter_by(user_id=current_user.id).all()
-    return jsonify(models_to_list(destinations))
+
+    if not destinations:
+        return jsonify({'destinations': [], 'message': 'No destinations found yet'}), 200
+
+    return jsonify({'destinations': models_to_list(destinations)}), 200
 
 # Get specific destination route
 @destination_bp.route('/get/<int:destination_id>', methods=['GET'])
 @login_required
 def get_destination(destination_id):
 
-    entry, status_code = get_entry(Destination, destination_id, current_user.id)
-    return jsonify(entry), status_code
+    # Check existence and permission of destination
+    entry = check_existence_and_permission(Destination, destination_id)
+    if isinstance(entry, tuple):
+        return entry
+
+    return jsonify({'destination': model_to_dict(entry)}), 200
 
 # Edit destination route
 @destination_bp.route('/edit/<int:destination_id>', methods=['POST'])
@@ -47,16 +54,12 @@ def edit_destination(destination_id):
 
     data = request.get_json() # Get data
 
-    # Check for required title
-    if not data.get('title') or data['title'] == '':
-            return jsonify({'error': 'Title is required'}), 400
-
     # Check existence and permission of destination
-    entry = check_existence_and_permission(Destination, destination_id, current_user.id)
+    entry = check_existence_and_permission(Destination, destination_id)
     if isinstance(entry, tuple):
         return entry
 
-    return edit_entry(Destination, destination_id, data, user_id=current_user.id)
+    return edit_entry(Destination, destination_id, data)
 
 # Reorder destinations route
 @destination_bp.route('/reorder', methods=['POST'])
@@ -74,12 +77,10 @@ def reorder_destinations():
 @login_required
 def delete_destination(destination_id):
 
-    # Get destination
-    destination = Destination.query.filter_by(id=destination_id, user_id=current_user.id).first()
-
-    # Check if destination exists
-    if not destination:
-        return jsonify({'error': 'Destination not found or not permitted'}), 403
+    # Check existence and permission of destination
+    entry = check_existence_and_permission(Destination, destination_id)
+    if isinstance(entry, tuple):
+        return entry
 
     return delete_item(Destination, destination_id)
 

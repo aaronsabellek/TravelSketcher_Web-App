@@ -23,7 +23,7 @@ from tests.routes_auth_data import (
 def test_registration(setup_database, test_data):
 
     # Use and validate route
-    response = request_and_validate(client=setup_database, endpoint='auth/register', test_data=test_data)
+    response = request_and_validate(setup_database, 'auth/register', test_data)
     if response.status_code not in [200, 201]:
         return
 
@@ -71,7 +71,7 @@ def test_resend_verification(setup_database, test_data):
     register(setup_database) # Register with new account
 
     # Use and validate route
-    response = request_and_validate(client=setup_database, endpoint='auth/resend_verification', test_data=test_data)
+    response = request_and_validate(setup_database, 'auth/resend_verification', test_data)
     if response.status_code not in [200, 201]:
         return
 

@@ -41,7 +41,7 @@ def test_profile(setup_logged_in_user):
 def test_edit(setup_logged_in_user, test_data):
 
     # Use and validate route
-    response = request_and_validate(client=setup_logged_in_user, endpoint='user/edit', test_data=test_data, json_method=True)
+    response = request_and_validate(setup_logged_in_user, 'user/edit', test_data)
     if response.status_code not in [200, 201]:
         return
 
@@ -69,7 +69,7 @@ def test_edit(setup_logged_in_user, test_data):
 def test_edit_email(setup_logged_in_user, test_data):
 
     # Use and validate route
-    response = request_and_validate(client=setup_logged_in_user, endpoint='user/edit_email', test_data=test_data, json_method=True)
+    response = request_and_validate(setup_logged_in_user, 'user/edit_email', test_data)
     if response.status_code not in [200, 201]:
         return
 
@@ -89,7 +89,7 @@ def test_reset_password(setup_database, test_data):
     token = create_test_token(test_data, 'email-confirmation', email=email)
 
     # Use and validate route
-    response = request_and_validate(client=setup_database, endpoint=f'user/verify_email/{token}', test_data=test_data, method='GET')
+    response = request_and_validate(setup_database, f'user/verify_email/{token}', test_data, method='GET')
     if response.status_code not in [200, 201]:
         return
 
@@ -102,7 +102,7 @@ def test_reset_password(setup_database, test_data):
 def test_edit_password(setup_logged_in_user, test_data):
 
     # Use and validate route
-    response = request_and_validate(client=setup_logged_in_user, endpoint='user/edit_password', test_data=test_data, json_method=True)
+    response = request_and_validate(setup_logged_in_user, 'user/edit_password', test_data)
     if response.status_code not in [200, 201]:
         return
 
@@ -113,7 +113,7 @@ def test_edit_password(setup_logged_in_user, test_data):
 def test_edit_email(setup_database, test_data):
 
     # Use and validate route
-    response = request_and_validate(client=setup_database, endpoint='user/request_password_reset', test_data=test_data)
+    response = request_and_validate(setup_database, 'user/request_password_reset', test_data)
     if response.status_code not in [200, 201]:
         return
 
@@ -126,7 +126,7 @@ def test_reset_password(setup_database, test_data):
     token = create_test_token(test_data, 'reset-password') # Create test token
 
     # Use and validate route
-    response = request_and_validate(client=setup_database, endpoint=f'user/reset_password/{token}', test_data=test_data)
+    response = request_and_validate(setup_database, f'user/reset_password/{token}', test_data)
     if response.status_code not in [200, 201]:
         return
 

@@ -54,9 +54,9 @@ reorder_destinations = [
 # Test delete destination
 delete_destination = [
     # Destination does not belong to user
-    {'destination_id': 4, 'expected_status': 403, 'expected_message': 'Destination not found or not permitted'},
+    {'destination_id': 4, 'expected_status': 403, 'expected_message': 'Destination not permitted'},
     # Destination does not exist
-    {'destination_id': 10, 'expected_status': 403, 'expected_message': 'Destination not found or not permitted'},
+    {'destination_id': 10, 'expected_status': 404, 'expected_message': 'Destination not found'},
 
     # Successfull test case
     {'destination_id': 1, 'expected_status': 200, 'expected_message': 'Destination deleted successfully!'}
