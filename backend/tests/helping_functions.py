@@ -25,6 +25,8 @@ def request_and_validate(client, endpoint, test_data, method='POST', json_method
     # Use route
     if method == 'GET':
         response = client.get(response_url)
+    elif method == 'DELETE':
+        response = client.delete(response_url)
     else:
         response = client.post(response_url, json=test_data)
 

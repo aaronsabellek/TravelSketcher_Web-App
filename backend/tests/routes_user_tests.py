@@ -144,7 +144,7 @@ def test_delete(setup_database):
     delete_url = f'{url}/user/delete'
     response = client.delete(delete_url)
     assert response.status_code == 200, f'Error: Deletion of user failed! Status: {response.status_code}, Text: {response.text}'
-    assert response.json['message'] == 'User deleted successfully', f'Error: Unecpected message. Status: {response.status_code}, Text: {response.text}'
+    assert response.json['message'] == 'User deleted successfully!', f'Error: Unecpected message. Status: {response.status_code}, Text: {response.text}'
 
     # Check for user in db
     user = User.query.filter_by(username=username).first()

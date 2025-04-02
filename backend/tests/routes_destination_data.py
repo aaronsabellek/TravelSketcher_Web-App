@@ -27,9 +27,9 @@ add_destination = [
 # Test get destination
 get_destination = [
     # Destination belongs to another user
-    {'destination_id': 4, 'expected_status': 403, 'expected_message': 'Destination not found or not permitted'},
+    {'destination_id': 4, 'expected_status': 403, 'expected_message': 'Destination not permitted'},
     # Destination does not exist
-    {'destination_id': 10, 'expected_status': 403, 'expected_message': 'Destination not found or not permitted'},
+    {'destination_id': 10, 'expected_status': 404, 'expected_message': 'Destination not found'},
 
     # Successfull test case
     {'destination_id': 1, 'expected_status': 200}
@@ -38,14 +38,14 @@ get_destination = [
 # Test edit destination
 edit_destination = [
     # Destination belongs to another user
-    {**new_destination, 'destination_id': 4, 'expected_status': 403, 'expected_message': 'Destination not found or not permitted'},
+    {**new_destination, 'destination_id': 4, 'expected_status': 403, 'expected_message': 'Destination not permitted'},
     # Destination does not exist
-    {**new_destination, 'destination_id': 10, 'expected_status': 403, 'expected_message': 'Destination not found or not permitted'},
+    {**new_destination, 'destination_id': 10, 'expected_status': 404, 'expected_message': 'Destination not found'},
     # Required field is empty
     {'title': '', 'destination_id': 1, 'expected_status': 400, 'expected_message': 'Title is required'},
 
     # Successfull test case
-    {**new_destination, 'destination_id': 1, 'expected_status': 200, 'expected_message': 'Updated Destination successfully!'},
+    {**new_destination, 'destination_id': 1, 'expected_status': 200, 'expected_message': 'Updated Destination successfully!'}
 ]
 
 # Test reorder destinations
@@ -59,5 +59,16 @@ reorder_destinations = [
 
     # Successfull test case
     {'new_order': [1, 3, 2], 'expected_status': 200, 'expected_message': 'Reordered Destinations successfully!'},
+]
+
+# Test delete destination
+delete_destination = [
+    # Destination does not belong to user
+    {'destination_id': 4, 'expected_status': 403, 'expected_message': 'Destination not found or not permitted'},
+    # Destination does not exist
+    {'destination_id': 10, 'expected_status': 403, 'expected_message': 'Destination not found or not permitted'},
+
+    # Successfull test case
+    {'destination_id': 1, 'expected_status': 200, 'expected_message': 'Destination deleted successfully!'}
 ]
 

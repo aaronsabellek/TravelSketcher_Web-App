@@ -13,7 +13,7 @@ from app.models import User, Destination, Activity
 
 # Change Model to dict
 def model_to_dict(model):
-    return {column.name: getattr(model, column.name) for column in model.__table__.columns}
+    return {key: getattr(model, key) for key in model.__table__.columns.keys() if not key.startswith('_')}
 
 # Change Model to list of dicts
 def models_to_list(models):
@@ -91,78 +91,79 @@ def update_password(user, new_password_1, new_password_2):
 
     return jsonify({'message': 'Password updated successfully!'}), 200
 
+# Check existence and persmission of entry
+def check_existence_and_permission(model, entry_id, user_id):
+
+    # Check if entry exists
+    entry = model.query.filter_by(id=entry_id).first()
+    if not entry:
+            return {'error': f'{model.__name__} not found'}, 404
+
+    # Check permission of user
+    entry = model.query.filter_by(id=entry_id, user_id=user_id).first()
+    if not entry:
+        return {'error': f'{model.__name__} not permitted'}, 403
+
+    return entry
+
 # Create entry
 def create_entry(model, data, user_id=None, destination_id=None):
 
-    # Erlaubte Felder aus dem Model holen und nur gültige Felder aus `data` übernehmen
-    allowed_fields = {column.name for column in model.__table__.columns}
-    data = {key: value for key, value in data.items() if key in allowed_fields}
+    # Get valid data as dict
+    data = {key: value for key, value in data.items() if key in model.__table__.columns}
 
+    # Check if required title exists
     if not data.get('title') or data['title'] == '':
         return jsonify({'error': 'Title is required'}), 400
 
-    # Setze die Position basierend auf existierenden Einträgen
+    # Set query
     position_query = db.session.query(db.func.max(model.position))
     if model == Destination:
         position_query = position_query.filter_by(user_id=user_id)
     elif model == Activity:
         position_query = position_query.filter_by(destination_id=destination_id)
 
-    #Neue Position setzen
+    # Set position
     highest_position = position_query.scalar()
     new_position = (highest_position + 1) if highest_position is not None else 1
     data['position'] = new_position
 
-    # Benutzer- oder Destination-ID zuweisen
+    # Set ID of required relationship
     if user_id:
         data['user_id'] = user_id
     if destination_id:
         data['destination_id'] = destination_id
 
-    # Initialisiere das neue Objekt mit den übergebenen Daten
+    # Init new entry
     new_entry = model(**data)
 
-    # Speichern in der Datenbank
+    # Safe new entry in db
     db.session.add(new_entry)
     db.session.commit()
 
-    # JSON-Antwort mit den erstellten Daten zurückgeben
     return jsonify({'message': f'{model.__name__} added successfully!', model.__name__.lower(): model_to_dict(new_entry)}), 201
 
 # Get entry by ID
-''' Is this needed? '''
-def get_entry(model, entry_id):
+def get_entry(model, entry_id, user_id):
 
-    # Get entry
-    entry = model.query.filter_by(id=entry_id).first()
-    if not entry:
-        return jsonify({'error': f'{model.__name__} not found'}), 404
+    # Get entry and return error if one is thrown
+    entry = check_existence_and_permission(model, entry_id, user_id)
+    if isinstance(entry, tuple):
+        return entry
 
-    # Get data as dict
-    entry_data = {
-        key: getattr(entry, key) for key in model.__table__.columns.keys() if not key.startswith('_')
-    }
-
-    return entry_data, 200
+    return model_to_dict(entry), 200
 
 # Edit entry in db
-def edit_entry(model, entry_id, data, allowed_fields=None):
+def edit_entry(model, entry_id, data, allowed_fields=None, user_id=None):
 
     # Set allowed fields to standard value
     if allowed_fields is None:
         allowed_fields = [key for key in data.keys() if not key.startswith('_')]
 
-    # Get entry from
-    query = model.query.filter_by(id=entry_id)
-    entry = query.first()
-
-    # Check for given entry
+    # Get entry
+    entry = model.query.filter_by(id=entry_id).first()
     if not entry:
-        return jsonify({'error': f'{model.__name__} not found or no permission'}), 403
-
-    # CHeck for required title
-    if not data.get('title') or data['title'] == '':
-        return jsonify({'error': 'Title is required'}), 400
+        return jsonify({'error': f'{model} not found'}), 404
 
     # Edit allowed fields only
     for key, value in data.items():
@@ -172,10 +173,7 @@ def edit_entry(model, entry_id, data, allowed_fields=None):
     # Commit changings in db
     db.session.commit()
 
-    # Filter only allowed fields
-    edited_entry = {key: getattr(entry, key) for key in allowed_fields}
-
-    return jsonify({'message': f'Updated {model.__name__} successfully!', model.__name__.lower(): edited_entry}), 200
+    return jsonify({'message': f'Updated {model.__name__} successfully!', model.__name__.lower(): model_to_dict(entry)}), 200
 
 # Reorder items
 def reorder_items(model, filter_by, new_order, item_name):
@@ -216,7 +214,7 @@ def delete_item(model, item_id):
     if model == User:
         logout_user()
 
-    return jsonify({'message': f'{model.__name__} deleted successfully'}), 200
+    return jsonify({'message': f'{model.__name__} deleted successfully!'}), 200
 
 def create_search_query(model, search_query, exclude_fields):
     """

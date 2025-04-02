@@ -3,6 +3,7 @@ from flask_login import login_required, current_user
 
 from app.models import Destination
 from app.routes.helpers import (
+    check_existence_and_permission,
     create_entry,
     edit_entry,
     delete_item,
@@ -36,13 +37,8 @@ def get_destinations():
 @login_required
 def get_destination(destination_id):
 
-    # Check if destination exists and belongs to user
-    destination = Destination.query.filter_by(id=destination_id, user_id=current_user.id).first()
-    if not destination:
-        return jsonify({'error': 'Destination not found or not permitted'}), 403
-
-    # Return relevant data
-    return jsonify({key: getattr(destination, key) for key in Destination.__table__.columns.keys() if not key.startswith('_')}), 200
+    entry, status_code = get_entry(Destination, destination_id, current_user.id)
+    return jsonify(entry), status_code
 
 # Edit destination route
 @destination_bp.route('/edit/<int:destination_id>', methods=['POST'])
@@ -51,12 +47,16 @@ def edit_destination(destination_id):
 
     data = request.get_json() # Get data
 
-    # Check if destination belongs to user
-    destination = Destination.query.filter_by(id=destination_id, user_id=current_user.id).first()
-    if not destination:
-        return jsonify({'error': 'Destination not found or not permitted'}), 403
+    # Check for required title
+    if not data.get('title') or data['title'] == '':
+            return jsonify({'error': 'Title is required'}), 400
 
-    return edit_entry(Destination, destination_id, data)
+    # Check existence and permission of destination
+    entry = check_existence_and_permission(Destination, destination_id, current_user.id)
+    if isinstance(entry, tuple):
+        return entry
+
+    return edit_entry(Destination, destination_id, data, user_id=current_user.id)
 
 # Reorder destinations route
 @destination_bp.route('/reorder', methods=['POST'])
@@ -69,15 +69,17 @@ def reorder_destinations():
 
     return reorder_items(Destination, {'user_id': current_user.id}, new_order, 'destinations')
 
+# Delete destination route
 @destination_bp.route('/delete/<int:destination_id>', methods=['DELETE'])
-@login_required  # Damit der User eingeloggt sein muss
+@login_required
 def delete_destination(destination_id):
-    # Hole die Destination anhand der ID
+
+    # Get destination
     destination = Destination.query.filter_by(id=destination_id, user_id=current_user.id).first()
 
-    # Wenn die Destination nicht existiert, gib einen Fehler zurück
-    if destination is None:
-        return jsonify({'error': 'Destination not found!'}), 404
+    # Check if destination exists
+    if not destination:
+        return jsonify({'error': 'Destination not found or not permitted'}), 403
 
     return delete_item(Destination, destination_id)
 

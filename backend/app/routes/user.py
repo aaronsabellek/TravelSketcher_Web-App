@@ -57,7 +57,7 @@ def edit_profile():
         return jsonify({'error': 'This username already exists!'}), 400
 
     # Edit entries in db
-    response, status_code = edit_entry(User, current_user.id, data, allowed_fields)
+    response, status_code = edit_entry(User, current_user.id, data, allowed_fields=allowed_fields)
 
     return response, status_code
 
