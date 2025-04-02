@@ -2,8 +2,8 @@ from flask import Blueprint, request, jsonify
 from flask_login import login_required, current_user
 
 from app.models import Destination, Activity
-from app.routes.helpers.helpers import models_to_list
-from app.routes.helpers.helpers_entries import (
+from app.helpers.helpers import models_to_list
+from app.helpers.helpers_entries import (
     create_entry,
     get_entry,
     edit_entry,

@@ -1,7 +1,7 @@
 import requests
 import time
 
-from app.routes.helpers.helpers import generate_token
+from app.helpers.helpers import generate_token
 from tests.helping_variables import (
     url,
     mailhog_v2,

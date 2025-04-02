@@ -3,7 +3,7 @@ from flask_login import logout_user
 
 from app import db
 from app.models import User, Destination, Activity
-from app.routes.helpers.helpers import model_to_dict
+from app.helpers.helpers import model_to_dict
 
 
 # Check existence and persmission of entry

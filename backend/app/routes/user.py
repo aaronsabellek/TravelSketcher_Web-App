@@ -3,7 +3,7 @@ from flask_login import login_required, current_user
 
 from app import db
 from app.models import User
-from app.routes.helpers.helpers import (
+from app.helpers.helpers import (
     is_valid_email,
     generate_token,
     confirm_token,
@@ -11,7 +11,7 @@ from app.routes.helpers.helpers import (
     send_email,
     update_password
 )
-from app.routes.helpers.helpers_entries import(
+from app.helpers.helpers_entries import(
     edit_entry,
     delete_item
 )

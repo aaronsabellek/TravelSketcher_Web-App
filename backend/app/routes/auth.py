@@ -4,7 +4,7 @@ from werkzeug.security import generate_password_hash, check_password_hash
 
 from app import db, login_manager
 from app.models import User
-from app.routes.helpers.helpers import (
+from app.helpers.helpers import (
     is_valid_email,
     validate_password,
     confirm_token,
