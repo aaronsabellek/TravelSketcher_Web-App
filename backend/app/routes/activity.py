@@ -45,7 +45,7 @@ def get_activities(destination_id):
 
     # Check if activities of destination are empty
     if not activities:
-        return jsonify({'message': f"Destination '{destination.title}' has no activities yet"}), 200
+        return jsonify({'activities': [], 'message': f"Destination '{destination.title}' has no activities yet"}), 200
 
     return jsonify({
         'destination': destination.title,
