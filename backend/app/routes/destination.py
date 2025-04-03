@@ -28,11 +28,14 @@ def add_destination():
 @login_required
 def get_destinations():
 
+    # Get all destinations of user
     destinations = Destination.query.filter_by(user_id=current_user.id).all()
 
+    # Check if there are any destinations
     if not destinations:
         return jsonify({'destinations': [], 'message': 'No destinations found yet'}), 200
 
+    # Return destinations
     return jsonify({'destinations': models_to_list(destinations)}), 200
 
 # Get specific destination route
@@ -45,6 +48,7 @@ def get_destination(destination_id):
     if isinstance(entry, tuple):
         return entry
 
+    # Return destination
     return jsonify({'destination': model_to_dict(entry)}), 200
 
 # Edit destination route
@@ -59,6 +63,7 @@ def edit_destination(destination_id):
     if isinstance(entry, tuple):
         return entry
 
+    # Edit destination
     return edit_entry(Destination, destination_id, data)
 
 # Reorder destinations route
@@ -70,6 +75,7 @@ def reorder_destinations():
     data = request.get_json()
     new_order = data.get('new_order')
 
+    # Reorder destinations
     return reorder_items(Destination, {'user_id': current_user.id}, new_order, 'destinations')
 
 # Delete destination route
@@ -82,5 +88,6 @@ def delete_destination(destination_id):
     if isinstance(entry, tuple):
         return entry
 
+    # Delete destination
     return delete_item(Destination, destination_id)
 

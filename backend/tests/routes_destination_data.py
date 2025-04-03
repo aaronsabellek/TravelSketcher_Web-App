@@ -41,11 +41,15 @@ edit_destination = [
 # Test reorder destinations
 reorder_destinations = [
     # New order missing
-    {'new_order': [], 'expected_status': 400, 'expected_message': 'The list of destinations is missing'},
+    {'new_order': [], 'expected_status': 400, 'expected_message': 'The new order of destinations is missing'},
     # ID is from different user
     {'new_order': [1, 4, 2], 'expected_status': 400, 'expected_message': 'Invalid or missing IDs of destinations'},
     # ID does not exist
     {'new_order': [1, 10, 2], 'expected_status': 400, 'expected_message': 'Invalid or missing IDs of destinations'},
+    # New order is too long
+    {'new_order': [1, 3, 2, 3], 'expected_status': 400, 'expected_message': 'Length of new order does not match length of destinations'},
+    # New order is too short
+    {'new_order': [1, 3], 'expected_status': 400, 'expected_message': 'Length of new order does not match length of destinations'},
 
     # Successfull test case
     {'new_order': [1, 3, 2], 'expected_status': 200, 'expected_message': 'Reordered Destinations successfully!'},

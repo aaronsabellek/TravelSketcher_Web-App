@@ -94,11 +94,15 @@ def reorder_items(model, filter_by, new_order, item_name):
 
     # Check if there is new order from data
     if not new_order:
-        return jsonify({'error': f'The list of {item_name} is missing'}), 400
+        return jsonify({'error': f'The new order of {item_name} is missing'}), 400
 
     # Get all items needed as dict
     items = model.query.filter_by(**filter_by).all()
     item_dict = {item.id: item for item in items}
+
+    # Check if length of new order matches length of items
+    if len(new_order) != len(item_dict):
+        return jsonify({'error': f'Length of new order does not match length of {item_name}'}), 400
 
     # Check if all the IDs exist
     if set(map(int, new_order)) != set(item_dict.keys()):

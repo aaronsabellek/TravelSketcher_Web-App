@@ -1,5 +1,5 @@
 from flask import Blueprint, request, jsonify
-from flask_login import login_required, current_user
+from flask_login import login_required
 
 from app.models import Destination, Activity
 from app.helpers.helpers import models_to_list, model_to_dict
@@ -28,6 +28,7 @@ def add_activity():
     if isinstance(destination, tuple):
         return destination
 
+    # Create activity
     return create_entry(Activity, data, destination_id=data.get('destination_id'))
 
 @activity_bp.route('/get_all/<int:destination_id>', methods=['GET'])
@@ -47,6 +48,7 @@ def get_activities(destination_id):
     if not activities:
         return jsonify({'activities': [], 'message': f"Destination '{destination.title}' has no activities yet"}), 200
 
+    # Return activities
     return jsonify({
         'destination': destination.title,
         'activities': models_to_list(activities)
@@ -62,38 +64,50 @@ def get_activity(activity_id):
     if isinstance(entry, tuple):
         return entry
 
+    # Return activity
     return jsonify({'activity': model_to_dict(entry)}), 200
 
 @activity_bp.route('/edit/<int:activity_id>', methods=['POST'])
 @login_required
 def edit_activity(activity_id):
-    data = request.get_json()
-    activity = Activity.query.get(activity_id)
 
-    # Stelle sicher, dass der Nutzer berechtigt ist, die Activity zu bearbeiten
-    if activity.destination.owner.id != current_user.id:
-        return jsonify({'error': 'Nicht autorisiert'}), 403
+    data = request.get_json() # Get data
 
+    # Check existence and permission of activity
+    entry = check_existence_and_permission(Activity, activity_id)
+    if isinstance(entry, tuple):
+        return entry
+
+    # Edit activity
     return edit_entry(Activity, activity_id, data)
 
+# Reorder activities route
 @activity_bp.route('/reorder/<int:destination_id>', methods=['POST'])
 @login_required
 def reorder_activities(destination_id):
-    data = request.get_json()
-    new_order = data.get("activities")
-    return reorder_items(Activity, {"destination_id": destination_id}, new_order, "activities")
 
+    # Check existence and permission of activity
+    entry = check_existence_and_permission(Destination, destination_id)
+    if isinstance(entry, tuple):
+        return entry
+
+    # Get new order from data
+    data = request.get_json()
+    new_order = data.get('new_order')
+
+    # Reorder destinations
+    return reorder_items(Activity, {'destination_id': destination_id}, new_order, 'activities')
+
+# Delete destinations route
 @activity_bp.route('/delete/<int:activity_id>', methods=['DELETE'])
 @login_required
 def delete_activity(activity_id):
-    activity = Activity.query.get(activity_id)
 
-    if activity is None:
-        return jsonify({'error': 'Activity not found'}), 404
+    # Check existence and permission of activity
+    entry = check_existence_and_permission(Activity, activity_id)
+    if isinstance(entry, tuple):
+        return entry
 
-    # Prüfen, ob der aktuelle Benutzer der Besitzer der zugehörigen Destination ist
-    if activity.destination.user_id != current_user.id:
-        return jsonify({'error': 'You are not authorized to delete this activity'}), 403
-
+    # Delete activity
     return delete_item(Activity, activity_id)
 

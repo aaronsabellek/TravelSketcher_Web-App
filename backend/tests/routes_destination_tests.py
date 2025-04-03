@@ -1,5 +1,6 @@
 import pytest
 
+from app import db
 from app.models import Destination
 from tests.helping_variables import url
 from tests.helping_functions import request_and_validate
@@ -37,8 +38,20 @@ def test_get_all(setup_logged_in_user):
     response_data = response.json()
 
     # Check for errors
-    assert len(response_data) >= 0, f'Unexpected Error: No destinations found!'
+    assert len(response_data['destinations']) >= 2, f'Unexpected Error: No destinations found!'
     assert response_data['destinations'][2]['title'] == 'Tokyo', f'Unexpected Error: Title not found!'
+
+    # Delete all destinations from db
+    Destination.query.delete()
+    db.session.commit()
+
+    # Use route again
+    response = setup_logged_in_user.get(get_url)
+    response_data = response.json()
+
+    # Check for errors in case of no destinations
+    assert len(response_data['destinations']) == 0, f'Unexpected Error: Still destinations in db!'
+    assert response_data['message'] == 'No destinations found yet'
 
 # Test get specific destination
 @pytest.mark.parametrize('test_data', get_destination)
@@ -57,7 +70,7 @@ def test_edit(setup_logged_in_user, test_data):
         return
 
     # Check for updates in db
-    destination = Destination.query.filter_by(id=1).first()
+    destination = Destination.query.filter_by(id=test_data['destination_id']).first()
     assert destination.title == test_data['title'], f'Unexpedted Error: Destination not edited in db'
 
 # Test reorder destinations
@@ -84,6 +97,6 @@ def test_delete(setup_logged_in_user, test_data):
         return
 
     # Check if destination got deleted in db
-    destination = Destination.query.filter_by(user_id=test_data['destination_id']).first()
-    assert destination, f'Error: Destination still found in database'
+    destination = Destination.query.filter_by(id=test_data['destination_id']).first()
+    assert destination is None, f'Error: Destination still found in database'
 

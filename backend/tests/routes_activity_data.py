@@ -39,3 +39,45 @@ get_activity = [
     # Successfull test case
     {'activity_id': 1, 'expected_status': 200}
 ]
+
+# Test edit activity
+edit_activity = [
+    # Activtiy belongs to another user
+    {**new_activity, 'activity_id': 10, 'expected_status': 403, 'expected_message': 'Activity not permitted'},
+    # Activity does not exist
+    {**new_activity, 'activity_id': 30, 'expected_status': 404, 'expected_message': 'Activity not found'},
+    # Required field is empty
+    {'title': '', 'activity_id': 1, 'expected_status': 400, 'expected_message': 'Title is required'},
+
+    # Successfull test case
+    {**new_activity, 'activity_id': 1, 'expected_status': 200, 'expected_message': 'Updated Activity successfully!'}
+]
+
+# Test reorder activities
+reorder_activities = [
+    # Destination belongs to another user
+    {'destination_id': 4, 'new_order': [1, 3, 2, 4, 5], 'expected_status': 403, 'expected_message': 'Destination not permitted'},
+    # Destination does not exist
+    {'destination_id': 10, 'new_order': [1, 3, 2, 4, 5], 'expected_status': 404, 'expected_message': 'Destination not found'},
+    # New order missing
+    {'destination_id': 1, 'new_order': [], 'expected_status': 400, 'expected_message': 'The new order of activities is missing'},
+    # New order is too long
+    {'destination_id': 1, 'new_order': [1, 3, 2, 4, 5, 6], 'expected_status': 400, 'expected_message': 'Length of new order does not match length of activities'},
+    # New order is too short
+    {'destination_id': 1, 'new_order': [1, 3, 2, 4], 'expected_status': 400, 'expected_message': 'Length of new order does not match length of activities'},
+
+    # Successfull test case
+    {'destination_id': 1, 'new_order': [1, 3, 2, 4, 5], 'expected_status': 200, 'expected_message': 'Reordered Activities successfully!'}
+]
+
+# Test delete activity
+delete_activity = [
+    # Destination does not belong to user
+    {'activity_id': 10, 'expected_status': 403, 'expected_message': 'Activity not permitted'},
+    # Destination does not exist
+    {'activity_id': 30, 'expected_status': 404, 'expected_message': 'Activity not found'},
+
+    # Successfull test case
+    {'activity_id': 1, 'expected_status': 200, 'expected_message': 'Activity deleted successfully!'}
+]
+
