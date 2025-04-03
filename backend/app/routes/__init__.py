@@ -4,6 +4,7 @@ from app.routes.destination import destination_bp
 from app.routes.activity import activity_bp
 from app.routes.search import search_bp
 
+
 def register_blueprints(app):
     """Registers all blueprints from app"""
 
