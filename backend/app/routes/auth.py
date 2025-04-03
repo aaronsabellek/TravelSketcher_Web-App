@@ -132,7 +132,7 @@ def resend_verification():
 
 @auth_bp.route('/login', methods=['POST'])
 def login():
-    """Logs user in"""
+    """Login of user"""
 
     # Check if user is already logged in
     if current_user.is_authenticated:
@@ -171,7 +171,7 @@ def login():
 @auth_bp.route('/logout', methods=['POST'])
 @login_required
 def logout():
-    """Logs user out"""
+    """Logout of user"""
 
     logout_user()
     return jsonify({'message': 'Logout successfull!'}), 200

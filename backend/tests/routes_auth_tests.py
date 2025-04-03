@@ -88,7 +88,7 @@ def test_resend_verification(setup_database, test_data):
 
 @pytest.mark.parametrize('test_data', login_data)
 def test_login(setup_database, test_data):
-    """Test: Login user with different identifiers"""
+    """Test: Login of user with different identifiers"""
 
     login_url = f'{url}/auth/login'
 
@@ -119,7 +119,7 @@ def test_login(setup_database, test_data):
 
 
 def test_logout(setup_database):
-    """Test logout of user"""
+    """Test: Logout of user"""
 
     login(setup_database) # Login
 
