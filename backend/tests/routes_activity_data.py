@@ -1,6 +1,5 @@
 from tests.helping_variables import new_activity
 
-
 # Test data to add activity to database
 add_activity = [
     # Wrong id

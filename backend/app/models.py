@@ -1,6 +1,7 @@
 from app import db
 from flask_login import UserMixin
 
+
 class User(UserMixin, db.Model):
     """Represents the user with his profile data"""
 

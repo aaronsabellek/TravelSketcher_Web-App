@@ -7,6 +7,7 @@ from werkzeug.security import generate_password_hash
 
 from app import db, mail
 
+
 def model_to_dict(model):
     """Returns model as dictionary"""
     return {key: getattr(model, key) for key in model.__table__.columns.keys() if not key.startswith('_')}

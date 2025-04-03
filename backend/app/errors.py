@@ -1,5 +1,6 @@
 from flask import jsonify, current_app
 
+
 def page_not_found(e):
     return jsonify({'error': 'Page not found', 'details': str(e)}), 404
 

@@ -26,7 +26,7 @@ allowed_fields = ['username', 'city', 'longitude', 'latitude', 'country', 'curre
 @user_bp.route('/profile', methods=['GET'])
 @login_required
 def get_profile():
-    """Get profile of user"""
+    """Gets profile of user"""
 
     # Show profile data except for password and data that was not logged in explicitly
     user_data = {key: value for key, value in current_user.__dict__.items() if key in allowed_fields}

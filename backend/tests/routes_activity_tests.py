@@ -11,6 +11,7 @@ from tests.routes_activity_data import (
     delete_activity
 )
 
+
 @pytest.mark.parametrize('test_data', add_activity)
 def test_add(setup_logged_in_user, test_data):
     """Test: Add activity to database"""

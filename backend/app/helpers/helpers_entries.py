@@ -5,6 +5,7 @@ from app import db
 from app.models import User, Destination, Activity
 from app.helpers.helpers import model_to_dict
 
+
 def check_existence_and_permission(model, entry_id):
     """Checks existence and user permission of entry"""
 
