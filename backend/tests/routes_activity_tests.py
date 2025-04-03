@@ -11,10 +11,9 @@ from tests.routes_activity_data import (
     delete_activity
 )
 
-
-# Test add destination
 @pytest.mark.parametrize('test_data', add_activity)
 def test_add(setup_logged_in_user, test_data):
+    """Test: Add activity to database"""
 
     # Use and validate route
     response = request_and_validate(setup_logged_in_user, 'activity/add', test_data)
@@ -28,9 +27,10 @@ def test_add(setup_logged_in_user, test_data):
     assert activity.position == 6, f'Error: Position expected: 6, but got: {activity.position}'
     assert activity.destination_id == 1, f'Error: Destination-ID expected: 1, but got: {activity.position}'
 
-# Test get all destinations of user
+
 @pytest.mark.parametrize('test_data', get_all)
 def test_get_all(setup_logged_in_user, test_data):
+    """Test: Get all activities from specific destination"""
 
     # Use and validate route
     response = request_and_validate(setup_logged_in_user, f'activity/get_all/{test_data['destination_id']}', test_data, method='GET')
@@ -41,9 +41,10 @@ def test_get_all(setup_logged_in_user, test_data):
     if test_data['destination_id'] == 1:
         assert response.json()['activities'][2]['title'] == 'Notre-Dame Cathedral besichtigen', f'Unexpected Error: Title not found!'
 
-# Test get specific activity
+
 @pytest.mark.parametrize('test_data', get_activity)
 def test_get_destination(setup_logged_in_user, test_data):
+    """Test: Get specific activity"""
 
     # Use route
     request_and_validate(client=setup_logged_in_user, endpoint=f'activity/get/{test_data['activity_id']}', test_data=test_data, method='GET')
@@ -61,9 +62,10 @@ def test_edit_activity(setup_logged_in_user, test_data):
     activity = Activity.query.filter_by(id=test_data['activity_id']).first()
     assert activity.title == test_data['title'], f'Unexpedted Error: Activity not edited in db'
 
-# Test reorder activities of specific destination
+
 @pytest.mark.parametrize('test_data', reorder_activities)
 def test_edit_activity(setup_logged_in_user, test_data):
+    """Test: Reorder activities of specific destination"""
 
     # Use and validate route
     response = request_and_validate(setup_logged_in_user, f'activity/reorder/{test_data['destination_id']}', test_data)
@@ -75,9 +77,10 @@ def test_edit_activity(setup_logged_in_user, test_data):
     reordered_ids = [act.id for act in reordered_activities]
     assert reordered_ids == test_data['new_order'], f'Error! Expected: {test_data['new_order']}, but got: {reordered_ids}'
 
-# Test delete destinations
+
 @pytest.mark.parametrize('test_data', delete_activity)
 def test_delete(setup_logged_in_user, test_data):
+    """Test: Delete activity from database"""
 
     # Use and validate route
     response = request_and_validate(setup_logged_in_user, f'activity/delete/{test_data['activity_id']}', test_data, method='DELETE')

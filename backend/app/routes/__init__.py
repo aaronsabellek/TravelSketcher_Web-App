@@ -4,9 +4,9 @@ from app.routes.destination import destination_bp
 from app.routes.activity import activity_bp
 from app.routes.search import search_bp
 
-
 def register_blueprints(app):
-    """Registriert alle Blueprints in der Flask-App"""
+    """Registers all blueprints from app"""
+
     app.register_blueprint(auth_bp)
     app.register_blueprint(user_bp)
     app.register_blueprint(destination_bp)

@@ -22,8 +22,8 @@ from tests.routes_user_data import (
 )
 
 
-# Test profile
 def test_profile(setup_logged_in_user):
+    """Test: Get profile of user"""
 
     # User profile route
     profile_url = f'{url}/user/profile'
@@ -36,9 +36,10 @@ def test_profile(setup_logged_in_user):
     assert 'password' not in response_data, f'Password should not be shown!'
     assert 'is_email_verified' not in response_data, f'Verification status should not be shown'
 
-# Test edit profile
+
 @pytest.mark.parametrize('test_data', edit_data)
 def test_edit(setup_logged_in_user, test_data):
+    "Test: Edit profile of user"
 
     # Use and validate route
     response = request_and_validate(setup_logged_in_user, 'user/edit', test_data)
@@ -64,20 +65,23 @@ def test_edit(setup_logged_in_user, test_data):
         if key == 'password':
             assert user_data['password'] != test_data['password'], f'Unexpected error: Data should not have been changed: {test_data['password']}'
 
-# Test edit email
+
 @pytest.mark.parametrize('test_data', edit_email)
 def test_edit_email(setup_logged_in_user, test_data):
+    """Test: Edit email of user"""
 
     # Use and validate route
     response = request_and_validate(setup_logged_in_user, 'user/edit_email', test_data)
     if response.status_code not in [200, 201]:
         return
 
-    check_for_mail('Please confirm your E-Mail') # Check for email by subject
+    # Check for email by subject
+    check_for_mail('Please confirm your E-Mail')
 
-# Test new email verification
+
 @pytest.mark.parametrize('test_data', reset_email)
 def test_reset_password(setup_database, test_data):
+    """Test: Verify new email of user"""
 
     # Get user
     user = User.query.filter_by(username=username).first()
@@ -97,31 +101,36 @@ def test_reset_password(setup_database, test_data):
     updated_user = User.query.filter_by(email=email).first()
     assert updated_user is not None, f"User with email {email} should be in DB"
 
-# Test edit password
+
 @pytest.mark.parametrize('test_data', edit_password)
 def test_edit_password(setup_logged_in_user, test_data):
+    """Test: Edit password of user"""
 
     # Use and validate route
     response = request_and_validate(setup_logged_in_user, 'user/edit_password', test_data)
     if response.status_code not in [200, 201]:
         return
 
-    check_for_mail('Confirmation: Your password has been changed') # Check for email by subject
+    # Check for email by subject
+    check_for_mail('Confirmation: Your password has been changed')
 
-# Test password reset request
+
 @pytest.mark.parametrize('test_data', request_password_reset)
 def test_edit_email(setup_database, test_data):
+    """Test: Request password reset"""
 
     # Use and validate route
     response = request_and_validate(setup_database, 'user/request_password_reset', test_data)
     if response.status_code not in [200, 201]:
         return
 
-    check_for_mail('Reset password') # Check for email by subject
+    # Check for email by subject
+    check_for_mail('Reset password')
 
-# Test password reset
+
 @pytest.mark.parametrize('test_data', reset_password)
 def test_reset_password(setup_database, test_data):
+    """Test: Verify password reset"""
 
     token = create_test_token(test_data, 'reset-password') # Create test token
 
@@ -135,8 +144,9 @@ def test_reset_password(setup_database, test_data):
     assert user is not None, f'User with email {email} not found in the database'
     assert check_password_hash(user.password, test_data['new_password_1']), 'Password was not correctly hashed and saved in the database'
 
-# Test delete user
+
 def test_delete(setup_database):
+    """Test: Delete user from database"""
 
     client = login(setup_database) # Login
 

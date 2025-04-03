@@ -5,9 +5,8 @@ from app import db
 from app.models import User, Destination, Activity
 from app.helpers.helpers import model_to_dict
 
-
-# Check existence and persmission of entry
 def check_existence_and_permission(model, entry_id):
+    """Checks existence and user permission of entry"""
 
     # Check if entry exists
     entry = model.query.filter_by(id=entry_id).first()
@@ -25,8 +24,9 @@ def check_existence_and_permission(model, entry_id):
 
     return entry
 
-# Create entry
+
 def create_entry(model, data, user_id=None, destination_id=None):
+    """Creates entry in database"""
 
     # Get valid data as dict
     data = {key: value for key, value in data.items() if key in model.__table__.columns}
@@ -62,8 +62,9 @@ def create_entry(model, data, user_id=None, destination_id=None):
 
     return jsonify({'message': f'{model.__name__} added successfully!', model.__name__.lower(): model_to_dict(new_entry)}), 201
 
-# Edit entry in db
+
 def edit_entry(model, entry_id, data, allowed_fields=None):
+    """Edits entry in database"""
 
     # Set allowed fields to standard value
     if allowed_fields is None:
@@ -89,12 +90,13 @@ def edit_entry(model, entry_id, data, allowed_fields=None):
 
     return jsonify({'message': f'Updated {model.__name__} successfully!', model.__name__.lower(): model_to_dict(entry)}), 200
 
-# Reorder items
-def reorder_items(model, filter_by, new_order, item_name):
+
+def reorder_entries(model, filter_by, new_order, entry_name):
+    """Reorders entries in database"""
 
     # Check if there is new order from data
     if not new_order:
-        return jsonify({'error': f'The new order of {item_name} is missing'}), 400
+        return jsonify({'error': f'The new order of {entry_name} is missing'}), 400
 
     # Get all items needed as dict
     items = model.query.filter_by(**filter_by).all()
@@ -102,11 +104,11 @@ def reorder_items(model, filter_by, new_order, item_name):
 
     # Check if length of new order matches length of items
     if len(new_order) != len(item_dict):
-        return jsonify({'error': f'Length of new order does not match length of {item_name}'}), 400
+        return jsonify({'error': f'Length of new order does not match length of {entry_name}'}), 400
 
     # Check if all the IDs exist
     if set(map(int, new_order)) != set(item_dict.keys()):
-        return jsonify({'error': f'Invalid or missing IDs of {item_name}'}), 400
+        return jsonify({'error': f'Invalid or missing IDs of {entry_name}'}), 400
 
     # Reorder items
     for new_position, item_id in enumerate(new_order, start=1):
@@ -116,16 +118,17 @@ def reorder_items(model, filter_by, new_order, item_name):
     # Update db
     db.session.commit()
 
-    return jsonify({'message': f'Reordered {item_name.capitalize()} successfully!'}), 200
+    return jsonify({'message': f'Reordered {entry_name.capitalize()} successfully!'}), 200
 
-# Delete item
-def delete_item(model, item_id):
+
+def delete_entry(model, entry_id):
+    """Deletes entry from database"""
 
     # Get item by id
-    item = model.query.filter_by(id=item_id).first()
+    entry = model.query.filter_by(id=entry_id).first()
 
     # Delete item in db
-    db.session.delete(item)
+    db.session.delete(entry)
     db.session.commit()
 
     # Logout if item is user

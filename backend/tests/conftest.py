@@ -7,19 +7,23 @@ from app import create_app, db
 from app.models import User, Destination, Activity
 from .helping_variables import url, dummy_data, login_data_username, username
 
+
 @pytest.fixture(scope="function")
 def setup_database():
-    """Fixture zur Vorbereitung der Testdatenbank und Session."""
-    # Setze den Application Context
+    """Fixture to setup the test database"""
+
+    # Set application context
     app = create_app()
     with app.app_context():
-        # Leere die Datenbank
+
+        # Drop and create new database
         db.drop_all()
         db.create_all()
 
+        # Set hashed password
         hashed_password = generate_password_hash(dummy_data['user']['password'], method='pbkdf2:sha256')
 
-        # Erstelle den Benutzer
+        # Create main user in database
         user = User(
             username=dummy_data['user']['username'],
             email=dummy_data['user']['email'],
@@ -34,6 +38,7 @@ def setup_database():
         db.session.add(user)
         db.session.commit()
 
+        # Create second user in database
         second_user = User(
             username=dummy_data['second_user']['username'],
             email=dummy_data['second_user']['email'],
@@ -48,7 +53,7 @@ def setup_database():
         db.session.add(second_user)
         db.session.commit()
 
-        # Erstelle die Destinations und Activities und verknüpfe sie mit den Usern
+        # Create destinations and activities of main user in database
         for destination_data in dummy_data['destinations']:
             destination = Destination(
                 title=destination_data['title'],
@@ -70,7 +75,7 @@ def setup_database():
 
             db.session.commit()
 
-        # Das gleiche für zweiten User
+        # Create destinations and activities of second user in database
         for second_destination_data in dummy_data['second_destinations']:
             second_destination = Destination(
                 title=destination_data['title'],
@@ -92,31 +97,33 @@ def setup_database():
 
             db.session.commit()
 
+        # Return test client
         with app.test_client() as client:
             yield client
-        #yield db
 
-        # Bereinigen der db
+        # Remove all data from database
         db.session.remove()
         db.drop_all()
 
+
 @pytest.fixture(scope="function")
 def setup_logged_in_user(setup_database):
-    """Fixture, die einen User einloggt und eine Requests-Session zurückgibt."""
-    #session = requests.Session()
-    #app = create_app()
-    #with app.app_context():
+    """Fixture to setup test database, login user and return request session"""
+
+    # Create session for user
     session = requests.Session()
     user = User.query.filter_by(username=username).first()
-    assert user is not None, "User existiert nicht in der Datenbank!"
+    assert user is not None, 'User does not exisst in database!'
 
+    # Login user
     login_url = f'{url}/auth/login'
     response_login = session.post(login_url, json=login_data_username)
     assert response_login.status_code == 200, f"Login fehlgeschlagen! Status: {response_login.status_code}, Antwort: {response_login.text}"
 
+    # Return test session
     yield session
 
-    # Logout
+    # Logout user
     logout_url = f'{url}/auth/logout'
     response_logout = session.post(logout_url)
     assert response_logout.status_code == 200, f'Error: Logout failed! Status: {response_logout.status_code}, Text: {response_logout.text}'

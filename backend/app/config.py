@@ -2,25 +2,30 @@ import os
 
 from dotenv import load_dotenv
 
-
+# Load data from .env file
 load_dotenv()
 
+
 class Config:
-    """Flask Konfigurationsklasse"""
+    """Flask configuration class"""
+
+    # Initialize secret key
     SECRET_KEY = os.getenv('SECRET_KEY')
     if SECRET_KEY is None:
         raise ValueError('SECRET_KEY is not set! Insert the .env file.')
 
+    # Initialize database with SQLAlchemy
     SQLALCHEMY_DATABASE_URI = os.getenv('SQLALCHEMY_DATABASE_URI')
     if SQLALCHEMY_DATABASE_URI is None:
         raise ValueError('DATABASE_URL is not set! Insert the .env file.')
 
     SQLALCHEMY_TRACK_MODIFICATIONS = False
 
+    # Initialize maintenance mode
     MAINTENANCE_MODE = os.getenv('MAINTENANCE_MODE', "False").lower() == 'true'
     MAINTAINANCE_MESSAGE= os.getenv('MAINTENANCE_MESSAGE', 'This Website is currently in Maintainance mode. Please try again later.')
 
-    # Initlialize mailserver data from .env (MailHog for testing purpose)
+    # Initlialize mailserver data (MailHog for testing purpose)
     MAIL_SERVER = os.getenv('MAIL_SERVER')
     MAIL_PORT = os.getenv('MAIL_PORT')
     MAIL_USERNAME = os.getenv('MAIL_USERNAME') or None
@@ -33,11 +38,17 @@ class Config:
     MAIL_USE_TLS = os.getenv('MAIL_USE_TLS', False) == 'True'
     MAIL_USE_SSL = os.getenv('MAIL_USE_SSL', False) == 'True'
 
+
 class DevelopmentConfig(Config):
+    """Flask configuration class for development"""
+
     DEBUG = True
     SESSION_COOKIE_SECURE = False
 
+
 class ProductionConfig(Config):
+    """Flask configuration class for production"""
+
     DEBUG = False
     SESSION_COOKIE_SECURE = True
 

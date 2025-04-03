@@ -60,7 +60,6 @@ dummy_data = {
             'activities': []
         }
     ],
-    # Hier die Daten noch einmal neu generieren lassen
     'second_destinations': [
         {
             'title': 'Paris',
@@ -127,6 +126,7 @@ login_data_username = {
     'password': dummy_data['user']['password']
 }
 
+# Data for new destianation
 new_destination = {
     'title': 'Helsinki',
     'country': 'Finland',
@@ -147,6 +147,7 @@ new_destination = {
     'free_text': 'Don’t miss the Suomenlinna sea fortress and the traditional Finnish saunas!'
 }
 
+# Data for new activity
 new_activity = {
     'title': 'Suomenlina Fortress',
     'country': 'Finland',
@@ -165,37 +166,9 @@ new_activity = {
     'destination_id': 1
 }
 
-
-updated_password = {
-    'new_password_1': 'new_password123!',
-    'new_password_2': 'new_password123!'
-}
-
+# Data to login with username
 login_data_username = {
     'identifier': dummy_data['user']['username'],
     'password': dummy_data['user']['password']
-}
-
-login_data_email = {
-    'identifier': dummy_data['user']['email'],
-    'password': dummy_data['user']['password']
-}
-
-activity_data = {
-    'title': 'Helsinki Sightseeing Tour',
-    'country': 'Finland',
-    'duration': '3 hours',
-    'pricing': '50',
-    'status': 'available',
-    'web_link': 'https://example.com/helsinki-tour',
-    'img_link': 'https://example.com/helsinki-tour.jpg',
-    'tags': 'sightseeing, history, culture',
-    'trip_duration': '1 day',
-    'trip_pricing': '75',
-    'longitude': '24.945',
-    'latitude': '60.169',
-    'description': 'Explore Helsinki’s iconic landmarks, including Senate Square, Temppeliaukio Church, and Market Square.',
-    'free_text': 'Includes a professional guide and transport between locations.',
-    'destination_id': 1
 }
 

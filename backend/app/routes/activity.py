@@ -7,18 +7,18 @@ from app.helpers.helpers_entries import (
     check_existence_and_permission,
     create_entry,
     edit_entry,
-    reorder_items,
-    delete_item
+    reorder_entries,
+    delete_entry
 )
-
 
 # Set blueprint
 activity_bp = Blueprint('activity', __name__, url_prefix='/activity')
 
-# Add activity route
+
 @activity_bp.route('/add', methods=['POST'])
 @login_required
 def add_activity():
+    """Adds activity to database"""
 
     data = request.get_json() # Get data
 
@@ -31,9 +31,11 @@ def add_activity():
     # Create activity
     return create_entry(Activity, data, destination_id=data.get('destination_id'))
 
+
 @activity_bp.route('/get_all/<int:destination_id>', methods=['GET'])
 @login_required
 def get_activities(destination_id):
+    """Get all destinations of user"""
 
     # Check existence and permission of activity
     entry = check_existence_and_permission(Destination, destination_id)
@@ -54,10 +56,11 @@ def get_activities(destination_id):
         'activities': models_to_list(activities)
     })
 
-# Get activity route
+
 @activity_bp.route('/get/<int:activity_id>', methods=['GET'])
 @login_required
 def get_activity(activity_id):
+    """Get specific destination of user"""
 
     # Check existence and permission of activity
     entry = check_existence_and_permission(Activity, activity_id)
@@ -67,9 +70,11 @@ def get_activity(activity_id):
     # Return activity
     return jsonify({'activity': model_to_dict(entry)}), 200
 
+
 @activity_bp.route('/edit/<int:activity_id>', methods=['POST'])
 @login_required
 def edit_activity(activity_id):
+    """Edit activity in database"""
 
     data = request.get_json() # Get data
 
@@ -81,10 +86,11 @@ def edit_activity(activity_id):
     # Edit activity
     return edit_entry(Activity, activity_id, data)
 
-# Reorder activities route
+
 @activity_bp.route('/reorder/<int:destination_id>', methods=['POST'])
 @login_required
 def reorder_activities(destination_id):
+    """Reorder activities of specific destination"""
 
     # Check existence and permission of activity
     entry = check_existence_and_permission(Destination, destination_id)
@@ -96,12 +102,13 @@ def reorder_activities(destination_id):
     new_order = data.get('new_order')
 
     # Reorder destinations
-    return reorder_items(Activity, {'destination_id': destination_id}, new_order, 'activities')
+    return reorder_entries(Activity, {'destination_id': destination_id}, new_order, 'activities')
 
-# Delete destinations route
+
 @activity_bp.route('/delete/<int:activity_id>', methods=['DELETE'])
 @login_required
 def delete_activity(activity_id):
+    """Delete activity from database"""
 
     # Check existence and permission of activity
     entry = check_existence_and_permission(Activity, activity_id)
@@ -109,5 +116,5 @@ def delete_activity(activity_id):
         return entry
 
     # Delete activity
-    return delete_item(Activity, activity_id)
+    return delete_entry(Activity, activity_id)
 

@@ -7,22 +7,25 @@ from werkzeug.security import generate_password_hash
 
 from app import db, mail
 
-
-# Change Model to dict
 def model_to_dict(model):
+    """Returns model as dictionary"""
     return {key: getattr(model, key) for key in model.__table__.columns.keys() if not key.startswith('_')}
 
-# Change Model to list of dicts
+
 def models_to_list(models):
+    """Returns model als list of dictionaries"""
     return [model_to_dict(model) for model in models]
 
-# Check if email has valid format
+
 def is_valid_email(email):
+    """Checks if email has valid format"""
     regex = r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,7}\b'
     return re.match(regex, email)
 
-# Check if password fits requirements
+
 def validate_password(password):
+    """Checks if password fits requirements"""
+
     if len(password) < 8:
         return jsonify({'error': 'Passwort has to have at least 8 characters!'}), 400
     if not any(i.isdigit() for i in password):
@@ -31,15 +34,18 @@ def validate_password(password):
         return jsonify({'error': 'Passwort has to have at least one letter!'}), 400
     if not any(not i.isalnum() for i in password):
         return jsonify({'error': 'Passwort has to have at least one special character!'}), 400
+
     return None
 
-# Generate verificatoin token
+
 def generate_token(email, salt):
+    """Generates verification token"""
     serializer = current_app.config['SERIALIZER']
     return serializer.dumps(email, salt=salt)
 
-# Confirm verification token
+
 def confirm_token(token, salt, expiration=3600):
+    """Confirms verification token"""
     try:
         serializer = current_app.config['SERIALIZER']
         email = serializer.loads(token, salt=salt, max_age=expiration)
@@ -47,8 +53,10 @@ def confirm_token(token, salt, expiration=3600):
     except:
         return None
 
-# Send email for verification
+
 def send_verification_email(user, salt):
+    """Sends verification email to user"""
+
     token = generate_token(user.email, salt=salt)
     verify_url = f'/verify_email/{token}'
     subject = 'Please confirm your E-Mail'
@@ -56,15 +64,18 @@ def send_verification_email(user, salt):
 
     send_email(user.email, subject, body)
 
-# Send email
+
 def send_email(to_email, subject, body):
+    """Sends email to user"""
+
     with current_app.app_context():
         sender_email = current_app.config['MAIL_DEFAULT_SENDER']
     msg = Message(subject, recipients=[to_email], body=body, sender=sender_email)
     mail.send(msg)
 
-# Update password
+
 def update_password(user, new_password_1, new_password_2):
+    """Updates password of user in database"""
 
     # Check for password in two fields
     if not new_password_1 or not new_password_2:
@@ -88,6 +99,7 @@ def update_password(user, new_password_1, new_password_2):
 
     return jsonify({'message': 'Password updated successfully!'}), 200
 
+
 def create_search_query(model, search_query, exclude_fields):
     """
     Erstellt eine SQLAlchemy-Abfrage für eine unscharfe Suche in einem bestimmten Modell.
@@ -106,6 +118,7 @@ def create_search_query(model, search_query, exclude_fields):
     )
 
     return query
+
 
 def search_resources(model, search_query, exclude_fields):
     """

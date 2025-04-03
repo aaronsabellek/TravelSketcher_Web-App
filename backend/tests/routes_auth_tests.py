@@ -18,9 +18,9 @@ from tests.routes_auth_data import (
 )
 
 
-# Test registration
 @pytest.mark.parametrize('test_data', registration_data)
 def test_registration(setup_database, test_data):
+    """Test: Register user in database"""
 
     # Use and validate route
     response = request_and_validate(setup_database, 'auth/register', test_data)
@@ -35,9 +35,10 @@ def test_registration(setup_database, test_data):
 
     check_for_mail('Please confirm your E-Mail') # Check for email by subject
 
-# Test email verification
+
 @pytest.mark.parametrize('test_data', verification_data)
 def test_verifify_email(setup_database, test_data):
+    """Test: Verify email to register user"""
 
     # Get email and user from data
     email = test_data['email']
@@ -53,7 +54,8 @@ def test_verifify_email(setup_database, test_data):
         user.is_email_verified = False
         db.session.commit()
 
-    token = create_test_token(test_data, 'account-verification', email=email) # Create test token
+    # Create test token
+    token = create_test_token(test_data, 'account-verification', email=email)
 
     # Use and validate route
     response = request_and_validate(client=setup_database, endpoint=f'auth/verify_email/{token}', test_data=test_data, method='GET')
@@ -64,9 +66,10 @@ def test_verifify_email(setup_database, test_data):
     if not 'E-Mail confirmed successfully!' in response.text:
         assert user.is_email_verified == True, f'Error: User still not verified in database! Status: {response.status_code}, Text: {response.text}'
 
-# Test resend verification mail
+
 @pytest.mark.parametrize('test_data', resend_verification_data)
 def test_resend_verification(setup_database, test_data):
+    """Test: Resend verification email"""
 
     register(setup_database) # Register with new account
 
@@ -79,11 +82,13 @@ def test_resend_verification(setup_database, test_data):
     if 'E-Mail is already verified!' in response.text:
         return
 
-    check_for_mail('Please confirm your E-Mail') # Check for email by subject
+    # Check for email by subject
+    check_for_mail('Please confirm your E-Mail')
 
-# Test login
+
 @pytest.mark.parametrize('test_data', login_data)
 def test_login(setup_database, test_data):
+    """Test: Login user with different identifiers"""
 
     login_url = f'{url}/auth/login'
 
@@ -112,8 +117,9 @@ def test_login(setup_database, test_data):
     else:
         assert test_data['expected_message'] in response.json['error'], f'Error: Unexpected error message. Status: {response.status_code}, Text: {response.text}'
 
-# Test Logout
+
 def test_logout(setup_database):
+    """Test logout of user"""
 
     login(setup_database) # Login
 

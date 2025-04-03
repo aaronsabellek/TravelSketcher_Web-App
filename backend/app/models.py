@@ -1,9 +1,9 @@
 from app import db
 from flask_login import UserMixin
 
-
-# Model für User
 class User(UserMixin, db.Model):
+    """Represents the user with his profile data"""
+
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(20), unique=True, nullable=False)
     email = db.Column(db.String(50), unique=True, nullable=False)
@@ -16,14 +16,16 @@ class User(UserMixin, db.Model):
     currency = db.Column(db.String(20), nullable=False)
     is_email_verified = db.Column(db.Boolean, default=False)
 
-    # Beziehung zu Reisezielen
+    # Relationship to destinations
     destinations = db.relationship('Destination', backref='owner', lazy=True, cascade="all, delete")
 
     def __repr__(self):
         return f'<User {self.username}>'
 
-# Model für Reiseziele
+
 class Destination(db.Model):
+    """Represents destinations of a user"""
+
     id = db.Column(db.Integer, primary_key=True)
     title = db.Column(db.String(20), nullable=False)
     country = db.Column(db.String(20), nullable=True)
@@ -44,13 +46,17 @@ class Destination(db.Model):
     description = db.Column(db.String(200), nullable=True)
     free_text = db.Column(db.String(500), nullable=True)
 
+    # Relationships to user and activities
     user_id = db.Column(db.Integer, db.ForeignKey('user.id', ondelete="CASCADE"), nullable=False)
     activities = db.relationship('Activity', backref='destination', lazy=True, cascade="all, delete")
 
     def __repr__(self):
         return f'<Destination {self.title} (Position: {self.position})>'
 
+
 class Activity(db.Model):
+    """Represents activities of a specific destination"""
+
     id = db.Column(db.Integer, primary_key=True)
     title = db.Column(db.String(50), nullable=False)
     country = db.Column(db.String(50), nullable=True)
@@ -68,6 +74,7 @@ class Activity(db.Model):
     description = db.Column(db.String(200), nullable=True)
     free_text = db.Column(db.String(500), nullable=True)
 
+    # Relationship to destination
     destination_id = db.Column(db.Integer, db.ForeignKey('destination.id', ondelete="CASCADE"), nullable=False)
 
     def __repr__(self):

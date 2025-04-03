@@ -11,23 +11,25 @@ from app.helpers.helpers import (
     send_verification_email,
 )
 
-
 # Set blueprint
 auth_bp = Blueprint('auth', __name__, url_prefix='/auth')
 
-# Load user
+
 @login_manager.user_loader
 def load_user(user_id):
+    """Get user from database"""
     return User.query.get(int(user_id))
 
-# Home Route
+
 @auth_bp.route('/')
 def home():
+    """Return homepage"""
     return 'Backend is active!'
 
-# Register route
+
 @auth_bp.route('/register', methods=['POST'])
 def register():
+    """Registers user in database"""
 
     data = request.get_json() # Get data
 
@@ -74,13 +76,15 @@ def register():
     db.session.add(new_user)
     db.session.commit()
 
-    send_verification_email(new_user, salt='account-verification') # Send validation email
+    # Send verification email to user
+    send_verification_email(new_user, salt='account-verification')
 
     return jsonify({'message': 'Registration was successfull! A confirmation link has been sent.'}), 201
 
-# Verification route
+
 @auth_bp.route('/verify_email/<token>', methods=['GET'])
 def verify_email(token):
+    """Verifies the token from verification email"""
 
     # Verify email
     email = confirm_token(token, salt='account-verification')
@@ -104,9 +108,10 @@ def verify_email(token):
 
     return jsonify({'message': 'E-Mail confirmed successfully!'}), 200
 
-# Resend verification route
+
 @auth_bp.route('/resend_verification', methods=['POST'])
 def resend_verification():
+    """Resends verification email to user"""
 
     data = request.get_json()
     email = data.get('email')
@@ -124,9 +129,11 @@ def resend_verification():
     send_verification_email(user, salt='account-verification')
     return jsonify({'message': 'New verification link has been sent!'}), 200
 
-# Login route
+
 @auth_bp.route('/login', methods=['POST'])
 def login():
+    """Logs user in"""
+
     # Check if user is already logged in
     if current_user.is_authenticated:
         return jsonify({'message': 'You are logged in already'}), 200
@@ -160,10 +167,12 @@ def login():
     login_user(user)
     return jsonify({'message': 'Login successfull!'}), 200
 
-# Logout route
+
 @auth_bp.route('/logout', methods=['POST'])
 @login_required
 def logout():
+    """Logs user out"""
+
     logout_user()
     return jsonify({'message': 'Logout successfull!'}), 200
 

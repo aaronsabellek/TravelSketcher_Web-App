@@ -8,13 +8,12 @@ from tests.helping_variables import (
     currency,
 )
 
-
-# Variables for test dicts
+# Variables for user tests
 new_password = 'New_password_123!'
 wrong_password = 'newpassword123'
 new_email= 'new_email@mail.com'
 
-# Base data for profile edit
+# Base data to edit user profile
 updated_profile= {
     'username': 'new_username',
     'city': city,
@@ -24,7 +23,7 @@ updated_profile= {
     'currency': currency
 }
 
-# Test data for profile edit
+# Test data to edit user profile
 edit_data = [
     # Missing value
     {**updated_profile, 'city': '', 'expected_status': 400, 'expected_message': 'city not found!'},
@@ -39,7 +38,7 @@ edit_data = [
     {**updated_profile, 'password': 'unallowed_password123!', 'expected_status': 200, 'expected_message': 'Updated User successfully!'},
 ]
 
-# Test data for email edit
+# Test data to edit user email
 edit_email = [
     # No Email
     {'expected_status': 400, 'expected_message': 'No E-Mail found!'},
@@ -54,6 +53,7 @@ edit_email = [
     {'email': new_email, 'expected_status': 200, 'expected_message': 'Verification e-mail has been sent.'}
 ]
 
+# Test data to verify new email of user
 reset_email= [
     # Wrong email adress
     {'email': email, 'expected_status': 404, 'expected_message': 'Request to edit email not found'},
@@ -62,7 +62,7 @@ reset_email= [
     {'email': new_email, 'expected_status': 200, 'expected_message': 'Email verification successful!'}
 ]
 
-# Test for password edit
+# Test data to edit password of user
 edit_password = [
     # Password missing
     {'new_password_1': new_password, 'expected_status': 400, 'expected_message': 'Password missing!'},
@@ -75,7 +75,7 @@ edit_password = [
     {'new_password_1': new_password, 'new_password_2': new_password, 'expected_status': 200, 'expected_message': 'Password updated successfully!'}
 ]
 
-# Test for request password reset
+# Test data to request password reset
 request_password_reset = [
     # Missing email
     {'expected_status': 400, 'expected_message': 'Email missing!'},
@@ -86,7 +86,7 @@ request_password_reset = [
     {'email': email, 'expected_status': 200, 'expected_message': 'A reset link has been sent.'}
 ]
 
-# Test for password reset
+# Test data to reset password
 reset_password = [
     # Invalid token
     {'invalid_token': True, 'new_password_1': new_password, 'new_password_2': new_password, 'expected_status': 400, 'expected_message': 'Invalid or expired token'},

@@ -11,13 +11,13 @@ from tests.helping_variables import (
     registration_base_data
 )
 
-
-# Clear MailHog mailbox
 def clear_mailhog():
+    """Clears MailHog Mailbox"""
     requests.delete(mailhog_v1)
 
-# Send request and validate output
+
 def request_and_validate(client, endpoint, test_data, method='POST'):
+    """Sends request and validates output"""
 
     # Set url
     response_url = f'{url}/{endpoint}'
@@ -50,8 +50,9 @@ def request_and_validate(client, endpoint, test_data, method='POST'):
 
     return response
 
-# Check for incoming Mail by subject
+
 def check_for_mail(subject):
+    """Check for incoming email by subject"""
 
     time.sleep(1) # Wait one second for MailHog to receive the validation mail
 
@@ -70,7 +71,9 @@ def check_for_mail(subject):
 
     return response
 
+
 def create_test_token(test_data, salt, email=email):
+    """Creates test token for verification emails"""
 
     # Generate token
     token = generate_token(email=email, salt=salt)
@@ -82,8 +85,9 @@ def create_test_token(test_data, salt, email=email):
 
     return token
 
-# Login user
+
 def login(client, login_data=login_data_username):
+    """Login user"""
 
     login_url = f'{url}/auth/login'
     response = client.post(login_url, json=login_data)
@@ -91,8 +95,9 @@ def login(client, login_data=login_data_username):
 
     return client
 
-# Register user
+
 def register(client):
+    """Register user"""
 
     register_url = f'{url}/auth/register'
     response = client.post(register_url, json=registration_base_data)

@@ -1,7 +1,6 @@
 from tests.helping_variables import new_destination
 
-
-# Test add destination
+# Test data for adding destination to database
 add_destination = [
     # Wrong id
     {**new_destination, 'id': 2, 'expected_status': 500, 'expected_message': 'A database error occurred'},
@@ -14,7 +13,7 @@ add_destination = [
     {**new_destination, 'country': '', 'expected_status': 201, 'expected_message': 'Destination added successfully!'}
 ]
 
-# Test get destination
+# Test data to get specific destination of user
 get_destination = [
     # Destination belongs to another user
     {'destination_id': 4, 'expected_status': 403, 'expected_message': 'Destination not permitted'},
@@ -25,7 +24,7 @@ get_destination = [
     {'destination_id': 1, 'expected_status': 200}
 ]
 
-# Test edit destination
+# Test data to edit destination
 edit_destination = [
     # Destination belongs to another user
     {**new_destination, 'destination_id': 4, 'expected_status': 403, 'expected_message': 'Destination not permitted'},
@@ -38,7 +37,7 @@ edit_destination = [
     {**new_destination, 'destination_id': 1, 'expected_status': 200, 'expected_message': 'Updated Destination successfully!'}
 ]
 
-# Test reorder destinations
+# Test data to reorder destinations of user
 reorder_destinations = [
     # New order missing
     {'new_order': [], 'expected_status': 400, 'expected_message': 'The new order of destinations is missing'},
@@ -55,7 +54,7 @@ reorder_destinations = [
     {'new_order': [1, 3, 2], 'expected_status': 200, 'expected_message': 'Reordered Destinations successfully!'},
 ]
 
-# Test delete destination
+# Test data to delete destination
 delete_destination = [
     # Destination does not belong to user
     {'destination_id': 4, 'expected_status': 403, 'expected_message': 'Destination not permitted'},

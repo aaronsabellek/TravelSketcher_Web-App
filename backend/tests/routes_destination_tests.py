@@ -13,9 +13,9 @@ from tests.routes_destination_data import (
 )
 
 
-# Test add destination
 @pytest.mark.parametrize('test_data', add_destination)
 def test_add(setup_logged_in_user, test_data):
+    """Test: Add destination to database"""
 
     # Use and validate route
     response = request_and_validate(setup_logged_in_user, 'destination/add', test_data)
@@ -29,8 +29,9 @@ def test_add(setup_logged_in_user, test_data):
     assert destination.position == 4, f'Error: Position expected: 4, but got: {destination.position}'
     assert destination.user_id == 1, f'Error: User-ID expected: 1, but got: {destination.position}'
 
-# Test get all destinations of user
+
 def test_get_all(setup_logged_in_user):
+    """Test: Get all destinations of user"""
 
     # Use route
     get_url = f'{url}/destination/get_all'
@@ -53,16 +54,18 @@ def test_get_all(setup_logged_in_user):
     assert len(response_data['destinations']) == 0, f'Unexpected Error: Still destinations in db!'
     assert response_data['message'] == 'No destinations found yet'
 
-# Test get specific destination
+
 @pytest.mark.parametrize('test_data', get_destination)
 def test_get_destination(setup_logged_in_user, test_data):
+    """Test: Get specific destination"""
 
-    # Use route
+    # Use and validate route
     request_and_validate(setup_logged_in_user, f'destination/get/{test_data['destination_id']}', test_data, method='GET')
 
-# Test edit destination
+
 @pytest.mark.parametrize('test_data', edit_destination)
 def test_edit(setup_logged_in_user, test_data):
+    """Test: Edit destination"""
 
     # Use and validate route
     response = request_and_validate(setup_logged_in_user, f'destination/edit/{test_data['destination_id']}', test_data)
@@ -73,9 +76,10 @@ def test_edit(setup_logged_in_user, test_data):
     destination = Destination.query.filter_by(id=test_data['destination_id']).first()
     assert destination.title == test_data['title'], f'Unexpedted Error: Destination not edited in db'
 
-# Test reorder destinations
+
 @pytest.mark.parametrize('test_data', reorder_destinations)
 def test_reorder(setup_logged_in_user, test_data):
+    """Test: Reorder destinations of user"""
 
     # Use and validate route
     response = request_and_validate(setup_logged_in_user, 'destination/reorder', test_data)
@@ -87,9 +91,10 @@ def test_reorder(setup_logged_in_user, test_data):
     reordered_ids = [dest.id for dest in reordered_destinations]
     assert reordered_ids == test_data['new_order'], f'Error! Expected: {test_data['new_order']}, but got: {reordered_ids}'
 
-# Test delete destinations
+
 @pytest.mark.parametrize('test_data', delete_destination)
 def test_delete(setup_logged_in_user, test_data):
+    """Test: Delete destination"""
 
     # Use and validate route
     response = request_and_validate(setup_logged_in_user, f'destination/delete/{test_data['destination_id']}', test_data, method='DELETE')

@@ -1,11 +1,9 @@
 from tests.helping_variables import (
-    user,
     username,
     email,
     password,
     registration_base_data
 )
-
 
 # Test data for registration
 registration_data = [
@@ -32,7 +30,7 @@ registration_data = [
     {**registration_base_data, 'expected_status': 201, 'expected_message': 'Registration was successfull! A confirmation link has been sent.'}
 ]
 
-# Test data for verification
+# Test data for email verification
 verification_data = [
     # Email does not exist in db
     {'email': 'wrong_email@test-com', 'expected_status': 404, 'expected_message': 'User not found!'},
