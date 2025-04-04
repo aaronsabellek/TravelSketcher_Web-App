@@ -1,6 +1,6 @@
 import uuid
 
-from tests.helping_variables import (
+from tests.helpers.variables import (
     dest_main_id,
     dest_2_id,
     dest_3_id,

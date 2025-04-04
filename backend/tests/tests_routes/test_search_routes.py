@@ -1,7 +1,7 @@
 import pytest
 
-from tests.helping_variables import url
-from tests.routes_search_data import search_data
+from tests.helpers.variables import url
+from tests.test_data.search_data import search_data
 
 
 @pytest.mark.parametrize('test_data', search_data)

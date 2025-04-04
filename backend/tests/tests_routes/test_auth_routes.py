@@ -2,15 +2,15 @@ import pytest
 
 from app import db
 from app.models import User
-from tests.helping_variables import url
-from tests.helping_functions import (
+from tests.helpers.variables import url
+from tests.helpers.functions import (
     request_and_validate,
     check_for_mail,
     create_test_token,
     login,
     register
 )
-from tests.routes_auth_data import (
+from tests.test_data.auth_data import (
     registration_data,
     verification_data,
     resend_verification_data,

@@ -5,8 +5,8 @@ from werkzeug.security import generate_password_hash
 
 from app import create_app, db
 from app.models import User, Destination, Activity
-from tests.dummy_data import dummy_data
-from .helping_variables import (
+from tests.helpers.dummy_data import dummy_data
+from tests.helpers.variables import (
     url,
     user,
     username,

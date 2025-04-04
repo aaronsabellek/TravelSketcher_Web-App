@@ -1,4 +1,4 @@
-from tests.helping_variables import (
+from tests.helpers.variables import (
     username,
     email,
     password,

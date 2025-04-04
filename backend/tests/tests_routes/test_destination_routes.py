@@ -2,13 +2,13 @@ import pytest
 
 from app import db
 from app.models import Destination
-from tests.helping_functions import request_and_validate
-from tests.helping_variables import (
+from tests.helpers.functions import request_and_validate
+from tests.helpers.variables import (
     url,
     user,
     user_id
 )
-from tests.routes_destination_data import (
+from tests.test_data.destination_data import (
     new_destination,
     add_destination,
     get_destination,

@@ -4,14 +4,14 @@ from werkzeug.security import check_password_hash
 
 from app import db
 from app.models import User
-from tests.helping_variables import url, email, username
-from tests.helping_functions import (
+from tests.helpers.variables import url, email, username
+from tests.helpers.functions import (
     request_and_validate,
     check_for_mail,
     create_test_token,
     login
 )
-from tests.routes_user_data import (
+from tests.test_data.user_data import (
     new_email,
     edit_data,
     edit_email,

@@ -1,5 +1,5 @@
-from tests.dummy_data import dummy_data
-from tests.helping_variables import (
+from tests.helpers.dummy_data import dummy_data
+from tests.helpers.variables import (
     email,
     city,
     longitude,

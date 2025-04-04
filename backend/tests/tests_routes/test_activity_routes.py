@@ -1,9 +1,9 @@
 import pytest
 
 from app.models import Activity
-from tests.helping_functions import request_and_validate
-from tests.helping_variables import dest_main_id
-from tests.routes_activity_data import (
+from tests.helpers.functions import request_and_validate
+from tests.helpers.variables import dest_main_id
+from tests.test_data.activity_data import (
     new_activity,
     add_activity,
     get_all,
