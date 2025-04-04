@@ -1,8 +1,9 @@
+import uuid
+
 from tests.helping_variables import (
     dest_main_id,
     dest_3_id,
     dest_second_user_id,
-    new_activity,
     act_main_id,
     act_2_id,
     act_3_id,
@@ -11,6 +12,26 @@ from tests.helping_variables import (
     act_second_user_id,
     wrong_id
 )
+
+# Base data for new activity
+new_activity = {
+    'id': str(uuid.uuid4()),
+    'title': 'Suomenlina Fortress',
+    'country': 'Finland',
+    'duration': '3-6h',
+    'pricing': 'Free',
+    'status': 'Planned',
+    'web_link': 'https://suomenlina.fi',
+    'img_link': 'https://suomenlina.fi/img',
+    'tags': 'Fortress,Military,Island',
+    'trip_duration': '0,5h',
+    'trip_pricing': '5 EUR',
+    'longitude': '24.59',
+    'latitude': '60.852',
+    'description': 'Old fortress in the Baltic Sea',
+    'free_text': 'Combine with boat tour through the Archipelago',
+    'destination_id': dest_main_id
+}
 
 # Test data to add activity to database
 add_activity = [

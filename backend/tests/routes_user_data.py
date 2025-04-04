@@ -1,11 +1,11 @@
+from tests.dummy_data import dummy_data
 from tests.helping_variables import (
-    dummy_data,
     email,
     city,
     longitude,
     latitude,
     country,
-    currency,
+    currency
 )
 
 # Variables for user tests

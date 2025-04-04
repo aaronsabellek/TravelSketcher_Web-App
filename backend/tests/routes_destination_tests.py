@@ -1,24 +1,21 @@
 import pytest
 
-from app import create_app, db
+from app import db
 from app.models import Destination
 from tests.helping_functions import request_and_validate
 from tests.helping_variables import (
     url,
     user,
-    new_destination,
-    user_main_id
+    user_id
 )
 from tests.routes_destination_data import (
+    new_destination,
     add_destination,
     get_destination,
     edit_destination,
     reorder_destinations,
     delete_destination
 )
-
-# Create app for app context
-app = create_app()
 
 
 @pytest.mark.parametrize('test_data', add_destination)
@@ -96,10 +93,9 @@ def test_reorder(setup_logged_in_user, test_data):
         return
 
     # Check new order in db
-    with app.app_context():
-            reordered_destinations = Destination.query.filter_by(user_id=user_main_id).order_by(Destination.position).all()
-            reordered_ids = [str(dest.id) for dest in reordered_destinations]
-            assert reordered_ids == test_data['new_order'], f'Error: Expected: {test_data['new_order']}, got: {reordered_ids}'
+    reordered_destinations = Destination.query.filter_by(user_id=user_id).order_by(Destination.position).all()
+    reordered_ids = [str(dest.id) for dest in reordered_destinations]
+    assert reordered_ids == test_data['new_order'], f'Error: Expected: {test_data['new_order']}, got: {reordered_ids}'
 
 
 @pytest.mark.parametrize('test_data', delete_destination)

@@ -2,8 +2,9 @@ import pytest
 
 from app.models import Activity
 from tests.helping_functions import request_and_validate
-from tests.helping_variables import new_activity, dest_main_id
+from tests.helping_variables import dest_main_id
 from tests.routes_activity_data import (
+    new_activity,
     add_activity,
     get_all,
     get_activity,
@@ -55,6 +56,7 @@ def test_get_destination(setup_logged_in_user, test_data):
 # Test edit activity
 @pytest.mark.parametrize('test_data', edit_activity)
 def test_edit_activity(setup_logged_in_user, test_data):
+    """Test: Edit activity"""
 
     # Use and validate route
     response = request_and_validate(setup_logged_in_user, f'activity/edit/{test_data['id']}', test_data)

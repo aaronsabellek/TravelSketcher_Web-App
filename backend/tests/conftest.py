@@ -1,12 +1,19 @@
 import requests
 import pytest
-import uuid
 
 from werkzeug.security import generate_password_hash
 
 from app import create_app, db
 from app.models import User, Destination, Activity
-from .helping_variables import url, dummy_data, user, second_user, login_data_username, username
+from tests.dummy_data import dummy_data
+from .helping_variables import (
+    url,
+    user,
+    username,
+    second_user,
+    login_data_username,
+    username
+)
 
 
 @pytest.fixture(scope='function')

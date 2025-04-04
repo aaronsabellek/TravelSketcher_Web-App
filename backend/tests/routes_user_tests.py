@@ -18,7 +18,7 @@ from tests.routes_user_data import (
     reset_email,
     edit_password,
     request_password_reset,
-    reset_password,
+    reset_password
 )
 
 
@@ -99,7 +99,7 @@ def test_reset_password(setup_database, test_data):
 
     # Check new email in db
     updated_user = User.query.filter_by(email=email).first()
-    assert updated_user is not None, f"User with email {email} should be in DB"
+    assert updated_user is not None, f'User with email {email} should be in db'
 
 
 @pytest.mark.parametrize('test_data', edit_password)
