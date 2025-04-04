@@ -15,7 +15,7 @@ from flask_cors import CORS
 from flask_migrate import Migrate
 
 from app.errors import handle_exception, handle_http_exception, handle_db_error, page_not_found, method_not_allowed
-from app.config import DevelopmentConfig, ProductionConfig
+from app.config import DevelopmentConfig, TestingConfig, ProductionConfig
 
 # Flask Extensions
 db = SQLAlchemy()

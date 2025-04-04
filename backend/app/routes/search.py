@@ -4,30 +4,35 @@ from flask_login import login_required
 from app.models import Destination, Activity
 from app.helpers.helpers import search_resources
 
-
 search_bp = Blueprint('search', __name__)
+
 
 @search_bp.route('/search', methods=['GET'])
 @login_required
 def search():
-    search_query = request.args.get('search_query')  # Der Suchtext
-    resource_type = request.args.get('resource_type')  # 'destination', 'activity' oder 'both' für beide
+    """Searches through strings in destinations and/or activities of user"""
 
-    if not search_query:
-        return jsonify({'error': 'Suchtext ist erforderlich'}), 400
+    # Get query and type of entry
+    query = request.args.get('query')
+    type = request.args.get('type')
 
-    # Felder, die wir nicht durchsuchen wollen (ID, Position und Beziehungen)
-    exclude_fields = ['id', 'position', 'user_id', 'destination_id']  # Anpassbar je nach Bedarf
+    # Check if search query exists
+    if not query:
+        return jsonify({'error': 'Search query required'}), 400
 
+    # Set types of models that can be searched through
+    types = ['destination', 'activity', 'both']
+
+    # Set empty list for results
     results_data = []
 
-    # Wenn nur 'destination' angegeben ist
-    if resource_type == 'destination' or resource_type == 'both' or not resource_type:
-        results_data.extend(search_resources(Destination, search_query, exclude_fields))
+    # Search through destinations
+    if type == 'destination' or type == 'both' or type not in types:
+        results_data.extend(search_resources(Destination, query))
 
-    # Wenn nur 'activity' angegeben ist
-    if resource_type == 'activity' or resource_type == 'both' or not resource_type:
-        results_data.extend(search_resources(Activity, search_query, exclude_fields))
+    # Search through activities
+    if type == 'activity' or type == 'both' or type not in types:
+        results_data.extend(search_resources(Activity, query))
 
     return jsonify(results=results_data), 200
 

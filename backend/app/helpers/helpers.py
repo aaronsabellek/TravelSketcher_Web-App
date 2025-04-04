@@ -1,11 +1,13 @@
 import re
 
 from flask import jsonify, current_app
+from flask_login import current_user
 from sqlalchemy import func, String, Text
 from flask_mail import Message
 from werkzeug.security import generate_password_hash
 
 from app import db, mail
+from app.models import Activity, Destination
 
 
 def model_to_dict(model):
@@ -121,11 +123,30 @@ def create_search_query(model, search_query, exclude_fields):
     return query
 
 
-def search_resources(model, search_query, exclude_fields):
-    """
-    Führt eine Suche für das gegebene Modell aus und gibt die Ergebnisse als Liste von Dictionaries zurück.
-    """
-    query = create_search_query(model, search_query, exclude_fields)
+def search_resources(model, search_query):
+    """Searches through strings of a specific model from user"""
+
+    # Filter fields that will be searched
+    exclude_fields = ['id', 'position', 'user_id', 'destination_id']
+    filters = []
+
+    for column in model.__table__.columns:
+        if column.name not in exclude_fields and isinstance(column.type, (String, Text)):
+            filters.append(func.lower(getattr(model, column.name)).contains(func.lower(search_query)))
+
+    # Start query for model
+    query = db.session.query(model)
+
+    # Search only through entries of user
+    if hasattr(model, 'user_id'):
+        query = query.filter(model.user_id == current_user.id)
+    elif hasattr(model, 'destination_id'):
+        query = query.join(Destination).filter(Destination.user_id == current_user.id)
+
+    # Combine filters with or-operator
+    query = query.filter(db.or_(*filters))
+
+    # Get and return results as list of dicts
     results = query.all()
     return [model_to_dict(resource) for resource in results]
 

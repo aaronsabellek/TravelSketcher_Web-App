@@ -22,8 +22,8 @@ class Config:
     SQLALCHEMY_TRACK_MODIFICATIONS = False
 
     # Initialize maintenance mode
-    MAINTENANCE_MODE = os.getenv('MAINTENANCE_MODE', "False").lower() == 'true'
-    MAINTAINANCE_MESSAGE= os.getenv('MAINTENANCE_MESSAGE', 'This Website is currently in Maintainance mode. Please try again later.')
+    MAINTENANCE_MODE = os.getenv('MAINTENANCE_MODE', 'False').lower() == 'true'
+    MAINTENANCE_MESSAGE= os.getenv('MAINTENANCE_MESSAGE', 'This Website is currently in Maintainance mode. Please try again later.')
 
     # Initlialize mailserver data (MailHog for testing purpose)
     MAIL_SERVER = os.getenv('MAIL_SERVER')
@@ -44,6 +44,12 @@ class DevelopmentConfig(Config):
 
     DEBUG = True
     SESSION_COOKIE_SECURE = False
+
+
+class TestingConfig(Config):
+    """Flask configuration class for testing"""
+
+    TESTING = True
 
 
 class ProductionConfig(Config):
