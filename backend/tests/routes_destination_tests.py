@@ -1,9 +1,14 @@
 import pytest
 
-from app import db
+from app import create_app, db
 from app.models import Destination
-from tests.helping_variables import url
 from tests.helping_functions import request_and_validate
+from tests.helping_variables import (
+    url,
+    user,
+    new_destination,
+    user_main_id
+)
 from tests.routes_destination_data import (
     add_destination,
     get_destination,
@@ -11,6 +16,9 @@ from tests.routes_destination_data import (
     reorder_destinations,
     delete_destination
 )
+
+# Create app for app context
+app = create_app()
 
 
 @pytest.mark.parametrize('test_data', add_destination)
@@ -25,9 +33,9 @@ def test_add(setup_logged_in_user, test_data):
     # Check for destination in db
     destination = Destination.query.filter_by(title=test_data['title']).first()
     assert destination is not None, f'Error: Destination not found in db'
-    assert destination.id == 7, f'Error: ID expected: 4, but got: {destination.id}'
+    assert destination.id == new_destination['id'], f'Error: ID expected: {new_destination['id']}, but got: {destination.id}'
     assert destination.position == 4, f'Error: Position expected: 4, but got: {destination.position}'
-    assert destination.user_id == 1, f'Error: User-ID expected: 1, but got: {destination.position}'
+    assert destination.user_id == user['id'], f'Error: User-ID expected: {user['id']}, but got: {destination.destination.user_id}'
 
 
 def test_get_all(setup_logged_in_user):
@@ -60,7 +68,7 @@ def test_get_destination(setup_logged_in_user, test_data):
     """Test: Get specific destination"""
 
     # Use and validate route
-    request_and_validate(setup_logged_in_user, f'destination/get/{test_data['destination_id']}', test_data, method='GET')
+    request_and_validate(setup_logged_in_user, f'destination/get/{test_data['id']}', test_data, method='GET')
 
 
 @pytest.mark.parametrize('test_data', edit_destination)
@@ -68,12 +76,13 @@ def test_edit(setup_logged_in_user, test_data):
     """Test: Edit destination"""
 
     # Use and validate route
-    response = request_and_validate(setup_logged_in_user, f'destination/edit/{test_data['destination_id']}', test_data)
+    response = request_and_validate(setup_logged_in_user, f'destination/edit/{test_data['id']}', test_data)
     if response.status_code not in [200, 201]:
         return
 
     # Check for updates in db
-    destination = Destination.query.filter_by(id=test_data['destination_id']).first()
+    destination = Destination.query.filter_by(id=test_data['id']).first()
+    print(destination)
     assert destination.title == test_data['title'], f'Unexpedted Error: Destination not edited in db'
 
 
@@ -86,10 +95,11 @@ def test_reorder(setup_logged_in_user, test_data):
     if response.status_code not in [200, 201]:
         return
 
-    # Check for new order in db
-    reordered_destinations = Destination.query.filter_by(user_id=1).order_by(Destination.position).all()
-    reordered_ids = [dest.id for dest in reordered_destinations]
-    assert reordered_ids == test_data['new_order'], f'Error! Expected: {test_data['new_order']}, but got: {reordered_ids}'
+    # Check new order in db
+    with app.app_context():
+            reordered_destinations = Destination.query.filter_by(user_id=user_main_id).order_by(Destination.position).all()
+            reordered_ids = [str(dest.id) for dest in reordered_destinations]
+            assert reordered_ids == test_data['new_order'], f'Error: Expected: {test_data['new_order']}, got: {reordered_ids}'
 
 
 @pytest.mark.parametrize('test_data', delete_destination)

@@ -93,33 +93,35 @@ def edit_entry(model, entry_id, data, allowed_fields=None):
 
 
 def reorder_entries(model, filter_by, new_order, entry_name):
-    """Reorders entries in database"""
+    """Reorders entries in database based on IDs"""
 
-    # Check if there is new order from data
+    # Check if new order exists
     if not new_order:
         return jsonify({'error': f'The new order of {entry_name} is missing'}), 400
 
-    # Get all items needed as dict
-    items = model.query.filter_by(**filter_by).all()
-    item_dict = {item.id: item for item in items}
+     # Get all current entries for the user
+    entries = model.query.filter_by(**filter_by).all()
+    entries_dict = {str(entry.id): entry for entry in entries}
 
-    # Check if length of new order matches length of items
-    if len(new_order) != len(item_dict):
-        return jsonify({'error': f'Length of new order does not match length of {entry_name}'}), 400
+     # Check for invalid or missing IDs
+    if set(new_order) != set(entries_dict.keys()):
+        return jsonify({
+            'error': f'Invalid or missing IDs for {entry_name}',
+            'expected': list(entries_dict.keys()),
+            'got': new_order
+        }), 400
 
-    # Check if all the IDs exist
-    if set(map(int, new_order)) != set(item_dict.keys()):
-        return jsonify({'error': f'Invalid or missing IDs of {entry_name}'}), 400
-
-    # Reorder items
+    # Reorder positions
     for new_position, item_id in enumerate(new_order, start=1):
-        item = item_dict[int(item_id)]
+        item = entries_dict[item_id]
         item.position = new_position
 
-    # Update db
-    db.session.commit()
+    db.session.commit() # Commit changes in database
 
-    return jsonify({'message': f'Reordered {entry_name.capitalize()} successfully!'}), 200
+    return jsonify({
+        'message': f'Reordered {entry_name.capitalize()} successfully!',
+        'new_order': [str(item.id) for item in sorted(entries_dict.values(), key=lambda x: x.position)]
+    }), 200
 
 
 def delete_entry(model, entry_id):

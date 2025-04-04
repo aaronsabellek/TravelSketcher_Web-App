@@ -2,6 +2,7 @@ import pytest
 
 from app.models import Activity
 from tests.helping_functions import request_and_validate
+from tests.helping_variables import new_activity, dest_main_id
 from tests.routes_activity_data import (
     add_activity,
     get_all,
@@ -24,9 +25,9 @@ def test_add(setup_logged_in_user, test_data):
     # Check for destination in db
     activity = Activity.query.filter_by(title=test_data['title']).first()
     assert activity is not None, f'Error: Activity not found in db'
-    assert activity.id == 17, f'Error: ID expected: 17, but got: {activity.id}'
+    assert activity.id == new_activity['id'], f'Error: ID expected: {new_activity['id']}, but got: {activity.id}'
     assert activity.position == 6, f'Error: Position expected: 6, but got: {activity.position}'
-    assert activity.destination_id == 1, f'Error: Destination-ID expected: 1, but got: {activity.position}'
+    assert activity.destination_id == dest_main_id, f'Error: Destination-ID expected: {dest_main_id}, but got: {activity.destination_id}'
 
 
 @pytest.mark.parametrize('test_data', get_all)
@@ -39,8 +40,8 @@ def test_get_all(setup_logged_in_user, test_data):
         return
 
     # Check for right entry
-    if test_data['destination_id'] == 1:
-        assert response.json()['activities'][2]['title'] == 'Notre-Dame Cathedral besichtigen', f'Unexpected Error: Title not found!'
+    if test_data['destination_id'] == dest_main_id:
+        assert response.json()['activities'][2]['title'] == 'Visit Notre-Dame Cathedral', f'Unexpected Error: Title not found!'
 
 
 @pytest.mark.parametrize('test_data', get_activity)
@@ -50,17 +51,18 @@ def test_get_destination(setup_logged_in_user, test_data):
     # Use route
     request_and_validate(client=setup_logged_in_user, endpoint=f'activity/get/{test_data['activity_id']}', test_data=test_data, method='GET')
 
+
 # Test edit activity
 @pytest.mark.parametrize('test_data', edit_activity)
 def test_edit_activity(setup_logged_in_user, test_data):
 
     # Use and validate route
-    response = request_and_validate(setup_logged_in_user, f'activity/edit/{test_data['activity_id']}', test_data)
+    response = request_and_validate(setup_logged_in_user, f'activity/edit/{test_data['id']}', test_data)
     if response.status_code not in [200, 201]:
         return
 
     # Check for updates in db
-    activity = Activity.query.filter_by(id=test_data['activity_id']).first()
+    activity = Activity.query.filter_by(id=test_data['id']).first()
     assert activity.title == test_data['title'], f'Unexpedted Error: Activity not edited in db'
 
 
@@ -91,4 +93,3 @@ def test_delete(setup_logged_in_user, test_data):
     # Check if destination got deleted in db
     activity = Activity.query.filter_by(id=test_data['activity_id']).first()
     assert activity is None, f'Error: Activity still found in database'
-

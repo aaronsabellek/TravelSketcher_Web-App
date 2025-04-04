@@ -18,7 +18,8 @@ auth_bp = Blueprint('auth', __name__, url_prefix='/auth')
 @login_manager.user_loader
 def load_user(user_id):
     """Get user from database"""
-    return User.query.get(int(user_id))
+    #return User.query.get(int(user_id))
+    return User.query.get(user_id)
 
 
 @auth_bp.route('/')

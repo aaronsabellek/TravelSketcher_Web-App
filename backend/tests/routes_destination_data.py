@@ -1,9 +1,16 @@
-from tests.helping_variables import new_destination
+from tests.helping_variables import (
+    new_destination,
+    dest_main_id,
+    dest_2_id,
+    dest_3_id,
+    dest_second_user_id,
+    wrong_id
+)
 
 # Test data for adding destination to database
 add_destination = [
     # Wrong id
-    {**new_destination, 'id': 2, 'expected_status': 500, 'expected_message': 'A database error occurred'},
+    {**new_destination, 'id': dest_main_id, 'expected_status': 500, 'expected_message': 'A database error occurred'},
     # Required field empty
     {**new_destination, 'title': '', 'expected_status': 400, 'expected_message': 'Title is required'},
 
@@ -16,52 +23,52 @@ add_destination = [
 # Test data to get specific destination of user
 get_destination = [
     # Destination belongs to another user
-    {'destination_id': 4, 'expected_status': 403, 'expected_message': 'Destination not permitted'},
+    {'id': dest_second_user_id, 'expected_status': 403, 'expected_message': 'Destination not permitted'},
     # Destination does not exist
-    {'destination_id': 10, 'expected_status': 404, 'expected_message': 'Destination not found'},
+    {'id': wrong_id, 'expected_status': 404, 'expected_message': 'Destination not found'},
 
     # Successfull test case
-    {'destination_id': 1, 'expected_status': 200}
+    {'id': dest_main_id, 'expected_status': 200}
 ]
 
 # Test data to edit destination
 edit_destination = [
     # Destination belongs to another user
-    {**new_destination, 'destination_id': 4, 'expected_status': 403, 'expected_message': 'Destination not permitted'},
+    {**new_destination, 'id': dest_second_user_id, 'expected_status': 403, 'expected_message': 'Destination not permitted'},
     # Destination does not exist
-    {**new_destination, 'destination_id': 10, 'expected_status': 404, 'expected_message': 'Destination not found'},
+    {**new_destination, 'id': wrong_id, 'expected_status': 404, 'expected_message': 'Destination not found'},
     # Required field is empty
-    {'title': '', 'destination_id': 1, 'expected_status': 400, 'expected_message': 'Title is required'},
+    {'title': '', 'id': dest_main_id, 'expected_status': 400, 'expected_message': 'Title is required'},
 
     # Successfull test case
-    {**new_destination, 'destination_id': 1, 'expected_status': 200, 'expected_message': 'Updated Destination successfully!'}
+    {**new_destination, 'id': dest_main_id, 'expected_status': 200, 'expected_message': 'Updated Destination successfully!'}
 ]
 
-# Test data to reorder destinations of user
+# Test data to reorder destinations
 reorder_destinations = [
     # New order missing
     {'new_order': [], 'expected_status': 400, 'expected_message': 'The new order of destinations is missing'},
-    # ID is from different user
-    {'new_order': [1, 4, 2], 'expected_status': 400, 'expected_message': 'Invalid or missing IDs of destinations'},
-    # ID does not exist
-    {'new_order': [1, 10, 2], 'expected_status': 400, 'expected_message': 'Invalid or missing IDs of destinations'},
-    # New order is too long
-    {'new_order': [1, 3, 2, 3], 'expected_status': 400, 'expected_message': 'Length of new order does not match length of destinations'},
+    # Destination belongs to different user
+    {'new_order': [dest_main_id, dest_second_user_id, dest_2_id], 'expected_status': 400, 'expected_message': 'Invalid or missing IDs for destinations'},
+    # Destination does not exist
+    {'new_order': [dest_main_id, wrong_id, dest_2_id], 'expected_status': 400, 'expected_message': 'Invalid or missing IDs for destinations'},
+    # Dublicates in new order
+    {'new_order': [dest_main_id, dest_3_id, dest_3_id], 'expected_status': 400, 'expected_message': 'Invalid or missing IDs for destinations'},
     # New order is too short
-    {'new_order': [1, 3], 'expected_status': 400, 'expected_message': 'Length of new order does not match length of destinations'},
+    {'new_order': [dest_main_id, dest_3_id], 'expected_status': 400, 'expected_message': 'Invalid or missing IDs for destinations'},
 
     # Successfull test case
-    {'new_order': [1, 3, 2], 'expected_status': 200, 'expected_message': 'Reordered Destinations successfully!'},
+    {'new_order': [dest_main_id, dest_3_id, dest_2_id], 'expected_status': 200, 'expected_message': 'Reordered Destinations successfully!'},
 ]
 
 # Test data to delete destination
 delete_destination = [
     # Destination does not belong to user
-    {'destination_id': 4, 'expected_status': 403, 'expected_message': 'Destination not permitted'},
+    {'destination_id': dest_second_user_id, 'expected_status': 403, 'expected_message': 'Destination not permitted'},
     # Destination does not exist
-    {'destination_id': 10, 'expected_status': 404, 'expected_message': 'Destination not found'},
+    {'destination_id': wrong_id, 'expected_status': 404, 'expected_message': 'Destination not found'},
 
     # Successfull test case
-    {'destination_id': 1, 'expected_status': 200, 'expected_message': 'Destination deleted successfully!'}
+    {'destination_id': dest_main_id, 'expected_status': 200, 'expected_message': 'Destination deleted successfully!'}
 ]
 

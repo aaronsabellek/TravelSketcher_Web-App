@@ -29,10 +29,10 @@ def add_activity():
         return destination
 
     # Create activity
-    return create_entry(Activity, data, destination_id=data.get('destination_id'))
+    return create_entry(Activity, data, destination_id=destination_id)
 
 
-@activity_bp.route('/get_all/<int:destination_id>', methods=['GET'])
+@activity_bp.route('/get_all/<string:destination_id>', methods=['GET'])
 @login_required
 def get_activities(destination_id):
     """Gets all destinations of user"""
@@ -57,7 +57,7 @@ def get_activities(destination_id):
     })
 
 
-@activity_bp.route('/get/<int:activity_id>', methods=['GET'])
+@activity_bp.route('/get/<string:activity_id>', methods=['GET'])
 @login_required
 def get_activity(activity_id):
     """Gets specific destination of user"""
@@ -71,7 +71,7 @@ def get_activity(activity_id):
     return jsonify({'activity': model_to_dict(entry)}), 200
 
 
-@activity_bp.route('/edit/<int:activity_id>', methods=['POST'])
+@activity_bp.route('/edit/<string:activity_id>', methods=['POST'])
 @login_required
 def edit_activity(activity_id):
     """Edits activity in database"""
@@ -87,7 +87,7 @@ def edit_activity(activity_id):
     return edit_entry(Activity, activity_id, data)
 
 
-@activity_bp.route('/reorder/<int:destination_id>', methods=['POST'])
+@activity_bp.route('/reorder/<string:destination_id>', methods=['POST'])
 @login_required
 def reorder_activities(destination_id):
     """Reorders activities of specific destination"""
@@ -105,7 +105,7 @@ def reorder_activities(destination_id):
     return reorder_entries(Activity, {'destination_id': destination_id}, new_order, 'activities')
 
 
-@activity_bp.route('/delete/<int:activity_id>', methods=['DELETE'])
+@activity_bp.route('/delete/<string:activity_id>', methods=['DELETE'])
 @login_required
 def delete_activity(activity_id):
     """Deletes activity from database"""

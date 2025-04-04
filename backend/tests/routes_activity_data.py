@@ -1,11 +1,23 @@
-from tests.helping_variables import new_activity
+from tests.helping_variables import (
+    dest_main_id,
+    dest_3_id,
+    dest_second_user_id,
+    new_activity,
+    act_main_id,
+    act_2_id,
+    act_3_id,
+    act_4_id,
+    act_5_id,
+    act_second_user_id,
+    wrong_id
+)
 
 # Test data to add activity to database
 add_activity = [
     # Wrong id
-    {**new_activity, 'id': 2, 'expected_status': 500, 'expected_message': 'A database error occurred'},
+    {**new_activity, 'id': act_second_user_id, 'expected_status': 500, 'expected_message': 'A database error occurred'},
     # Destination does not belong to user
-    {**new_activity, 'destination_id': 4, 'expected_status': 403, 'expected_message': 'Destination not permitted'},
+    {**new_activity, 'destination_id': dest_second_user_id, 'expected_status': 403, 'expected_message': 'Destination not permitted'},
     # Required field empty
     {**new_activity, 'title': '', 'expected_status': 400, 'expected_message': 'Title is required'},
 
@@ -18,65 +30,67 @@ add_activity = [
 # Test data to get all activities of specific destination
 get_all = [
     # Destination belongs to another user
-    {'destination_id': 4, 'expected_status': 403, 'expected_message': 'Destination not permitted'},
+    {'destination_id': dest_second_user_id, 'expected_status': 403, 'expected_message': 'Destination not permitted'},
     # Destination does not exist
-    {'destination_id': 10, 'expected_status': 404, 'expected_message': 'Destination not found'},
+    {'destination_id': wrong_id, 'expected_status': 404, 'expected_message': 'Destination not found'},
 
     # Successfull test case
-    {'destination_id': 1, 'expected_status': 200},
+    {'destination_id': dest_main_id, 'expected_status': 200},
     # Successfull test case but with no activities
-    {'destination_id': 3, 'expected_status': 200, 'expected_message': "Destination 'Tokyo' has no activities yet"}
+    {'destination_id': dest_3_id, 'expected_status': 200, 'expected_message': "Destination 'Tokyo' has no activities yet"}
 ]
 
 # Test data to get specific activity
 get_activity = [
     # Activity belongs to another user
-    {'activity_id': 10, 'expected_status': 403, 'expected_message': 'Activity not permitted'},
+    {'activity_id': act_second_user_id, 'expected_status': 403, 'expected_message': 'Activity not permitted'},
     # Activity does not exist
-    {'activity_id': 30, 'expected_status': 404, 'expected_message': 'Activity not found'},
+    {'activity_id': wrong_id, 'expected_status': 404, 'expected_message': 'Activity not found'},
 
     # Successfull test case
-    {'activity_id': 1, 'expected_status': 200}
+    {'activity_id': act_main_id, 'expected_status': 200}
 ]
 
 # Test data to edit activity
 edit_activity = [
     # Activtiy belongs to another user
-    {**new_activity, 'activity_id': 10, 'expected_status': 403, 'expected_message': 'Activity not permitted'},
+    {**new_activity, 'id': act_second_user_id, 'expected_status': 403, 'expected_message': 'Activity not permitted'},
     # Activity does not exist
-    {**new_activity, 'activity_id': 30, 'expected_status': 404, 'expected_message': 'Activity not found'},
+    {**new_activity, 'id': wrong_id, 'expected_status': 404, 'expected_message': 'Activity not found'},
     # Required field is empty
-    {'title': '', 'activity_id': 1, 'expected_status': 400, 'expected_message': 'Title is required'},
+    {**new_activity, 'id': act_main_id, 'title': '', 'expected_status': 400, 'expected_message': 'Title is required'},
 
     # Successfull test case
-    {**new_activity, 'activity_id': 1, 'expected_status': 200, 'expected_message': 'Updated Activity successfully!'}
+    {**new_activity, 'id': act_main_id, 'expected_status': 200, 'expected_message': 'Updated Activity successfully!'}
 ]
 
 # Test data to reorder activities of specific destination
+new_order = [act_main_id, act_3_id, act_2_id, act_4_id, act_5_id]
+
 reorder_activities = [
-    # Destination belongs to another user
-    {'destination_id': 4, 'new_order': [1, 3, 2, 4, 5], 'expected_status': 403, 'expected_message': 'Destination not permitted'},
-    # Destination does not exist
-    {'destination_id': 10, 'new_order': [1, 3, 2, 4, 5], 'expected_status': 404, 'expected_message': 'Destination not found'},
     # New order missing
-    {'destination_id': 1, 'new_order': [], 'expected_status': 400, 'expected_message': 'The new order of activities is missing'},
-    # New order is too long
-    {'destination_id': 1, 'new_order': [1, 3, 2, 4, 5, 6], 'expected_status': 400, 'expected_message': 'Length of new order does not match length of activities'},
+    {'destination_id': dest_main_id, 'new_order': [], 'expected_status': 400, 'expected_message': 'The new order of activities is missing'},
+    # Destination belongs to different user
+    {'destination_id': dest_second_user_id, 'new_order': new_order, 'expected_status': 403, 'expected_message': 'Destination not permitted'},
+    # Destination does not exist
+    {'destination_id': wrong_id, 'new_order': new_order, 'expected_status': 404, 'expected_message': 'Destination not found'},
+    # Dublicates in new order
+    {'destination_id': dest_main_id, 'new_order': [act_main_id, act_3_id, act_2_id, act_4_id, act_4_id], 'expected_status': 400, 'expected_message': 'Invalid or missing IDs for activities'},
     # New order is too short
-    {'destination_id': 1, 'new_order': [1, 3, 2, 4], 'expected_status': 400, 'expected_message': 'Length of new order does not match length of activities'},
+    {'destination_id': dest_main_id, 'new_order': [act_main_id, act_3_id, act_2_id, act_4_id], 'expected_status': 400, 'expected_message': 'Invalid or missing IDs for activities'},
 
     # Successfull test case
-    {'destination_id': 1, 'new_order': [1, 3, 2, 4, 5], 'expected_status': 200, 'expected_message': 'Reordered Activities successfully!'}
+    {'destination_id': dest_main_id, 'new_order': new_order, 'expected_status': 200, 'expected_message': 'Reordered Activities successfully!'}
 ]
 
 # Test data to delete specific activity from database
 delete_activity = [
-    # Destination does not belong to user
-    {'activity_id': 10, 'expected_status': 403, 'expected_message': 'Activity not permitted'},
-    # Destination does not exist
-    {'activity_id': 30, 'expected_status': 404, 'expected_message': 'Activity not found'},
+    # Activity does not belong to user
+    {'activity_id': act_second_user_id, 'expected_status': 403, 'expected_message': 'Activity not permitted'},
+    # Activity does not exist
+    {'activity_id': wrong_id, 'expected_status': 404, 'expected_message': 'Activity not found'},
 
     # Successfull test case
-    {'activity_id': 1, 'expected_status': 200, 'expected_message': 'Activity deleted successfully!'}
+    {'activity_id': act_main_id, 'expected_status': 200, 'expected_message': 'Activity deleted successfully!'}
 ]
 

@@ -30,7 +30,7 @@ def get_destinations():
     """Gets all destinations of user"""
 
     # Get all destinations of user
-    destinations = Destination.query.filter_by(user_id=current_user.id).all()
+    destinations = Destination.query.filter_by(user_id=str(current_user.id)).all()
 
     # Check if there are any destinations
     if not destinations:
@@ -40,7 +40,7 @@ def get_destinations():
     return jsonify({'destinations': models_to_list(destinations)}), 200
 
 
-@destination_bp.route('/get/<int:destination_id>', methods=['GET'])
+@destination_bp.route('/get/<string:destination_id>', methods=['GET'])
 @login_required
 def get_destination(destination_id):
     """Gets specific destination of user"""
@@ -54,7 +54,7 @@ def get_destination(destination_id):
     return jsonify({'destination': model_to_dict(entry)}), 200
 
 
-@destination_bp.route('/edit/<int:destination_id>', methods=['POST'])
+@destination_bp.route('/edit/<string:destination_id>', methods=['POST'])
 @login_required
 def edit_destination(destination_id):
     """Edits destination"""
@@ -83,7 +83,7 @@ def reorder_destinations():
     return reorder_entries(Destination, {'user_id': current_user.id}, new_order, 'destinations')
 
 
-@destination_bp.route('/delete/<int:destination_id>', methods=['DELETE'])
+@destination_bp.route('/delete/<string:destination_id>', methods=['DELETE'])
 @login_required
 def delete_destination(destination_id):
     """Deletes specific destination"""

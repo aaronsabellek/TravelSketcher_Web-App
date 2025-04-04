@@ -1,14 +1,15 @@
 import requests
 import pytest
+import uuid
 
 from werkzeug.security import generate_password_hash
 
 from app import create_app, db
 from app.models import User, Destination, Activity
-from .helping_variables import url, dummy_data, login_data_username, username
+from .helping_variables import url, dummy_data, user, second_user, login_data_username, username
 
 
-@pytest.fixture(scope="function")
+@pytest.fixture(scope='function')
 def setup_database():
     """Fixture to setup the test database"""
 
@@ -21,54 +22,58 @@ def setup_database():
         db.create_all()
 
         # Set hashed password
-        hashed_password = generate_password_hash(dummy_data['user']['password'], method='pbkdf2:sha256')
+        hashed_password = generate_password_hash(user['password'], method='pbkdf2:sha256')
 
-        # Create main user in database
-        user = User(
-            username=dummy_data['user']['username'],
-            email=dummy_data['user']['email'],
+         # Create main user in database
+        main_user = User(
+            id=user['id'],
+            username=user['username'],
+            email=user['email'],
             password=hashed_password,
-            city=dummy_data['user']['city'],
-            longitude=dummy_data['user']['longitude'],
-            latitude=dummy_data['user']['latitude'],
-            country=dummy_data['user']['country'],
-            currency=dummy_data['user']['currency'],
-            is_email_verified=dummy_data['user']['is_email_verified']
+            city=user['city'],
+            longitude=user['longitude'],
+            latitude=user['latitude'],
+            country=user['country'],
+            currency=user['currency'],
+            is_email_verified=user['is_email_verified']
         )
-        db.session.add(user)
+        db.session.add(main_user)
         db.session.commit()
 
         # Create second user in database
-        second_user = User(
-            username=dummy_data['second_user']['username'],
-            email=dummy_data['second_user']['email'],
+        secondary_user = User(
+            id=second_user['id'],
+            username=second_user['username'],
+            email=second_user['email'],
             password=hashed_password,
-            city=dummy_data['second_user']['city'],
-            longitude=dummy_data['second_user']['longitude'],
-            latitude=dummy_data['second_user']['latitude'],
-            country=dummy_data['second_user']['country'],
-            currency=dummy_data['second_user']['currency'],
-            is_email_verified=dummy_data['second_user']['is_email_verified']
+            city=second_user['city'],
+            longitude=second_user['longitude'],
+            latitude=second_user['latitude'],
+            country=second_user['country'],
+            currency=second_user['currency'],
+            is_email_verified=second_user['is_email_verified']
         )
-        db.session.add(second_user)
+        db.session.add(secondary_user)
         db.session.commit()
 
         # Create destinations and activities of main user in database
-        for destination_data in dummy_data['destinations']:
+        for dest_data in dummy_data['destinations']:
             destination = Destination(
-                title=destination_data['title'],
-                country=destination_data['country'],
-                position=destination_data['position'],
-                user_id=user.id
+                id=dest_data['id'],
+                title=dest_data['title'],
+                country=dest_data['country'],
+                position=dest_data['position'],
+                user_id=main_user.id
             )
             db.session.add(destination)
             db.session.commit()
 
-            for activity_data in destination_data['activities']:
+            for act_data in dest_data['activities']:
                 activity = Activity(
-                    title=activity_data['title'],
-                    country=activity_data['country'],
-                    position=activity_data['position'],
+                    id=act_data['id'],
+                    title=act_data['title'],
+                    country=act_data['country'],
+                    position=act_data['position'],
                     destination_id=destination.id
                 )
                 db.session.add(activity)
@@ -76,24 +81,26 @@ def setup_database():
             db.session.commit()
 
         # Create destinations and activities of second user in database
-        for second_destination_data in dummy_data['second_destinations']:
+        for sec_dest_data in dummy_data['second_destinations']:
             second_destination = Destination(
-                title=destination_data['title'],
-                country=destination_data['country'],
-                position=destination_data['position'],
-                user_id=second_user.id
+                id=sec_dest_data['id'],
+                title=sec_dest_data['title'],
+                country=sec_dest_data['country'],
+                position=sec_dest_data['position'],
+                user_id=secondary_user.id
             )
             db.session.add(second_destination)
             db.session.commit()
 
-            for activity_data in second_destination_data['activities']:
-                activity = Activity(
-                    title=activity_data['title'],
-                    country=activity_data['country'],
-                    position=activity_data['position'],
+            for sec_act_data in sec_dest_data['activities']:
+                second_activity = Activity(
+                    id=sec_act_data['id'],
+                    title=sec_act_data['title'],
+                    country=sec_act_data['country'],
+                    position=sec_act_data['position'],
                     destination_id=second_destination.id
                 )
-                db.session.add(activity)
+                db.session.add(second_activity)
 
             db.session.commit()
 
@@ -106,7 +113,8 @@ def setup_database():
         db.drop_all()
 
 
-@pytest.fixture(scope="function")
+
+@pytest.fixture(scope='function')
 def setup_logged_in_user(setup_database):
     """Fixture to setup test database, login user and return request session"""
 
@@ -127,4 +135,5 @@ def setup_logged_in_user(setup_database):
     logout_url = f'{url}/auth/logout'
     response_logout = session.post(logout_url)
     assert response_logout.status_code == 200, f'Error: Logout failed! Status: {response_logout.status_code}, Text: {response_logout.text}'
+    assert 'user_id' not in session.cookies, 'User session is still active after logout!'
 
