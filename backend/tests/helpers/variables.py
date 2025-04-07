@@ -41,6 +41,7 @@ act_5_id = activities[4]['id']
 second_user = dummy_data['second_user']
 
 user_second_id = second_user['id'] # ID
+second_destinations = dummy_data['second_destinations']# Destinations
 dest_second_user_id = dummy_data['second_destinations'][0]['id'] # Destination
 act_second_user_id = dummy_data['second_destinations'][0]['activities'][0]['id'] # Activity
 

@@ -1,14 +1,13 @@
 import pytest
 
-from werkzeug.security import generate_password_hash
-
 from app import create_app, db
-from app.models import User, Destination, Activity
-from tests.helpers.dummy_data import dummy_data
+from tests.helpers.functions import create_user, create_destinations_and_activities
 from tests.helpers.variables import (
     url,
     user,
     second_user,
+    destinations,
+    second_destinations,
     login_data_username,
 )
 
@@ -25,88 +24,13 @@ def setup_database():
         db.drop_all()
         db.create_all()
 
-        # Set hashed password
-        hashed_password = generate_password_hash(user['password'], method='pbkdf2:sha256')
+        # Create main user and secondary user
+        main_user = create_user(db, user)
+        secondary_user = create_user(db, second_user)
 
-        # Create main user in database
-        main_user = User(
-            id=user['id'],
-            username=user['username'],
-            email=user['email'],
-            password=hashed_password,
-            city=user['city'],
-            longitude=user['longitude'],
-            latitude=user['latitude'],
-            country=user['country'],
-            currency=user['currency'],
-            is_email_verified=user['is_email_verified']
-        )
-        db.session.add(main_user)
-        db.session.commit()
-
-        # Create secondary user in database
-        secondary_user = User(
-            id=second_user['id'],
-            username=second_user['username'],
-            email=second_user['email'],
-            password=hashed_password,
-            city=second_user['city'],
-            longitude=second_user['longitude'],
-            latitude=second_user['latitude'],
-            country=second_user['country'],
-            currency=second_user['currency'],
-            is_email_verified=second_user['is_email_verified']
-        )
-        db.session.add(secondary_user)
-        db.session.commit()
-
-        # Create destinations and activities of main user in database
-        for dest_data in dummy_data['destinations']:
-            destination = Destination(
-                id=dest_data['id'],
-                title=dest_data['title'],
-                country=dest_data['country'],
-                position=dest_data['position'],
-                user_id=main_user.id
-            )
-            db.session.add(destination)
-            db.session.commit()
-
-            for act_data in dest_data['activities']:
-                activity = Activity(
-                    id=act_data['id'],
-                    title=act_data['title'],
-                    country=act_data['country'],
-                    position=act_data['position'],
-                    destination_id=destination.id
-                )
-                db.session.add(activity)
-
-            db.session.commit()
-
-        # Create destinations and activities of secondary user in database
-        for sec_dest_data in dummy_data['second_destinations']:
-            second_destination = Destination(
-                id=sec_dest_data['id'],
-                title=sec_dest_data['title'],
-                country=sec_dest_data['country'],
-                position=sec_dest_data['position'],
-                user_id=secondary_user.id
-            )
-            db.session.add(second_destination)
-            db.session.commit()
-
-            for sec_act_data in sec_dest_data['activities']:
-                second_activity = Activity(
-                    id=sec_act_data['id'],
-                    title=sec_act_data['title'],
-                    country=sec_act_data['country'],
-                    position=sec_act_data['position'],
-                    destination_id=second_destination.id
-                )
-                db.session.add(second_activity)
-
-            db.session.commit()
+        # Create destinations and activities for users
+        create_destinations_and_activities(db, destinations, main_user)
+        create_destinations_and_activities(db, second_destinations, secondary_user)
 
         # Return test client
         with app.test_client() as client:
@@ -115,7 +39,6 @@ def setup_database():
         # Remove all data
         db.session.remove()
         db.drop_all()
-
 
 
 @pytest.fixture(scope='function')

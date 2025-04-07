@@ -1,6 +1,9 @@
 import requests
 import time
 
+from werkzeug.security import generate_password_hash
+
+from app.models import User, Destination, Activity
 from app.helpers.helpers import generate_token
 from tests.helpers.variables import (
     url,
@@ -105,4 +108,51 @@ def register(client):
     assert response.status_code in [200, 201], f'Error: Registration failed! Status: {response.status_code}, Text: {response.text}'
 
     return response
+
+
+def create_user(db, user_data):
+    """Creates users from dummy data"""
+
+    hashed_password = generate_password_hash(user_data['password'], method='pbkdf2:sha256')
+    user = User(
+        id=user_data['id'],
+        username=user_data['username'],
+        email=user_data['email'],
+        password=hashed_password,
+        city=user_data['city'],
+        longitude=user_data['longitude'],
+        latitude=user_data['latitude'],
+        country=user_data['country'],
+        currency=user_data['currency'],
+        is_email_verified=user_data['is_email_verified']
+    )
+    db.session.add(user)
+    db.session.commit()
+    return user
+
+
+def create_destinations_and_activities(db, destinations_data, user):
+    """Creates destinations and activities from dummy data"""
+
+    for dest_data in destinations_data:
+        destination = Destination(
+            id=dest_data['id'],
+            title=dest_data['title'],
+            country=dest_data['country'],
+            position=dest_data['position'],
+            user_id=user.id
+        )
+        db.session.add(destination)
+        db.session.commit()
+
+        for act_data in dest_data['activities']:
+            activity = Activity(
+                id=act_data['id'],
+                title=act_data['title'],
+                country=act_data['country'],
+                position=act_data['position'],
+                destination_id=destination.id
+            )
+            db.session.add(activity)
+        db.session.commit()
 
