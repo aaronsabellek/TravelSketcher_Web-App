@@ -33,6 +33,7 @@ def create_app(config_class=None):
     """App Factory: Creates and configures Flask-App"""
 
     ### 1. Initialize Flask App ###
+
     app = Flask(__name__)
 
     ### 2. Load environment variables and configuration ###
@@ -141,6 +142,7 @@ def create_app(config_class=None):
     app.errorhandler(SQLAlchemyError)(handle_db_error)
 
     ### 7. Register blueprints ###
+
     from app.routes import register_blueprints
     register_blueprints(app)
 
