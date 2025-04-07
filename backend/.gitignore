@@ -2,12 +2,12 @@ venv/
 __pycache__/
 instance/
 migrations/
+logs/
 
 .pytest_cache
 
-app.log
-
 *.env
-*.log
 *.sqlite
 *.txt
+
+*.log*
