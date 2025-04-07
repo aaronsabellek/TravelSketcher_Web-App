@@ -31,7 +31,7 @@ def test_profile(setup_logged_in_user):
     assert response.status_code == 200, f'Showing profile failed! Status: {response.status_code}, Text: {response.text}'
 
     # Check for (un-)expected fields
-    response_data = response.json()
+    response_data = response.json
     assert 'latitude' in response_data, f'Latitude should be shown'
     assert 'password' not in response_data, f'Password should not be shown!'
     assert 'is_email_verified' not in response_data, f'Verification status should not be shown'
@@ -116,7 +116,7 @@ def test_edit_password(setup_logged_in_user, test_data):
 
 
 @pytest.mark.parametrize('test_data', request_password_reset)
-def test_edit_email(setup_database, test_data):
+def test_request_password_reset(setup_database, test_data):
     """Test: Request password reset"""
 
     # Use and validate route

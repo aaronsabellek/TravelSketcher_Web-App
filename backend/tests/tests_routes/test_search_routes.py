@@ -11,7 +11,7 @@ def test_search_resources(setup_logged_in_user, test_data):
     # Use route
     search_url = f'{url}/search?query={test_data['query']}&type={test_data['type']}'
     response = setup_logged_in_user.get(search_url)
-    response_data = response.json()
+    response_data = response.json
 
     # Validate expected status code
     assert response.status_code == test_data['expected_status'], f'Error: Unexpected status code! Status: {response.status_code}, Text: {response.text}'

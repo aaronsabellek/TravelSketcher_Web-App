@@ -43,14 +43,13 @@ def get_activities(destination_id):
         return entry
 
     # Set destination and activities
-    destination = Destination.query.get(destination_id)
+    destination = Destination.query.filter_by(id=destination_id).first()
     activities = Activity.query.filter_by(destination_id=destination_id).all()
 
     # Check if activities of destination are empty
     if not activities:
         return jsonify({'activities': [], 'message': f"Destination '{destination.title}' has no activities yet"}), 200
 
-    # Return activities
     return jsonify({
         'destination': destination.title,
         'activities': models_to_list(activities)
@@ -67,7 +66,6 @@ def get_activity(activity_id):
     if isinstance(entry, tuple):
         return entry
 
-    # Return activity
     return jsonify({'activity': model_to_dict(entry)}), 200
 
 

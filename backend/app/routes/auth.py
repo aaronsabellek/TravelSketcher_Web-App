@@ -18,7 +18,6 @@ auth_bp = Blueprint('auth', __name__, url_prefix='/auth')
 @login_manager.user_loader
 def load_user(user_id):
     """Get user from database"""
-    #return User.query.get(int(user_id))
     return User.query.get(user_id)
 
 
@@ -36,6 +35,7 @@ def register():
 
     # Check if all required fields are filled
     required_fields = ['username', 'email', 'password', 'city', 'longitude', 'latitude', 'country', 'currency']
+
     for field in required_fields:
         if not data[field] or data[field] == '':
             return jsonify({'error': 'Field(s) missing!'}), 400

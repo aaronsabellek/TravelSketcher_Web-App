@@ -40,9 +40,9 @@ def test_get_all(setup_logged_in_user, test_data):
     if response.status_code not in [200, 201]:
         return
 
-    # Check for right entry
+    # Check for correct entry
     if test_data['destination_id'] == dest_main_id:
-        assert response.json()['activities'][2]['title'] == 'Visit Notre-Dame Cathedral', f'Unexpected Error: Title not found!'
+        assert response.json['activities'][2]['title'] == 'Visit Notre-Dame Cathedral', f'Unexpected Error: Title not found!'
 
 
 @pytest.mark.parametrize('test_data', get_activity)
@@ -95,3 +95,4 @@ def test_delete(setup_logged_in_user, test_data):
     # Check if destination got deleted in db
     activity = Activity.query.filter_by(id=test_data['activity_id']).first()
     assert activity is None, f'Error: Activity still found in database'
+

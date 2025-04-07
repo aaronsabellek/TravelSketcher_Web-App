@@ -36,7 +36,6 @@ def get_destinations():
     if not destinations:
         return jsonify({'destinations': [], 'message': 'No destinations found yet'}), 200
 
-    # Return destinations
     return jsonify({'destinations': models_to_list(destinations)}), 200
 
 
@@ -50,7 +49,6 @@ def get_destination(destination_id):
     if isinstance(entry, tuple):
         return entry
 
-    # Return destination
     return jsonify({'destination': model_to_dict(entry)}), 200
 
 

@@ -7,7 +7,7 @@ from flask_mail import Message
 from werkzeug.security import generate_password_hash
 
 from app import db, mail
-from app.models import Activity, Destination
+from app.models import Destination
 
 
 def model_to_dict(model):
@@ -101,26 +101,6 @@ def update_password(user, new_password_1, new_password_2):
     db.session.commit()
 
     return jsonify({'message': 'Password updated successfully!'}), 200
-
-
-def create_search_query(model, search_query, exclude_fields):
-    """
-    Erstellt eine SQLAlchemy-Abfrage für eine unscharfe Suche in einem bestimmten Modell.
-    Die Felder `id` und `position` sowie andere angegebene Felder werden ausgeschlossen.
-    """
-    # Dynamische Erstellung der Filterbedingung: Felder durchsuchen, die nicht ausgeschlossen sind
-    filters = []
-    for column in model.__table__.columns:
-        if column.name not in exclude_fields and isinstance(column.type, (String, Text)):
-            filters.append(func.lower(getattr(model, column.name)).contains(func.lower(search_query)))
-
-    # Kombiniere alle Filter mit `or`-Verknüpfung, damit ein Treffer in einem der Felder ausreicht
-    query = db.session.query(model)
-    query = query.filter(
-        db.or_(*filters)  # Übergebe alle Filterbedingungen als OR-Bedingung
-    )
-
-    return query
 
 
 def search_resources(model, search_query):

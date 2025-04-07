@@ -11,10 +11,6 @@ from tests.helpers.variables import (
     registration_base_data
 )
 
-def clear_mailhog():
-    """Clears MailHog Mailbox"""
-    requests.delete(mailhog_v1)
-
 
 def request_and_validate(client, endpoint, test_data, method='POST'):
     """Sends request and validates output"""
@@ -49,6 +45,11 @@ def request_and_validate(client, endpoint, test_data, method='POST'):
         assert test_data['expected_message'] in response_data['message'], f'Error: Unexpected message. Status: {response.status_code}, Text: {response.text}'
 
     return response
+
+
+def clear_mailhog():
+    """Clears MailHog Mailbox"""
+    requests.delete(mailhog_v1)
 
 
 def check_for_mail(subject):

@@ -33,7 +33,8 @@ def test_registration(setup_database, test_data):
     ).first()
     assert user is not None, f'Error: User has not been found in database: {test_data['username']}'
 
-    check_for_mail('Please confirm your E-Mail') # Check for email by subject
+    # Check for email by subject
+    check_for_mail('Please confirm your E-Mail')
 
 
 @pytest.mark.parametrize('test_data', verification_data)
@@ -121,7 +122,8 @@ def test_login(setup_database, test_data):
 def test_logout(setup_database):
     """Test: Logout of user"""
 
-    login(setup_database) # Login
+    # Login
+    login(setup_database)
 
     # Logout
     logout_url = f'{url}/auth/logout'

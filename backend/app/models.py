@@ -1,8 +1,6 @@
 import uuid
 
 from flask_login import UserMixin
-from sqlalchemy import Column, String
-from sqlalchemy.dialects.postgresql import UUID
 
 from app import db
 

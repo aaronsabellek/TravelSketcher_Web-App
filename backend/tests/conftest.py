@@ -1,4 +1,3 @@
-import requests
 import pytest
 
 from werkzeug.security import generate_password_hash
@@ -9,10 +8,8 @@ from tests.helpers.dummy_data import dummy_data
 from tests.helpers.variables import (
     url,
     user,
-    username,
     second_user,
     login_data_username,
-    username
 )
 
 
@@ -31,7 +28,7 @@ def setup_database():
         # Set hashed password
         hashed_password = generate_password_hash(user['password'], method='pbkdf2:sha256')
 
-         # Create main user in database
+        # Create main user in database
         main_user = User(
             id=user['id'],
             username=user['username'],
@@ -47,7 +44,7 @@ def setup_database():
         db.session.add(main_user)
         db.session.commit()
 
-        # Create second user in database
+        # Create secondary user in database
         secondary_user = User(
             id=second_user['id'],
             username=second_user['username'],
@@ -87,7 +84,7 @@ def setup_database():
 
             db.session.commit()
 
-        # Create destinations and activities of second user in database
+        # Create destinations and activities of secondary user in database
         for sec_dest_data in dummy_data['second_destinations']:
             second_destination = Destination(
                 id=sec_dest_data['id'],
@@ -115,7 +112,7 @@ def setup_database():
         with app.test_client() as client:
             yield client
 
-        # Remove all data from database
+        # Remove all data
         db.session.remove()
         db.drop_all()
 
@@ -125,22 +122,19 @@ def setup_database():
 def setup_logged_in_user(setup_database):
     """Fixture to setup test database, login user and return request session"""
 
-    # Create session for user
-    session = requests.Session()
-    user = User.query.filter_by(username=username).first()
-    assert user is not None, 'User does not exisst in database!'
+    # Create client
+    client = setup_database
 
     # Login user
     login_url = f'{url}/auth/login'
-    response_login = session.post(login_url, json=login_data_username)
-    assert response_login.status_code == 200, f"Login fehlgeschlagen! Status: {response_login.status_code}, Antwort: {response_login.text}"
+    response_login = client.post(login_url, json=login_data_username)
+    assert response_login.status_code == 200, f'Login failed! Status: {response_login.status_code}, Text: {response_login.text}'
 
-    # Return test session
-    yield session
+    # Return client
+    yield client
 
     # Logout user
     logout_url = f'{url}/auth/logout'
-    response_logout = session.post(logout_url)
+    response_logout = client.post(logout_url)
     assert response_logout.status_code == 200, f'Error: Logout failed! Status: {response_logout.status_code}, Text: {response_logout.text}'
-    assert 'user_id' not in session.cookies, 'User session is still active after logout!'
 

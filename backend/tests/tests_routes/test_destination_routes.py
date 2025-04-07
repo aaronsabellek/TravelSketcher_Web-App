@@ -41,7 +41,7 @@ def test_get_all(setup_logged_in_user):
     # Use route
     get_url = f'{url}/destination/get_all'
     response = setup_logged_in_user.get(get_url)
-    response_data = response.json()
+    response_data = response.json
 
     # Check for errors
     assert len(response_data['destinations']) >= 2, f'Unexpected Error: No destinations found!'
@@ -53,7 +53,7 @@ def test_get_all(setup_logged_in_user):
 
     # Use route again
     response = setup_logged_in_user.get(get_url)
-    response_data = response.json()
+    response_data = response.json
 
     # Check for errors in case of no destinations
     assert len(response_data['destinations']) == 0, f'Unexpected Error: Still destinations in db!'

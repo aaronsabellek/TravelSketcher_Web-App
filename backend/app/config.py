@@ -14,47 +14,77 @@ class Config:
     if SECRET_KEY is None:
         raise ValueError('SECRET_KEY is not set! Insert the .env file.')
 
-    # Initialize database with SQLAlchemy
-    SQLALCHEMY_DATABASE_URI = os.getenv('SQLALCHEMY_DATABASE_URI')
-    if SQLALCHEMY_DATABASE_URI is None:
-        raise ValueError('DATABASE_URL is not set! Insert the .env file.')
-
-    SQLALCHEMY_TRACK_MODIFICATIONS = False
-
     # Initialize maintenance mode
     MAINTENANCE_MODE = os.getenv('MAINTENANCE_MODE', 'False').lower() == 'true'
-    MAINTENANCE_MESSAGE= os.getenv('MAINTENANCE_MESSAGE', 'This Website is currently in Maintainance mode. Please try again later.')
+    MAINTENANCE_MESSAGE= os.getenv(
+        'MAINTENANCE_MESSAGE',
+        'This Website is currently in Maintainance mode. Please try again later.'
+    )
 
-    # Initlialize mailserver data (MailHog for testing purpose)
-    MAIL_SERVER = os.getenv('MAIL_SERVER')
-    MAIL_PORT = os.getenv('MAIL_PORT')
-    MAIL_USERNAME = os.getenv('MAIL_USERNAME') or None
-    MAIL_PASSWORD = os.getenv('MAIL_PASSWORD') or None
-    MAIL_DEFAULT_SENDER = os.getenv('MAIL_DEFAULT_SENDER')
+    # Initialize SQLAlchemy track modifications
+    SQLALCHEMY_TRACK_MODIFICATIONS = False
 
-    if MAIL_SERVER is None or MAIL_PORT is None or MAIL_USERNAME is None or MAIL_PASSWORD is None or MAIL_DEFAULT_SENDER is None:
-        raise ValueError("E-Mail-configuration is missing in the .env-file!")
-
-    MAIL_USE_TLS = os.getenv('MAIL_USE_TLS', False) == 'True'
-    MAIL_USE_SSL = os.getenv('MAIL_USE_SSL', False) == 'True'
+    # Initlialize mailserver data from MailHog for testing
+    MAIL_SERVER = 'localhost'
+    MAIL_PORT = 1025
+    MAIL_USERNAME = None
+    MAIL_PASSWORD = None
+    MAIL_DEFAULT_SENDER = 'noreply@example.com'
+    MAIL_USE_TLS = False
+    MAIL_USE_SSL = False
 
 
 class DevelopmentConfig(Config):
     """Flask configuration class for development"""
 
     DEBUG = True
+    TESTING = False
     SESSION_COOKIE_SECURE = False
+    LOG_LEVEL = 'DEBUG'
+    MAIL_SUPPRESS_SEND = False
+
+    # Initialize local development database with SQLAlchemy
+    SQLALCHEMY_DATABASE_URI = os.getenv('SQLALCHEMY_DATABASE_URI')
+    if SQLALCHEMY_DATABASE_URI is None:
+        raise ValueError('DATABASE_URL is not set! Insert the .env file.')
 
 
 class TestingConfig(Config):
     """Flask configuration class for testing"""
 
+    DEBUG = False
     TESTING = True
+    SESSION_COOKIE_SECURE = False
+    WTF_CSRF_ENABLED = False
+    MAIL_SUPPRESS_SEND = False
+
+    # Initialize memory database from SQLite
+    SQLALCHEMY_DATABASE_URI = 'sqlite:///:memory:'
 
 
 class ProductionConfig(Config):
     """Flask configuration class for production"""
 
     DEBUG = False
+    TESTING = False
     SESSION_COOKIE_SECURE = True
+    WTF_CSRF_ENABLED = True
+    LOG_LEVEL = 'WARNING'
+
+    # Initialize production database
+    SQLALCHEMY_DATABASE_URI = os.getenv('SQLALCHEMY_DATABASE_URI')
+    if not SQLALCHEMY_DATABASE_URI:
+        raise ValueError('DATABASE_URI not set in .env')
+
+    # Initialize production mail server
+    MAIL_SERVER = os.getenv('MAIL_SERVER')
+    MAIL_PORT = os.getenv('MAIL_PORT')
+    MAIL_USERNAME = os.getenv('MAIL_USERNAME')
+    MAIL_PASSWORD = os.getenv('MAIL_PASSWORD')
+    MAIL_DEFAULT_SENDER = os.getenv('MAIL_DEFAULT_SENDER')
+    MAIL_USE_TLS = os.getenv('MAIL_USE_TLS', 'True').lower() == 'true'
+    MAIL_USE_SSL = os.getenv('MAIL_USE_SSL', 'False').lower() == 'true'
+
+    if not all([MAIL_SERVER, MAIL_PORT, MAIL_USERNAME, MAIL_PASSWORD, MAIL_DEFAULT_SENDER]):
+        raise ValueError('Production mail configuration incomplete.')
 

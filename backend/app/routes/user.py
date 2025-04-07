@@ -42,9 +42,6 @@ def edit_profile():
     data = request.get_json()
     new_username = data.get('username')
 
-    # Set allowed fields
-    allowed_fields = ['username', 'city', 'longitude', 'latitude', 'country', 'currency']
-
     # Check if every value is set
     for key, value in data.items():
         if value == '':
@@ -173,7 +170,7 @@ def reset_password(token):
     """Resets password if reset has been requested"""
 
     # Confirm token
-    email = confirm_token(token, salt='reset-password', expiration=1800)  # 30 Min gültig
+    email = confirm_token(token, salt='reset-password', expiration=1800)
 
     # Check if token is valid
     if not email:
@@ -198,6 +195,7 @@ def reset_password(token):
 def delete_profile():
     """Deletes profile from database"""
 
+    # Delete user
     user_id = current_user.id
     return delete_entry(User, user_id)
 

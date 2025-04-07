@@ -14,8 +14,13 @@ from logging.handlers import RotatingFileHandler
 from flask_cors import CORS
 from flask_migrate import Migrate
 
-from app.errors import handle_exception, handle_http_exception, handle_db_error, page_not_found, method_not_allowed
 from app.config import DevelopmentConfig, TestingConfig, ProductionConfig
+from app.errors import (
+    handle_exception,
+    handle_http_exception,
+    handle_db_error, page_not_found,
+    method_not_allowed
+)
 
 # Flask Extensions
 db = SQLAlchemy()
@@ -24,24 +29,38 @@ login_manager = LoginManager()
 mail = Mail()
 
 
-def create_app(config_class=DevelopmentConfig):
+def create_app(config_class=None):
     """App Factory: Creates and configures Flask-App"""
 
+    # Set app
     app = Flask(__name__)
-    load_dotenv()
-    app.config.from_object(config_class)
 
-    # Restricting output in production mode
+    # Load and configure data from .env
+    load_dotenv()
+
+    # Initialize Flask environment and configuration class
+    if config_class is None:
+        env = os.getenv('FLASK_ENV', 'development')
+        if env == 'production':
+            app.config.from_object(ProductionConfig)
+        elif env == 'testing':
+            app.config.from_object(TestingConfig)
+        else:
+            app.config.from_object(DevelopmentConfig)
+    else:
+        app.config.from_object(config_class)
+
+    # Restrict output in production mode
     app.config['PROPAGATE_EXCEPTIONS'] = app.config['DEBUG']
 
-    # Forced use of HTTPS in production
-    if not app.debug:
+    # Force use of HTTPS in production
+    if os.getenv('FLASK_ENV') == 'production':
         Talisman(app, force_https=True)
 
     # Secure cookies for sessions in production
     app.config['REMEMBER_COOKIE_SECURE'] = True
     app.config['SESSION_COOKIE_HTTPONLY'] = True
-    app.config['SESSION_COOKIE_SAMESITE'] = 'Strict'  # oder 'Lax' je nach Bedarf
+    app.config['SESSION_COOKIE_SAMESITE'] = 'Strict'
 
     # Logger for the development environment
     if app.debug:
