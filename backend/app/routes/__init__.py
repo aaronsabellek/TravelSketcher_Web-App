@@ -1,8 +1,8 @@
-from backend.app.routes.auth import auth_bp
-from backend.app.routes.user import user_bp
-from backend.app.routes.destination import destination_bp
-from backend.app.routes.activity import activity_bp
-from backend.app.routes.search import search_bp
+from app.routes.auth import auth_bp
+from app.routes.user import user_bp
+from app.routes.destination import destination_bp
+from app.routes.activity import activity_bp
+from app.routes.search import search_bp
 
 
 def register_blueprints(app):

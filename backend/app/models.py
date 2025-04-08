@@ -2,7 +2,7 @@ import uuid
 
 from flask_login import UserMixin
 
-from backend.app import db
+from app import db
 
 
 class User(UserMixin, db.Model):

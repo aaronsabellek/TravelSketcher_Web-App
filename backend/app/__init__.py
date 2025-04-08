@@ -14,8 +14,8 @@ from flask_cors import CORS
 from flask_migrate import Migrate
 from logging.handlers import RotatingFileHandler
 
-from backend.app.config import DevelopmentConfig, TestingConfig, ProductionConfig
-from backend.app.errors import (
+from app.config import DevelopmentConfig, TestingConfig, ProductionConfig
+from app.errors import (
     handle_exception,
     handle_http_exception,
     handle_db_error, page_not_found,
@@ -56,7 +56,7 @@ def create_app(config_class=None):
     ### 3. Logging ###
 
     # Set up directory for logs
-    log_dir = os.path.join('backend', 'logs')
+    log_dir = os.path.join('logs')
     if not os.path.exists(log_dir):
         os.makedirs(log_dir)
 
@@ -142,7 +142,7 @@ def create_app(config_class=None):
     app.errorhandler(SQLAlchemyError)(handle_db_error)
 
     ### 7. Register blueprints ###
-    from backend.app.routes import register_blueprints
+    from app.routes import register_blueprints
     register_blueprints(app)
 
     return app

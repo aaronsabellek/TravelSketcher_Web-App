@@ -3,9 +3,9 @@ import time
 
 from werkzeug.security import generate_password_hash
 
-from backend.app.models import User, Destination, Activity
-from backend.app.helpers.helpers import generate_token
-from backend.tests.helpers.variables import (
+from app.models import User, Destination, Activity
+from app.helpers.helpers import generate_token
+from tests.helpers.variables import (
     url,
     mailhog_v2,
     mailhog_v1,

@@ -1,8 +1,8 @@
 from flask import Blueprint, request, jsonify
 from flask_login import login_required
 
-from backend.app.models import Destination, Activity
-from backend.app.helpers.helpers import search_resources
+from app.models import Destination, Activity
+from app.helpers.helpers import search_resources
 
 search_bp = Blueprint('search', __name__)
 

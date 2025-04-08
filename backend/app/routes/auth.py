@@ -2,9 +2,9 @@ from flask import Blueprint, jsonify, request, jsonify
 from flask_login import login_required, current_user, login_user, logout_user
 from werkzeug.security import generate_password_hash, check_password_hash
 
-from backend.app import db, login_manager
-from backend.app.models import User
-from backend.app.helpers.helpers import (
+from app import db, login_manager
+from app.models import User
+from app.helpers.helpers import (
     is_valid_email,
     validate_password,
     confirm_token,

@@ -1,7 +1,7 @@
-from backend.app import create_app, db
-from backend.app.config import DevelopmentConfig
-from backend.tests.helpers.functions import create_user, create_destinations_and_activities
-from backend.tests.helpers.variables import (
+from app import create_app, db
+from app.config import DevelopmentConfig
+from tests.helpers.functions import create_user, create_destinations_and_activities
+from tests.helpers.variables import (
     user,
     second_user,
     destinations,
@@ -19,6 +19,7 @@ def setup():
         print('Seeding dummy data...')
 
         # Create new database
+        db.create_all()
         db.drop_all()
         db.create_all()
 
