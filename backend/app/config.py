@@ -44,9 +44,11 @@ class DevelopmentConfig(Config):
     MAIL_SUPPRESS_SEND = False
 
     # Initialize local development database with SQLAlchemy
-    SQLALCHEMY_DATABASE_URI = os.getenv('SQLALCHEMY_DATABASE_URI')
-    if SQLALCHEMY_DATABASE_URI is None:
-        raise ValueError('DATABASE_URL is not set! Insert the .env file.')
+    DATABASE_URI_DEV = os.getenv('DATABASE_URI_DEV')
+    if DATABASE_URI_DEV is None:
+        raise ValueError('DATABASE_URI_DEV is not set in the .env file.')
+    absolute_db_path = os.path.abspath(DATABASE_URI_DEV)
+    SQLALCHEMY_DATABASE_URI = f'sqlite:///{absolute_db_path}'
 
 
 class TestingConfig(Config):
@@ -72,9 +74,9 @@ class ProductionConfig(Config):
     LOG_LEVEL = 'WARNING'
 
     # Initialize production database
-    SQLALCHEMY_DATABASE_URI = os.getenv('SQLALCHEMY_DATABASE_URI')
-    if not SQLALCHEMY_DATABASE_URI:
-        raise ValueError('DATABASE_URI not set in .env')
+    SQLALCHEMY_DATABASE_URI = os.getenv('DATABASE_URI_PROD')
+    #if not SQLALCHEMY_DATABASE_URI:
+    #    raise ValueError('DATABASE_URI not set in .env')
 
     # Initialize production mail server
     MAIL_SERVER = os.getenv('MAIL_SERVER')

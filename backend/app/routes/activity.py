@@ -1,9 +1,9 @@
 from flask import Blueprint, request, jsonify
 from flask_login import login_required
 
-from app.models import Destination, Activity
-from app.helpers.helpers import models_to_list, model_to_dict
-from app.helpers.helpers_entries import (
+from backend.app.models import Destination, Activity
+from backend.app.helpers.helpers import models_to_list, model_to_dict
+from backend.app.helpers.helpers_entries import (
     check_existence_and_permission,
     create_entry,
     edit_entry,

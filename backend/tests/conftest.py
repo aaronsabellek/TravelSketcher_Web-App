@@ -1,6 +1,7 @@
 import pytest
 
 from app import create_app, db
+from app.config import TestingConfig
 from tests.helpers.functions import create_user, create_destinations_and_activities
 from tests.helpers.variables import (
     url,
@@ -17,7 +18,7 @@ def setup_database():
     """Fixture to setup the test database"""
 
     # Set application context
-    app = create_app()
+    app = create_app(TestingConfig)
     with app.app_context():
 
         # Drop and create new database
@@ -49,7 +50,7 @@ def setup_logged_in_user(setup_database):
     client = setup_database
 
     # Login user
-    login_url = f'{url}/auth/login'
+    login_url = f'{url}/login'
     response_login = client.post(login_url, json=login_data_username)
     assert response_login.status_code == 200, f'Login failed! Status: {response_login.status_code}, Text: {response_login.text}'
 
@@ -57,7 +58,7 @@ def setup_logged_in_user(setup_database):
     yield client
 
     # Logout user
-    logout_url = f'{url}/auth/logout'
+    logout_url = f'{url}/logout'
     response_logout = client.post(logout_url)
     assert response_logout.status_code == 200, f'Error: Logout failed! Status: {response_logout.status_code}, Text: {response_logout.text}'
 

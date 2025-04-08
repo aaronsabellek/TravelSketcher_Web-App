@@ -1,4 +1,4 @@
-from tests.helpers.dummy_data import dummy_data
+from backend.tests.helpers.dummy_data import dummy_data
 
 # Standard URL
 url = 'http://127.0.0.1:5000'

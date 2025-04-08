@@ -6,8 +6,8 @@ from sqlalchemy import func, String, Text
 from flask_mail import Message
 from werkzeug.security import generate_password_hash
 
-from app import db, mail
-from app.models import Destination
+from backend.app import db, mail
+from backend.app.models import Destination
 
 
 def model_to_dict(model):

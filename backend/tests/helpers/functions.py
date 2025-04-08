@@ -3,9 +3,9 @@ import time
 
 from werkzeug.security import generate_password_hash
 
-from app.models import User, Destination, Activity
-from app.helpers.helpers import generate_token
-from tests.helpers.variables import (
+from backend.app.models import User, Destination, Activity
+from backend.app.helpers.helpers import generate_token
+from backend.tests.helpers.variables import (
     url,
     mailhog_v2,
     mailhog_v1,
@@ -93,7 +93,7 @@ def create_test_token(test_data, salt, email=email):
 def login(client, login_data=login_data_username):
     """Login user"""
 
-    login_url = f'{url}/auth/login'
+    login_url = f'{url}/login'
     response = client.post(login_url, json=login_data)
     assert response.status_code == 200, f'Error: Login failed! Status: {response.status_code}, Text: {response.text}'
 
@@ -103,7 +103,7 @@ def login(client, login_data=login_data_username):
 def register(client):
     """Register user"""
 
-    register_url = f'{url}/auth/register'
+    register_url = f'{url}/register'
     response = client.post(register_url, json=registration_base_data)
     assert response.status_code in [200, 201], f'Error: Registration failed! Status: {response.status_code}, Text: {response.text}'
 

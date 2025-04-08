@@ -23,7 +23,7 @@ def test_registration(setup_database, test_data):
     """Test: Register user in database"""
 
     # Use and validate route
-    response = request_and_validate(setup_database, 'auth/register', test_data)
+    response = request_and_validate(setup_database, 'register', test_data)
     if response.status_code not in [200, 201]:
         return
 
@@ -59,7 +59,7 @@ def test_verifify_email(setup_database, test_data):
     token = create_test_token(test_data, 'account-verification', email=email)
 
     # Use and validate route
-    response = request_and_validate(client=setup_database, endpoint=f'auth/verify_email/{token}', test_data=test_data, method='GET')
+    response = request_and_validate(client=setup_database, endpoint=f'verify_email/{token}', test_data=test_data, method='GET')
     if response.status_code not in [200, 201]:
         return
 
@@ -75,7 +75,7 @@ def test_resend_verification(setup_database, test_data):
     register(setup_database) # Register with new account
 
     # Use and validate route
-    response = request_and_validate(setup_database, 'auth/resend_verification', test_data)
+    response = request_and_validate(setup_database, 'resend_verification', test_data)
     if response.status_code not in [200, 201]:
         return
 
@@ -91,7 +91,7 @@ def test_resend_verification(setup_database, test_data):
 def test_login(setup_database, test_data):
     """Test: Login of user with different identifiers"""
 
-    login_url = f'{url}/auth/login'
+    login_url = f'{url}/login'
 
     # Get user with login data
     identifier = test_data['identifier']
@@ -126,7 +126,7 @@ def test_logout(setup_database):
     login(setup_database)
 
     # Logout
-    logout_url = f'{url}/auth/logout'
+    logout_url = f'{url}/logout'
     response = setup_database.post(logout_url)
     assert response.status_code == 200, f'Error: Logout failed! Status: {response.status_code}, Text: {response.text}'
     assert response.json['message'] == 'Logout successfull!', f'Error: Unecpected message. Status: {response.status_code}, Text: {response.text}'

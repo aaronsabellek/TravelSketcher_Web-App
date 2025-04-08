@@ -2,9 +2,9 @@ from flask import Blueprint, jsonify, request, jsonify
 from flask_login import login_required, current_user, login_user, logout_user
 from werkzeug.security import generate_password_hash, check_password_hash
 
-from app import db, login_manager
-from app.models import User
-from app.helpers.helpers import (
+from backend.app import db, login_manager
+from backend.app.models import User
+from backend.app.helpers.helpers import (
     is_valid_email,
     validate_password,
     confirm_token,
@@ -12,7 +12,7 @@ from app.helpers.helpers import (
 )
 
 # Set blueprint
-auth_bp = Blueprint('auth', __name__, url_prefix='/auth')
+auth_bp = Blueprint('auth', __name__)
 
 
 @login_manager.user_loader
@@ -166,6 +166,7 @@ def login():
 
     # Login user
     login_user(user)
+
     return jsonify({'message': 'Login successfull!'}), 200
 
 

@@ -1,9 +1,9 @@
 from flask import Blueprint, request, jsonify
 from flask_login import login_required, current_user
 
-from app import db
-from app.models import User
-from app.helpers.helpers import (
+from backend.app import db
+from backend.app.models import User
+from backend.app.helpers.helpers import (
     is_valid_email,
     generate_token,
     confirm_token,
@@ -11,7 +11,7 @@ from app.helpers.helpers import (
     send_email,
     update_password
 )
-from app.helpers.helpers_entries import(
+from backend.app.helpers.helpers_entries import(
     edit_entry,
     delete_entry
 )

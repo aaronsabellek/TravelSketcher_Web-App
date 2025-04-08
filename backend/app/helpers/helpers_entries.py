@@ -1,9 +1,9 @@
 from flask import jsonify
 from flask_login import logout_user, current_user
 
-from app import db
-from app.models import User, Destination, Activity
-from app.helpers.helpers import model_to_dict
+from backend.app import db
+from backend.app.models import User, Destination, Activity
+from backend.app.helpers.helpers import model_to_dict
 
 
 def check_existence_and_permission(model, entry_id):
