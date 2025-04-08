@@ -1,54 +1,78 @@
-// pages/login.js
-import { useState } from "react";
-import { login, getUserProfile } from "../services/api";
-import { useRouter } from "next/router";
+import { useState, useEffect } from 'react';
+import { useRouter } from 'next/router';
+import { login } from '../services/api';
 
 export default function LoginPage() {
-  const [email, setEmail] = useState("demo@example.com");
-  const [password, setPassword] = useState("1234");
-  const [error, setError] = useState("");
+  const [identifier, setIdentifier] = useState('');
+  const [password, setPassword] = useState('');
+  const [error, setError] = useState('');
+  const [loading, setLoading] = useState(true);
   const router = useRouter();
 
-  const handleLogin = async (e) => {
-    e.preventDefault();
-    try {
-      const loginResponse = await login(email, password);  // Login durchführen und Antwort holen
-      console.log("Login Response:", loginResponse.message);  // Erfolgsnachricht anzeigen
+  useEffect(() => {
+    // Check if user is already logged in
+    const checkLoginStatus = async () => {
+      const res = await fetch('/user/profile', { credentials: 'include' });
 
-      if (loginResponse.message === 'Login successful!') {
-        // Erfolgsnachricht prüfen
-        router.push("/"); // Weiterleitung zur Startseite oder einer anderen geschützten Seite
+      if (res.ok) {
+        // Push to user profile
+        router.push('/user/profile');
+      }
+
+      setLoading(false); // Ladeanzeige beenden, sobald die Überprüfung abgeschlossen ist
+    };
+
+    checkLoginStatus();
+  }, [router]);
+
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setError(''); // Fehler zurücksetzen
+
+    try {
+      const response = await login(identifier, password);
+
+      // Überprüfen, ob die Antwort korrekt ist
+      if (response.message === 'Login successfull!') {
+        router.push('/user/profile'); // Weiterleitung zur Profil-Seite
       } else {
-        setError("Login fehlgeschlagen"); // Wenn die Nachricht nicht 'Login successful!' ist
+        setError('Login fehlgeschlagen');
       }
     } catch (err) {
-      setError(err.message || "Login fehlgeschlagen");  // Zeigt die Fehlermeldung an
+      setError(err.message); // Fehler anzeigen
     }
   };
 
+
   return (
-    <div className="p-4 max-w-md mx-auto">
-      <h1 className="text-2xl font-bold mb-4">Login</h1>
-      <form onSubmit={handleLogin} className="space-y-3">
-        <input
-          type="email"
-          placeholder="E-Mail"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          className="border p-2 w-full"
-        />
-        <input
-          type="password"
-          placeholder="Passwort"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          className="border p-2 w-full"
-        />
-        <button type="submit" className="bg-blue-500 text-white px-4 py-2 rounded">
-          Einloggen
-        </button>
+    <div className="login-container">
+      <h1>Login</h1>
+      <form onSubmit={handleSubmit}>
+        <div>
+          <label htmlFor="identifier">Email or Username</label>
+          <input
+            type="text"
+            id="identifier"
+            value={identifier}
+            onChange={(e) => setIdentifier(e.target.value)}
+            required
+          />
+        </div>
+        <div>
+          <label htmlFor="password">Password</label>
+          <input
+            type="password"
+            id="password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            required
+          />
+        </div>
+        <button type="submit">Login</button>
       </form>
-      {error && <p className="text-red-500 mt-2">{error}</p>}
+
+      {error && <p style={{ color: 'red' }}>{error}</p>}
     </div>
   );
 }
