@@ -116,7 +116,7 @@ def create_app(config_class=None):
 
     # Initialize the Flask-Login extension
     login_manager.init_app(app)
-    login_manager.login_view = 'login'
+    login_manager.login_view = 'auth.login'
 
     # Initialize Flask Mail extension
     mail.init_app(app)
