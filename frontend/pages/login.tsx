@@ -1,49 +1,59 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
-import { login } from '../services/api';
 
-export default function LoginPage() {
+const LoginPage = () => {
   const [identifier, setIdentifier] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
-  const [loading, setLoading] = useState(true);
   const router = useRouter();
 
+  // Check if user is already logged in
   useEffect(() => {
-    // Check if user is already logged in
     const checkLoginStatus = async () => {
-      const res = await fetch('/user/profile', { credentials: 'include' });
+      const res = await fetch('http://localhost:5000/user/profile', {
+        credentials: 'include', // Cookies werden mitgesendet
+      });
 
       if (res.ok) {
-        // Push to user profile
+        // Wenn der Benutzer bereits eingeloggt ist, leite ihn auf die Profilseite weiter
         router.push('/user/profile');
       }
-
-      setLoading(false); // Ladeanzeige beenden, sobald die Überprüfung abgeschlossen ist
     };
 
     checkLoginStatus();
   }, [router]);
 
-
-  const handleSubmit = async (e) => {
+  // Login user
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError(''); // Fehler zurücksetzen
+    setError('');
 
     try {
-      const response = await login(identifier, password);
+      const response = await fetch('http://localhost:5000/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          identifier, // Username or Email
+          password,
+        }),
+        credentials: 'include', // Include cookie for session
+      });
 
-      // Überprüfen, ob die Antwort korrekt ist
-      if (response.message === 'Login successfull!') {
-        router.push('/user/profile'); // Weiterleitung zur Profil-Seite
-      } else {
-        setError('Login fehlgeschlagen');
+      if (!response.ok) {
+        const data = await response.json();
+        setError(data.error || 'Login fehlgeschlagen');
+        return;
       }
+
+      // Push to user profile
+      router.push('/user/profile');
     } catch (err) {
-      setError(err.message); // Fehler anzeigen
+      console.error(err);
+      setError('Ein Fehler ist beim Login aufgetreten.');
     }
   };
-
 
   return (
     <div className="login-container">
@@ -75,4 +85,6 @@ export default function LoginPage() {
       {error && <p style={{ color: 'red' }}>{error}</p>}
     </div>
   );
-}
+};
+
+export default LoginPage;

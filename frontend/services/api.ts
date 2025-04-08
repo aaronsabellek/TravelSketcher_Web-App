@@ -1,7 +1,10 @@
 const BASE_URL = 'http://localhost:5000';
 
-// Login
-export async function login(identifier, password) {
+interface LoginResponse {
+  message: string;
+}
+
+export async function login(identifier: string, password: string): Promise<LoginResponse> {
   const res = await fetch(`${BASE_URL}/login`, {
     method: 'POST',
     headers: {
@@ -9,7 +12,7 @@ export async function login(identifier, password) {
     },
     credentials: "include", // Include cookies
     body: JSON.stringify({
-      identifier, // Username or Email
+      identifier,
       password,
     }),
   });
