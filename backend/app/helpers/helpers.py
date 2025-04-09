@@ -1,6 +1,6 @@
 import re
 
-from flask import jsonify, current_app
+from flask import jsonify, current_app, render_template, url_for
 from flask_login import current_user
 from sqlalchemy import func, String, Text
 from flask_mail import Message
@@ -61,19 +61,38 @@ def send_verification_email(user, salt):
     """Sends verification email to user"""
 
     token = generate_token(user.email, salt=salt)
-    verify_url = f'/verify_email/{token}'
+    verify_url = url_for('auth.verify_email', token=token, _external=True)
     subject = 'Please confirm your E-Mail'
-    body = f'Click the following link to confirm your E-Mail: {verify_url}'
+    body_text = f"""Hello {user.username},
 
-    send_email(user.email, subject, body)
+Please verify your email address by clicking the link below:
+{verify_url}
+
+If you did not sign up, please ignore this email.
+"""
+
+    body_html = f'''
+        <p>Hello {user.username},</p>
+        <p>Please click the link below to verify your email address:</p>
+        <p><a href="{verify_url}">Verify my email</a></p>
+        <p>If you did not request this, please ignore this message.</p>
+    '''
+
+    send_email(user.email, subject, body_text, body_html=body_html)
 
 
-def send_email(to_email, subject, body):
+def send_email(to_email, subject, body_text, body_html=None):
     """Sends email to user"""
 
-    with current_app.app_context():
-        sender_email = current_app.config['MAIL_DEFAULT_SENDER']
-    msg = Message(subject, recipients=[to_email], body=body, sender=sender_email)
+    #with current_app.app_context():
+    sender_email = current_app.config['MAIL_DEFAULT_SENDER']
+    msg = Message(
+        subject,
+        recipients=[to_email],
+        body=body_text,
+        html=body_html or f'''<p>{body_text}</p>''',
+        sender=sender_email
+    )
     mail.send(msg)
 
 

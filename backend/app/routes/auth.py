@@ -1,4 +1,4 @@
-from flask import Blueprint, jsonify, request, jsonify
+from flask import Blueprint, jsonify, request, jsonify, redirect
 from flask_login import login_required, current_user, login_user, logout_user
 from werkzeug.security import generate_password_hash, check_password_hash
 
@@ -13,6 +13,9 @@ from app.helpers.helpers import (
 
 # Set blueprint
 auth_bp = Blueprint('auth', __name__)
+
+# Set Frontend page
+frontend_url = 'http://localhost:3000'
 
 
 @login_manager.user_loader
@@ -92,22 +95,26 @@ def verify_email(token):
 
     # Check if varification has worked
     if not email:
-        return jsonify({'error': 'Invalid or expired token!'}), 400
+        #return jsonify({'error': 'Invalid or expired token!'}), 400
+        return redirect(f'{frontend_url}/verify_email/{token}?error=invalid')
 
     # Check if user with this email exists in db
     user = User.query.filter_by(email=email).first()
     if not user:
-        return jsonify({'error': 'User not found!'}), 404
+        #return jsonify({'error': 'User not found!'}), 404
+        return redirect(f'{frontend_url}/verify_email/{token}?error=notfound')
 
     # Check if email is already verified
     if user.is_email_verified == True:
-        return jsonify({'message': 'E-Mail has already been confirmed!'}), 200
+        #return jsonify({'message': 'E-Mail has already been confirmed!'}), 200
+        return redirect(f'{frontend_url}/verify_email/{token}?status=already_verified')
 
     # Change verification status of user in db
     user.is_email_verified = True
     db.session.commit()
 
-    return jsonify({'message': 'E-Mail confirmed successfully!'}), 200
+    #return jsonify({'message': 'E-Mail confirmed successfully!'}), 200
+    return redirect(f'{frontend_url}/verify_email/{token}?status=success')
 
 
 @auth_bp.route('/resend_verification', methods=['POST'])
