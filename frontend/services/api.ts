@@ -1,4 +1,4 @@
-const BASE_URL = 'http://localhost:5000';
+import BASE_URL from '../utils/config';
 
 interface LoginResponse {
   message: string;

@@ -1,44 +1,30 @@
-import { useState, useEffect } from 'react';
-import { useRouter } from 'next/router';
+import { useState } from 'react';
+import { useAuth } from '../contexts/AuthContext';
+import { useRedirectIfAuthenticated } from '../utils/authRedirects';
+import Link from 'next/link';
+import BASE_URL from '../utils/config';
 
-const LoginPage = () => {
+const Login = () => {
   const [identifier, setIdentifier] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
-  const router = useRouter();
+  const { isLoading, login } = useAuth();
 
-  // Check if user is already logged in
-  useEffect(() => {
-    const checkLoginStatus = async () => {
-      const res = await fetch('http://localhost:5000/user/profile', {
-        credentials: 'include', // Cookies werden mitgesendet
-      });
+  // Redirect if user is authenticated
+  useRedirectIfAuthenticated();
 
-      if (res.ok) {
-        // Wenn der Benutzer bereits eingeloggt ist, leite ihn auf die Profilseite weiter
-        router.push('/user/profile');
-      }
-    };
-
-    checkLoginStatus();
-  }, [router]);
-
-  // Login user
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
 
     try {
-      const response = await fetch('http://localhost:5000/login', {
+      const response = await fetch(`${BASE_URL}/login`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({
-          identifier, // Username or Email
-          password,
-        }),
-        credentials: 'include', // Include cookie for session
+        body: JSON.stringify({ identifier, password }),
+        credentials: 'include',
       });
 
       if (!response.ok) {
@@ -47,44 +33,64 @@ const LoginPage = () => {
         return;
       }
 
-      // Push to user profile
-      router.push('/user/profile');
+      const userData = await response.json();
+      login(userData);
+
+      //router.replace('/user/profile');
     } catch (err) {
       console.error(err);
       setError('Ein Fehler ist beim Login aufgetreten.');
     }
   };
 
+  if (isLoading) {
+    return <div className="text-center mt-10">Lade Authentifizierungsstatus...</div>;
+  }
+
   return (
-    <div className="login-container">
-      <h1>Login</h1>
+    <div className="max-w-md mx-auto mt-10 p-6 border rounded-lg shadow-md bg-white">
+      <h1 className="text-2xl font-bold text-center mb-4">Login</h1>
       <form onSubmit={handleSubmit}>
-        <div>
-          <label htmlFor="identifier">Email or Username</label>
+        <div className="mb-4">
+          <label htmlFor="identifier" className="block text-sm font-medium text-gray-700">Email or Username</label>
           <input
             type="text"
             id="identifier"
             value={identifier}
             onChange={(e) => setIdentifier(e.target.value)}
             required
+            className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm"
           />
         </div>
-        <div>
-          <label htmlFor="password">Password</label>
+        <div className="mb-6">
+          <label htmlFor="password" className="block text-sm font-medium text-gray-700">Password</label>
           <input
             type="password"
             id="password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             required
+            className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm"
           />
         </div>
-        <button type="submit">Login</button>
+        <button
+          type="submit"
+          className="w-full py-2 px-4 bg-blue-500 text-white font-semibold rounded-lg hover:bg-blue-600"
+        >
+          Login
+        </button>
       </form>
-
-      {error && <p style={{ color: 'red' }}>{error}</p>}
+      <p className="mt-4 text-sm text-center">
+        Keine Verifizierungs-E-Mail erhalten?{' '}
+        <Link href="/resend_verification">
+          <span className="text-blue-600 underline cursor-pointer">
+            Hier erneut senden
+          </span>
+        </Link>
+      </p>
+      {error && <p className="text-red-500 mt-4 text-center">{error}</p>}
     </div>
   );
 };
 
-export default LoginPage;
+export default Login;
