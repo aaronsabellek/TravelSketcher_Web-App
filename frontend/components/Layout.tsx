@@ -1,14 +1,15 @@
+import { ReactNode } from 'react';
 import Navbar from './Navbar';
 import Footer from './Footer';
 
-const Layout = ({ children }: { children: React.ReactNode }) => {
+const Layout = ({ children }: { children: ReactNode }) => {
     return (
-      <div className="layout-wrapper">
-          <Navbar />
-          <main className="content">
-            {children}
-          </main>
-          <Footer />
+      <div>
+        <Navbar />
+        <main>
+          {children}
+        </main>
+        <Footer />
       </div>
     );
   };

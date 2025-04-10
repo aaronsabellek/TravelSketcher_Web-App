@@ -51,18 +51,18 @@ const Register = () => {
   };
 
   return (
-    <div className="max-w-md mx-auto mt-10 p-6 border rounded-lg shadow-md bg-white">
+    <div className="max-w-md mx-auto mt-10 p-6 border rounded-lg shadow-md border-gray-300 bg-gray-300/25">
       <h1 className="text-2xl font-bold text-center mb-4">Registrierung</h1>
       <form onSubmit={handleSubmit}>
         {[
-          { label: 'Benutzername', id: 'username', value: username, setValue: setUsername },
+          { label: 'Username', id: 'username', value: username, setValue: setUsername },
           { label: 'Email', id: 'email', value: email, setValue: setEmail },
-          { label: 'Passwort', id: 'password', value: password, setValue: setPassword, type: 'password' },
-          { label: 'Stadt', id: 'city', value: city, setValue: setCity },
+          { label: 'Password', id: 'password', value: password, setValue: setPassword, type: 'password' },
+          { label: 'City', id: 'city', value: city, setValue: setCity },
           { label: 'Longitude', id: 'longitude', value: longitude, setValue: setLongitude },
           { label: 'Latitude', id: 'latitude', value: latitude, setValue: setLatitude },
-          { label: 'Land', id: 'country', value: country, setValue: setCountry },
-          { label: 'Währung', id: 'currency', value: currency, setValue: setCurrency },
+          { label: 'Country', id: 'country', value: country, setValue: setCountry },
+          { label: 'Currency', id: 'currency', value: currency, setValue: setCurrency },
         ].map(({ label, id, value, setValue, type = 'text' }) => (
           <div className="mb-4" key={id}>
             <label htmlFor={id} className="block text-sm font-medium text-gray-700">{label}</label>
@@ -72,23 +72,23 @@ const Register = () => {
               value={value}
               onChange={(e) => setValue(e.target.value)}
               required
-              className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm"
+              className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm bg-white"
             />
           </div>
         ))}
 
         <button
           type="submit"
-          className="w-full py-2 px-4 bg-green-500 text-white font-semibold rounded-lg hover:bg-green-600"
+          className="w-full py-2 px-4 bg-blue-500 text-white font-semibold rounded-lg hover:bg-green-600"
         >
-          Registrieren
+          Register
         </button>
       </form>
       <p className="mt-4 text-sm text-center">
-        Keine Verifizierungs-E-Mail erhalten?{' '}
+      No verification email received?{' '}
         <Link href="/resend_verification">
           <span className="text-blue-600 underline cursor-pointer">
-            Hier erneut senden
+          Send here again
           </span>
         </Link>
       </p>

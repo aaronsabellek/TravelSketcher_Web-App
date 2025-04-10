@@ -48,7 +48,7 @@ const Login = () => {
   }
 
   return (
-    <div className="max-w-md mx-auto mt-10 p-6 border rounded-lg shadow-md bg-white">
+    <div className="max-w-md mx-auto mt-10 p-6 border rounded-lg shadow-md border-gray-300 bg-gray-300/25">
       <h1 className="text-2xl font-bold text-center mb-4">Login</h1>
       <form onSubmit={handleSubmit}>
         <div className="mb-4">
@@ -59,7 +59,7 @@ const Login = () => {
             value={identifier}
             onChange={(e) => setIdentifier(e.target.value)}
             required
-            className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm"
+            className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm bg-white"
           />
         </div>
         <div className="mb-6">
@@ -70,7 +70,7 @@ const Login = () => {
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             required
-            className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm"
+            className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm bg-white"
           />
         </div>
         <button
@@ -81,10 +81,10 @@ const Login = () => {
         </button>
       </form>
       <p className="mt-4 text-sm text-center">
-        Keine Verifizierungs-E-Mail erhalten?{' '}
+        No verification email received?{' '}
         <Link href="/resend_verification">
           <span className="text-blue-600 underline cursor-pointer">
-            Hier erneut senden
+            Send here again
           </span>
         </Link>
       </p>

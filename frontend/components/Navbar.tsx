@@ -10,23 +10,47 @@ const Navbar = () => {
   }
 
   return (
-    <nav className="navbar">
-      <ul>
-        <li><Link href="/about">About</Link></li>
-        {isLoggedIn ? (
-          <>
-            <li><Link href="/destinations">Destinations</Link></li>
-            <li><Link href="/search">Search</Link></li>
-            <li><Link href="/user/profile">Profile</Link></li>
-            <li><button onClick={logout} className="logout-button">Logout</button></li>
-          </>
-        ) : (
-          <>
-            <li><Link href="/register">Registration</Link></li>
-            <li><Link href="/login">Login</Link></li>
-          </>
-        )}
-      </ul>
+    <nav className="bg-white border-b border-gray-200">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="flex justify-between items-center h-16">
+
+          {/* Logo / Titel */}
+          <div className="flex-shrink-0 text-gray-800 font-bold text-xl">
+            <Link href="/">MyTravelSite</Link>
+          </div>
+
+          {/* Navigation Links */}
+          <div className="flex items-center space-x-6 text-gray-700 font-medium">
+            <Link href="/about">About</Link>
+            {isLoggedIn ? (
+              <>
+                <Link href="/destinations">Destinations</Link>
+                <Link href="/search">Search</Link>
+                <Link href="/user/profile">Profile</Link>
+                <button
+                  onClick={logout}
+                  className="inline-block bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-semibold transition"
+                >
+                  Logout
+                </button>
+              </>
+            ) : (
+              <>
+                <Link href="/register">Registration</Link>
+                <Link href="/login">
+                  <span className="inline-block bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-semibold transition">
+                    Login
+                  </span>
+                </Link>
+              </>
+            )}
+          </div>
+          {/* empty block for centering */}
+          <div className="inline-block">
+          </div>
+        </div>
+
+      </div>
     </nav>
   );
 };

@@ -39,12 +39,18 @@ const ResendVerification = () => {
     };
 
     return (
-      <div className="resend-verification-container">
-        <h1>Resend Verification Email</h1>
+      <div className="max-w-md mx-auto mt-10 p-6 border rounded-lg shadow-md border-gray-300 bg-gray-300/25">
+        <h1 className="text-2xl font-bold text-center mb-4">Resend Verification Email</h1>
         <form onSubmit={handleSubmit}>
-          <div>
-            <label htmlFor="email">Email Address</label>
+          <div className="mb-4">
+            <label
+              className="block text-sm font-medium text-gray-700"
+              htmlFor="email"
+            >
+              Email Address
+            </label>
             <input
+              className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm bg-white"
               type="email"
               id="email"
               value={email}
@@ -52,12 +58,17 @@ const ResendVerification = () => {
               required
             />
           </div>
-          <button type="submit">Resend Verification</button>
+          <button
+            type="submit"
+            className="w-full py-2 px-4 bg-blue-500 text-white font-semibold rounded-lg hover:bg-green-600"
+          >
+            Resend Verification
+          </button>
         </form>
 
         {message && <p className="success-message">{message}</p>}
         {error && <p className="error-message">{error}</p>}
-
+        {/*
         <style jsx>{`
           .resend-verification-container {
             max-width: 400px;
@@ -117,6 +128,7 @@ const ResendVerification = () => {
             margin-top: 1rem;
           }
         `}</style>
+        */}
       </div>
     );
   };
