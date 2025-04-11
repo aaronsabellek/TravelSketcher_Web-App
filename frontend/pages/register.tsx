@@ -1,8 +1,10 @@
 import { useState } from 'react';
 import { useRouter } from 'next/router';
 import { useRedirectIfAuthenticated } from '../utils/authRedirects';
+import Container from '../components/Container';
 import Link from 'next/link';
 import BASE_URL from '../utils/config';
+import axios from 'axios';
 
 const Register = () => {
   const [username, setUsername] = useState('');
@@ -16,6 +18,8 @@ const Register = () => {
   const [error, setError] = useState('');
   const [message, setMessage] = useState('');
   const router = useRouter();
+
+  const GEMINI_API_KEY = 'AIzaSyDDvs4ZkkRPVpdi-ZfJoyPjcXjofA1TxmQ'
 
   // Redirect if user is authenticated
   useRedirectIfAuthenticated();
@@ -51,17 +55,16 @@ const Register = () => {
   };
 
   return (
-    <div className="max-w-md mx-auto mt-10 p-6 border rounded-lg shadow-md border-gray-300 bg-gray-300/25">
-      <h1 className="text-2xl font-bold text-center mb-4">Registrierung</h1>
+    <Container title="Register">
       <form onSubmit={handleSubmit}>
         {[
           { label: 'Username', id: 'username', value: username, setValue: setUsername },
           { label: 'Email', id: 'email', value: email, setValue: setEmail },
           { label: 'Password', id: 'password', value: password, setValue: setPassword, type: 'password' },
           { label: 'City', id: 'city', value: city, setValue: setCity },
+          { label: 'Country', id: 'country', value: country, setValue: setCountry },
           { label: 'Longitude', id: 'longitude', value: longitude, setValue: setLongitude },
           { label: 'Latitude', id: 'latitude', value: latitude, setValue: setLatitude },
-          { label: 'Country', id: 'country', value: country, setValue: setCountry },
           { label: 'Currency', id: 'currency', value: currency, setValue: setCurrency },
         ].map(({ label, id, value, setValue, type = 'text' }) => (
           <div className="mb-4" key={id}>
@@ -79,7 +82,7 @@ const Register = () => {
 
         <button
           type="submit"
-          className="w-full py-2 px-4 bg-blue-500 text-white font-semibold rounded-lg hover:bg-green-600"
+          className="w-full py-2 px-4 bg-blue-500 text-white font-semibold rounded-lg hover:bg-blue-600"
         >
           Register
         </button>
@@ -94,7 +97,7 @@ const Register = () => {
       </p>
       {error && <p className="text-red-500 mt-4 text-center">{error}</p>}
       {message && <p className="text-green-500 mt-4 text-center">{message}</p>}
-    </div>
+    </Container>
   );
 };
 

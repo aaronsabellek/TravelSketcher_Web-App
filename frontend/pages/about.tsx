@@ -1,68 +1,99 @@
-import React from 'react';
+import React, { useState } from 'react';
+import { useRedirectIfAuthenticated } from '../utils/authRedirects';
+import Link from 'next/link';
 
 const About = () => {
+  const [isAreaHovered, setIsAreaHovered] = useState(false);
+  const [hoveredImageIndex, setHoveredImageIndex] = useState<number | null>(null);
+  const [isButtonHovered, setIsButtonHovered] = useState(false);
+
+  const showButton = isAreaHovered;
+
+  // Redirect if user is authenticated
+  useRedirectIfAuthenticated();
+
   return (
     <div>
-      <div className="">
-      <div className="relative w-full max-w-7xl mx-auto py-20 px-4">
-        {/* Overlay Text */}
+      <div
+        className="relative w-full max-w-7xl mx-auto"
+        onMouseEnter={() => setIsAreaHovered(true)}
+        onMouseLeave={() => {
+          setIsAreaHovered(false);
+          setHoveredImageIndex(null);
+        }}
+      >
+        {/* Overlay */}
         <div className="absolute inset-0 z-10 flex items-center justify-center pointer-events-none">
-          <h2 className="text-white group-hover:text-gray-900 text-3xl sm:text-4xl md:text-5xl font-extrabold text-center transition-colors duration-500 drop-shadow-lg">
-            Which adventure waits for you?
-          </h2>
+          <div className="pointer-events-auto transition-opacity duration-500 flex flex-col items-center justify-center text-center">
+            {showButton ? (
+              <div>
+              <h2 className="text-white mb-4 text-3xl sm:text-4xl md:text-5xl font-extrabold text-center transition-colors duration-500 drop-shadow-lg">
+                Register and find out:
+              </h2>
+              <Link href="/register">
+                <button
+                  className="border-2 mt-4 border-white text-white px-6 py-3 text-lg font-semibold rounded-lg transition-all duration-300 hover:bg-white hover:text-black"
+                  onMouseEnter={() => setIsButtonHovered(true)}
+                  onMouseLeave={() => setIsButtonHovered(false)}
+                >
+                  Register
+                </button>
+              </Link>
+              </div>
+            ) : (
+              <h2 className="text-white text-3xl sm:text-4xl md:text-5xl font-extrabold text-center transition-colors duration-500 drop-shadow-lg">
+                Which adventure awaits you?
+              </h2>
+            )}
+          </div>
         </div>
 
         {/* Image Gallery */}
         <div className="flex justify-between">
-          {/* Image 1 */}
-          <div className="group relative flex-1 min-w-0 overflow-hidden">
-            <div
-              className="bg-cover bg-center brightness-90 group-hover:brightness-75 transform group-hover:scale-105 transition-all duration-500 rounded-l-xl"
-              style={{
-                backgroundImage: `url(/travel-img-1.png)`,
-                height: '400px', // Höhe der Bilder
-              }}
-            />
-          </div>
+          {[1, 2, 3].map((num, index) => {
+            const isHovered = hoveredImageIndex === index;
+            const brightness =
+              isHovered ? 'brightness-75' : index === 1 ? 'brightness-100' : 'brightness-90';
 
-          {/* Image 2 */}
-          <div className="group relative flex-1 min-w-0 overflow-hidden">
-            <div
-              className="bg-cover bg-center brightness-100 group-hover:brightness-75 transform group-hover:scale-105 transition-all duration-500"
-              style={{
-                backgroundImage: `url(/travel-img-3.png)`,
-                height: '400px', // Höhe der Bilder
-              }}
-            />
-          </div>
-
-          {/* Image 3 */}
-          <div className="group relative flex-1 min-w-0 overflow-hidden">
-            <div
-              className="bg-cover bg-center brightness-90 group-hover:brightness-75 transform group-hover:scale-105 transition-all duration-500 rounded-r-xl"
-              style={{
-                backgroundImage: `url(/travel-img-2.png)`,
-                height: '400px', // Höhe der Bilder
-              }}
-            />
-          </div>
-        </div>
+            return (
+              <div
+                key={num}
+                className="relative flex-1 min-w-0 overflow-hidden"
+                onMouseEnter={() => setHoveredImageIndex(index)}
+                onMouseLeave={() => setHoveredImageIndex(null)}
+              >
+                <div
+                  className={`
+                    bg-cover bg-center
+                    ${brightness}
+                    ${isHovered ? 'scale-105' : ''}
+                    transition-all duration-500 w-full h-[500px]
+                  `}
+                  style={{
+                    backgroundImage: `url(/travel-img-${num}.png)`,
+                  }}
+                />
+              </div>
+            );
+          })}
         </div>
       </div>
 
-      <div className="mb-20">
+      {/* About Text */}
+      <div className="w-full mt-20 mb-20">
         <div className="max-w-5xl mx-auto px-4">
           <h1 className="text-3xl font-extrabold text-center mb-8">About This Project</h1>
           <p className="text-lg mb-8">
-            Lorem ipsum dolor sit amet, consectetur adipiscing elit. Curabitur non feugiat purus.
-            Nulla facilisi. Morbi imperdiet, nisl nec fringilla accumsan, lorem risus feugiat nisl,
-            nec egestas neque erat ut justo. Sed volutpat, sapien non tincidunt pulvinar, velit nunc
-            mattis sapien, id gravida leo erat sed justo. Duis id nisl non metus ultrices placerat.
+          Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat,
+          sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem
+          ipsum dolor sit amet. Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore
+          magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata
+          sanctus est Lorem ipsum dolor sit amet.
           </p>
           <p className="text-lg">
-            Vestibulum in varius quam. Pellentesque sagittis porttitor sapien, vel dapibus magna
-            blandit non. Integer cursus eros at facilisis hendrerit. Donec bibendum lacus sit amet
-            fermentum fringilla. Praesent semper leo vitae velit mattis, at hendrerit lacus maximus.
+          Duis autem vel eum iriure dolor in hendrerit in vulputate velit esse molestie consequat, vel illum dolore eu feugiat nulla facilisis at
+          vero eros et accumsan et iusto odio dignissim qui blandit praesent luptatum zzril delenit augue duis dolore te feugait nulla facilisi.
+          Lorem ipsum dolor sit amet, consectetuer adipiscing elit, sed diam nonummy nibh euismod tincidunt ut laoreet dolore magna aliquam erat volutpat.
           </p>
         </div>
       </div>

@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useRedirectIfAuthenticated } from '../utils/authRedirects';
+import Container from '../components/Container';
 import BASE_URL from '../utils/config';
 
 const ResendVerification = () => {
@@ -39,8 +40,7 @@ const ResendVerification = () => {
     };
 
     return (
-      <div className="max-w-md mx-auto mt-10 p-6 border rounded-lg shadow-md border-gray-300 bg-gray-300/25">
-        <h1 className="text-2xl font-bold text-center mb-4">Resend Verification Email</h1>
+      <Container title="Resend Verification Email">
         <form onSubmit={handleSubmit}>
           <div className="mb-4">
             <label
@@ -60,7 +60,7 @@ const ResendVerification = () => {
           </div>
           <button
             type="submit"
-            className="w-full py-2 px-4 bg-blue-500 text-white font-semibold rounded-lg hover:bg-green-600"
+            className="w-full py-2 px-4 bg-blue-500 text-white font-semibold rounded-lg hover:bg-blue-600"
           >
             Resend Verification
           </button>
@@ -68,68 +68,7 @@ const ResendVerification = () => {
 
         {message && <p className="success-message">{message}</p>}
         {error && <p className="error-message">{error}</p>}
-        {/*
-        <style jsx>{`
-          .resend-verification-container {
-            max-width: 400px;
-            margin: 0 auto;
-            padding: 1rem;
-            background-color: #f9f9f9;
-            border-radius: 8px;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-          }
-
-          h1 {
-            font-size: 24px;
-            margin-bottom: 1rem;
-            text-align: center;
-          }
-
-          form {
-            display: flex;
-            flex-direction: column;
-            gap: 1rem;
-          }
-
-          label {
-            font-size: 16px;
-          }
-
-          input {
-            padding: 0.5rem;
-            font-size: 16px;
-            border: 1px solid #ccc;
-            border-radius: 4px;
-          }
-
-          button {
-            background-color: #007bff;
-            color: white;
-            padding: 0.75rem;
-            font-size: 16px;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-          }
-
-          button:hover {
-            background-color: #0056b3;
-          }
-
-          .success-message {
-            color: green;
-            text-align: center;
-            margin-top: 1rem;
-          }
-
-          .error-message {
-            color: red;
-            text-align: center;
-            margin-top: 1rem;
-          }
-        `}</style>
-        */}
-      </div>
+     </Container>
     );
   };
 

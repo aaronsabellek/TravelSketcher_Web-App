@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { useRedirectIfAuthenticated } from '../utils/authRedirects';
+import Container from '../components/Container';
 import Link from 'next/link';
 import BASE_URL from '../utils/config';
 
@@ -48,8 +49,7 @@ const Login = () => {
   }
 
   return (
-    <div className="max-w-md mx-auto mt-10 p-6 border rounded-lg shadow-md border-gray-300 bg-gray-300/25">
-      <h1 className="text-2xl font-bold text-center mb-4">Login</h1>
+    <Container title="Login">
       <form onSubmit={handleSubmit}>
         <div className="mb-4">
           <label htmlFor="identifier" className="block text-sm font-medium text-gray-700">Email or Username</label>
@@ -89,7 +89,7 @@ const Login = () => {
         </Link>
       </p>
       {error && <p className="text-red-500 mt-4 text-center">{error}</p>}
-    </div>
+    </Container>
   );
 };
 
