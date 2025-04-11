@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
 import { useRedirectIfNotAuthenticated } from '../../utils/authRedirects';
+import Container from '../../components/Container';
 import BASE_URL from '../../utils/config';
 
 interface User {
@@ -61,12 +62,11 @@ const Profile: React.FC = () => {
 
   // Show profile data
   return (
-    <div>
-      <h1>User profile</h1>
+    <Container title="User profile">
       <p>Username: {user.username}</p>
       <p>City: {user.city}</p>
       <p>Country: {user.country}</p>
-    </div>
+    </Container>
   );
 };
 

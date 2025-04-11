@@ -9,7 +9,7 @@ const Home = () => {
   useEffect(() => {
     if (!isLoading) {
       if (isLoggedIn) {
-        router.push('/user/profile');
+        router.push('/destination/get_all');
       } else {
         router.push('/about');
       }

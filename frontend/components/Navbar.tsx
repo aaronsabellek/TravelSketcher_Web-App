@@ -23,7 +23,7 @@ const Navbar = () => {
           <div className="flex items-center space-x-6 text-gray-700 font-medium">
             {isLoggedIn ? (
               <>
-                <Link href="/destinations">Destinations</Link>
+                <Link href="/destination/get_all">Destinations</Link>
                 <Link href="/search">Search</Link>
                 <Link href="/user/profile">Profile</Link>
                 <button

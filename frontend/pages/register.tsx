@@ -4,7 +4,6 @@ import { useRedirectIfAuthenticated } from '../utils/authRedirects';
 import Container from '../components/Container';
 import Link from 'next/link';
 import BASE_URL from '../utils/config';
-import axios from 'axios';
 
 const Register = () => {
   const [username, setUsername] = useState('');
@@ -18,8 +17,6 @@ const Register = () => {
   const [error, setError] = useState('');
   const [message, setMessage] = useState('');
   const router = useRouter();
-
-  const GEMINI_API_KEY = 'AIzaSyDDvs4ZkkRPVpdi-ZfJoyPjcXjofA1TxmQ'
 
   // Redirect if user is authenticated
   useRedirectIfAuthenticated();

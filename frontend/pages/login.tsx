@@ -37,7 +37,6 @@ const Login = () => {
       const userData = await response.json();
       login(userData);
 
-      //router.replace('/user/profile');
     } catch (err) {
       console.error(err);
       setError('Ein Fehler ist beim Login aufgetreten.');
