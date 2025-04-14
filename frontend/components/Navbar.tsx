@@ -16,16 +16,16 @@ const Navbar = () => {
 
           {/* Logo / Titel */}
           <div className="flex-shrink-0 text-gray-800 font-bold text-xl">
-            <Link href="/">MyTravelSite</Link>
+            <Link href="/">TravelSketcher</Link>
           </div>
 
           {/* Navigation Links */}
           <div className="flex items-center space-x-6 text-gray-700 font-medium">
             {isLoggedIn ? (
               <>
-                <Link href="/destination/get_all">Destinations</Link>
-                <Link href="/search">Search</Link>
-                <Link href="/user/profile">Profile</Link>
+                <Link href="/destination/get_all" className="hover:underline">Destinations</Link>
+                <Link href="/search" className="hover:underline">Search</Link>
+                <Link href="/user/profile" className="hover:underline">Profile</Link>
                 <button
                   onClick={logout}
                   className="inline-block bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-semibold transition"
@@ -35,8 +35,8 @@ const Navbar = () => {
               </>
             ) : (
               <>
-                <Link href="/about">About</Link>
-                <Link href="/register">Registration</Link>
+                <Link href="/about" className="hover:underline">About</Link>
+                <Link href="/register" className="hover:underline">Registration</Link>
                 <Link href="/login">
                   <span className="inline-block bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-semibold transition">
                     Login
