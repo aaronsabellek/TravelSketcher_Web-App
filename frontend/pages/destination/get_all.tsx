@@ -1,5 +1,4 @@
-import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import React, { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/router';
 import { useRedirectIfNotAuthenticated } from '../../utils/authRedirects';
 import Link from 'next/link';
@@ -17,14 +16,33 @@ interface Destination {
   pricing: string;
   travel_duration_flight: string;
   trip_pricing_flight: string;
+  free_text: string;
 }
 
 const DestinationsPage = () => {
   const [destinations, setDestinations] = useState<Destination[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
+  const [expandedCard, setExpandedCard] = useState<string | null>(null);
+
   const router = useRouter();
 
+  // Edit/Delete
+  const [menuOpenFor, setMenuOpenFor] = useState<string | null>(null);
+  const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
+  const [deleting, setDeleting] = useState<boolean>(false);
+  const menuRef = useRef<HTMLDivElement | null>(null);
+
+  // Notes
+  const [noteForId, setNoteForId] = useState<string | null>(null);
+  const [noteText, setNoteText] = useState<string>('');
+  const [editingNote, setEditingNote] = useState<boolean>(false);
+  const [savingNote, setSavingNote] = useState<boolean>(false);
+
+  // User
+  const [userCity, setUserCity] = useState<string | null>(null);
+
+  // Redirect if user is not logged in
   useRedirectIfNotAuthenticated();
 
   // Funktion zum Abrufen der Destinations
@@ -63,94 +81,390 @@ const DestinationsPage = () => {
     fetchDestinations();
   }, []);
 
-  // Handler für Bearbeiten und Löschen (je nach Funktionalität)
-  const handleEdit = (id: string) => {
-    // Logik für Bearbeiten
-    router.push(`/edit-destination/${id}`);
+  // Add destination
+  const handleAddClick = () => {
+    router.push('/destination/add');
   };
 
-  const handleDelete = async (id: string) => {
+  // Get city from user data for Rome2Rio-link
+  useEffect(() => {
+    const fetchUser = async () => {
+      try {
+        const res = await fetch(`${BASE_URL}/user/profile`, {
+          method: 'GET',
+          credentials: 'include',
+        });
+
+        if (!res.ok) throw new Error('Fehler beim Abrufen der Userdaten');
+        const data = await res.json();
+        setUserCity(data.city); // <-- Genau das wollen wir
+      } catch (err) {
+        console.error('Userdaten konnten nicht geladen werden', err);
+      }
+    };
+
+    fetchUser();
+  }, []);
+
+  // Handler to edit destination
+  const handleEdit = (id: string) => {
+    // Logik für Bearbeiten
+    router.push(`/destination/edit/${id}`);
+  };
+
+  // Handler to delete destination
+  const handleDeleteConfirm = (id: string) => {
+    setMenuOpenFor(null); // Close menu
+    setConfirmDeleteId(id); // Open verification window
+  };
+
+  // Close edit/delete window with clicks outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
+        setMenuOpenFor(null); // Menü schließen
+      }
+    };
+
+    if (menuOpenFor) {
+      document.addEventListener('mousedown', handleClickOutside);
+    } else {
+      document.removeEventListener('mousedown', handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [menuOpenFor]);
+
+  // Open notes
+  const openNote = (id: string) => {
+    const destination = destinations.find((d) => d.id === id);
+    setNoteText(destination?.free_text || '');
+    setNoteForId(id);
+    setEditingNote(false); // Start im Anzeigemodus
+  };
+
+  // Safe notes
+  const saveNote = async () => {
+    if (!noteForId) return;
+    if (noteText.length > 1000) {
+      alert('Die Notiz darf maximal 1000 Zeichen lang sein.');
+      return;
+    }
+
+    setSavingNote(true);
+
     try {
-      await axios.delete(`/destination/delete/${id}`);
-      setDestinations(destinations.filter((dest) => dest.id !== id));
+      const response = await fetch(`${BASE_URL}/destination/edit_notes/${noteForId}`, {
+        method: 'POST',
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ free_text: noteText }),
+      });
+
+      if (!response.ok) throw new Error('Speichern fehlgeschlagen');
+
+      // Lokale Aktualisierung
+      setDestinations((prev) =>
+        prev.map((d) => (d.id === noteForId ? { ...d, free_text: noteText } : d))
+      );
+      setNoteForId(null);
     } catch (err) {
-      setError('Fehler beim Löschen der Destination');
+      alert('Fehler beim Speichern der Notiz.');
+    } finally {
+      setSavingNote(false);
     }
   };
 
   return (
-    <div className="container max-w-6xl mx-auto">
+    <div className="container max-w-6xl mx-auto px-4">
       <h1 className="text-3xl font-bold mb-6">My Destinations</h1>
       {loading && <p>Loading...</p>}
       {error && <p className="text-red-500">{error}</p>}
-      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-3 gap-4 hover:">
-        {destinations.map((destination) => (
-        <Link href="/user/profile">
-          <div key={destination.id} className="bg-white hover:brightness-95 rounded-lg pb-2">
-            <div className="relative aspect-[16/12] w-full rounded-lg overflow-hidden">
-              <img
-                src='/travel-img-2.png'
-                alt={destination.title}
-                className="w-full h-full object-cover hover:brightness-75 hover:scale-105 transition-all duration-500"
-              />
-              <div className="absolute top-2 right-2 text-white">
-                <button onClick={() => handleEdit(destination.id)} className="text-xl">⋮</button>
-                <button onClick={() => handleDelete(destination.id)} className="ml-2 text-xl">❌</button>
+      <div className="grid grid-cols-1 xs:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 gap-4">
+        {destinations.map((destination) => {
+
+          {/* Destination */}
+          const isExpanded = expandedCard === destination.id;
+
+          return (
+
+            <div
+              key={destination.id}
+              className="bg-white hover:brightness-95 rounded-lg pb-2"
+              onClick={(e) => {
+                const target = e.target as HTMLElement;
+                if (target.closest('[data-ignore-click]')) return; // <-- Neu: Events ignorieren
+                setExpandedCard(isExpanded ? null : destination.id);
+              }}
+            >
+
+              {/* Image */}
+              <div className="relative aspect-[16/12] w-full rounded-lg overflow-hidden">
+                <Link href="/user/profile">
+                  <img
+                    src='/travel-img-2.png'
+                    alt={destination.title}
+                    className="w-full h-full object-cover hover:brightness-75 hover:scale-105 transition-all duration-500"
+                  />
+                </Link>
+
+                {/* Edit/Delete */}
+                <div className="absolute top-2 right-2 text-white">
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation(); // verhindert, dass das Card-Click-Event ausgelöst wird
+                      setMenuOpenFor(destination.id === menuOpenFor ? null : destination.id);
+                    }}
+                    className="text-xl transition-size duration-300 hover:text-2xl w-7 cursor-pointer"
+                  >
+                    ⋮
+                  </button>
+
+                  {menuOpenFor === destination.id && (
+                    <div
+                      ref={menuRef}
+                      className="absolute right-0 mt-2 w-28 bg-white text-black rounded shadow-md z-50"
+                      onClick={(e) => e.stopPropagation()} // damit der Card-Click nicht ausgelöst wird
+                    >
+                      <button
+                        onClick={() => handleEdit(destination.id)}
+                        className="block w-full text-left px-4 py-2 hover:bg-gray-100"
+                      >
+                        ✏️ Edit
+                      </button>
+                      <button
+                        onClick={() => handleDeleteConfirm(destination.id)}
+                        className="block w-full text-left px-4 py-2 hover:bg-gray-100 text-red-600"
+                      >
+                        🗑️ Delete
+                      </button>
+                    </div>
+                  )}
+
+                </div>
+              </div>
+
+              {/* Title */}
+              <div>
+                <div className="flex p-2">
+                  <div className="mr-5">
+                    <Link href="/user/profile">
+                      <h2 className="text-xl font-semibold hover:underline">{destination.title}</h2>
+                    </Link>
+                      <p className="text-sm text-gray-500">{destination.country}</p>
+                  </div>
+                  <h2 className="mt-2 text-base text-white bg-blue-500 pt-2 px-3 rounded-2xl">{destination.status}</h2>
+                </div>
+
+                {/* Tags */}
+                <div
+                  className={`mt-2 px-2 ${
+                    isExpanded ? 'flex flex-wrap gap-2' : 'overflow-x-auto whitespace-nowrap pb-2'
+                  }`}
+                >
+                  {destination.tags.split(',').map((tag, idx) => (
+                    <span
+                      key={idx}
+                      className="text-xs bg-gray-200 rounded-full px-2 py-1 mr-2 mb-1 inline-block"
+                    >
+                      {tag.trim()}
+                    </span>
+                  ))}
+                </div>
+
+                {/* Link icons */}
+                <div className="flex justify-between space-x-4 p-2">
+
+                  <div className="grid grid-cols-3 gap-3">
+                    {userCity && (
+                      <button
+                      onClick={() =>
+                        window.open(`https://www.rome2rio.com/map/${userCity}/${destination.title}`, '_blank')
+                      }
+                      className="text-blue-500 hover:text-blue-700 cursor-pointer"
+                    >
+                      <img src="/rome2rio_icon.png" className="h-7" />
+                    </button>
+                    )}
+
+                    <button
+                      onClick={() =>
+                        window.open(`https://www.booking.com/${destination.title}`, '_blank')
+                      }
+                      className="text-blue-500 relative right-2 hover:text-blue-700 cursor-pointer"
+                    >
+                      <img src="/booking_icon.png" className="h-7" />
+                    </button>
+
+                    <button
+                      onClick={() =>
+                        window.open(`https://www.google.com/search?q=${destination.title} ${destination.country}`, '_blank')
+                      }
+                      className="text-blue-500 relative right-2 hover:text-blue-700 cursor-pointer"
+                    >
+                      <img src="/google_icon.png" className="h-7" />
+                    </button>
+
+                  </div>
+
+                  {/* Notes icon */}
+                  <div>
+                    <button
+                      data-ignore-click
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        openNote(destination.id);
+                      }}
+                      className="text-green-500 h-7 hover:text-green-700 justify-end"
+                    >
+                      <img src="/notes_icon.png" alt="Notizen" className="h-7 cursor-pointer" />
+                    </button>
+                  </div>
+
+                </div>
               </div>
             </div>
-            <div className="">
-              <div className="flex p-2">
-                <div className="mr-5">
-                    <h2 className="text-xl font-semibold">{destination.title}</h2>
-                    <p className="text-sm text-gray-500">{destination.country}</p>
-                </div>
-                <h2 className="mt-2 text-base text-white bg-blue-500 pt-2 px-3 rounded-2xl">{destination.status}</h2>
-              </div>
+          );
+        })}
+      </div>
 
-              <p className="hidden  mt-2 text-lg">{destination.tags}</p>
+      {/* Add Destination */}
+      <div className="flex justify-center mt-4">
+        <button
+          onClick={handleAddClick}
+          className="transition-opacity duration-300 opacity-18 hover:opacity-50"
+        >
+          <img src="/plus_icon.png" alt="Add Destination" className="w-12 h-12" />
+        </button>
+      </div>
 
-              {/* Nach rechts wischbarer Bereich */}
-              <div className="mt-4 hidden p-4 border shadow-md border-gray-300 bg-gray-300/25">
-                <div className="flex space-x-4">
-                  <div>
-                    <p>⏰: {destination.duration}</p>
-                    <p>📅: {destination.time}</p>
-                    <p>💸: {destination.pricing}</p>
-                    <p>✈️: {destination.travel_duration_flight}, {destination.trip_pricing_flight}</p>
-                  </div>
-                </div>
-              </div>
-
-              {/* Symbole für Google-Suche, Notizen und Rome2Rio */}
-              <div className="hidden mt-4 flex justify-end space-x-4">
-                <button
-                  onClick={() =>
-                    window.open(`https://www.google.com/search?q=${destination.title} ${destination.country}`, '_blank')
+      {/* Delete Destination */}
+      {confirmDeleteId && (
+        <div className="fixed inset-0 flex items-center justify-center bg-black/20 z-50">
+          <div className="bg-white p-6 rounded-lg shadow-xl w-80">
+            <h2 className="text-lg font-semibold mb-4">Destination löschen?</h2>
+            <p className="mb-4 text-sm text-gray-600">
+              Bist du sicher, dass du diese Destination löschen möchtest? Dies kann nicht rückgängig gemacht werden.
+            </p>
+            <div className="flex justify-end space-x-4">
+              <button
+                className="px-4 py-2 text-gray-600 hover:text-black"
+                onClick={() => setConfirmDeleteId(null)}
+              >
+                Abbrechen
+              </button>
+              <button
+                className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700"
+                onClick={async () => {
+                  setDeleting(true);
+                  try {
+                    const response = await fetch(`${BASE_URL}/destination/delete/${confirmDeleteId}`, {
+                      method: 'DELETE',
+                      credentials: 'include',
+                    });
+                    if (!response.ok) throw new Error('Fehler beim Löschen');
+                    setDestinations(destinations.filter((dest) => dest.id !== confirmDeleteId));
+                    setConfirmDeleteId(null);
+                  } catch (err) {
+                    alert('Löschen fehlgeschlagen.');
+                  } finally {
+                    setDeleting(false);
                   }
-                  className="text-blue-500 hover:text-blue-700"
-                >
-                  🔍
-                </button>
-                <button
-                  onClick={() => alert('Freitext Notizen anzeigen')} // Logik für Notizen einfügen
-                  className="text-green-500 hover:text-green-700"
-                >
-                  📝
-                </button>
-                <button
-                  onClick={() =>
-                    window.open(`https://www.rome2rio.com/map/${destination.country} to ${destination.title}`, '_blank')
-                  }
-                  className="text-orange-500 hover:text-orange-700"
-                >
-                  🚗
-                </button>
-              </div>
+                }}
+                disabled={deleting}
+              >
+                {deleting ? 'Lösche...' : 'Ja, löschen'}
+              </button>
             </div>
           </div>
-          </Link>
-        ))}
-      </div>
+        </div>
+      )}
+
+      {/* Show notes */}
+      {noteForId && (
+        <div data-ignore-click className="fixed inset-0 flex items-center justify-center bg-black/20 z-50">
+          <div className="bg-white p-6 rounded-lg shadow-xl w-[90%] max-w-md relative">
+            <h2 className="text-lg font-semibold mb-4">Notizen zur Destination</h2>
+
+            {!editingNote ? (
+              <>
+                <div className="whitespace-pre-wrap text-sm text-gray-800 overflow-y-auto max-h-64">
+                  {
+                    // Auto-Linking von URLs
+                    noteText
+                      .split(/(\s+)/)
+                      .map((part, i) =>
+                        part.match(/^https?:\/\/\S+$/) ? (
+                          <a
+                            key={i}
+                            href={part}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-blue-600 hover:underline break-all"
+                          >
+                            {part}
+                          </a>
+                        ) : (
+                          part
+                        )
+                      )
+                  }
+                </div>
+                <button
+                  onClick={() => setEditingNote(true)}
+                  className="absolute top-4 right-4 text-sm text-blue-600 hover:underline"
+                >
+                  ✏️ Bearbeiten
+                </button>
+                <div className="flex justify-end mt-6">
+                  <button
+                    className="px-4 py-2 text-gray-600 hover:text-black"
+                    onClick={() => setNoteForId(null)}
+                  >
+                    Schließen
+                  </button>
+                </div>
+              </>
+            ) : (
+              <>
+                <textarea
+                  value={noteText}
+                  onChange={(e) => setNoteText(e.target.value)}
+                  maxLength={500}
+                  rows={8}
+                  className="w-full p-2 border rounded resize-none whitespace-pre-wrap break-words text-sm"
+                />
+                <div className="text-right text-sm text-gray-500 mt-1">
+                  {noteText.length}/500 Zeichen
+                </div>
+                <div className="flex justify-end space-x-4 mt-4">
+                  <button
+                    className="px-4 py-2 text-gray-600 hover:text-black"
+                    onClick={() => {
+                      setEditingNote(false);
+                      const d = destinations.find((d) => d.id === noteForId);
+                      setNoteText(d?.free_text || '');
+                    }}
+                  >
+                    Abbrechen
+                  </button>
+                  <button
+                    className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700"
+                    onClick={saveNote}
+                    disabled={savingNote}
+                  >
+                    {savingNote ? 'Speichere...' : 'Speichern'}
+                  </button>
+                </div>
+              </>
+            )}
+          </div>
+        </div>
+      )}
+
+
     </div>
   );
 };
