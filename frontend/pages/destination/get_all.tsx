@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { useRouter } from 'next/router';
 import { motion, AnimatePresence } from "framer-motion";
 import { toast } from "sonner";
@@ -43,6 +43,8 @@ const DestinationsPage = () => {
 
   // Reorder
   const [isReorderMode, setIsReorderMode] = useState<boolean>(false);
+  const [originalOrder, setOriginalOrder] = useState<Destination[]>([]);
+  const [savedOrder, setSavedOrder] = useState<Destination[] | null>(null);
 
   // User
   const [userCity, setUserCity] = useState<string | null>(null);
@@ -72,6 +74,7 @@ const DestinationsPage = () => {
 
       if (data.destinations) {
         setDestinations(data.destinations);
+        setOriginalOrder(data.destinations);
       }
     } catch (err) {
       console.error('Error fetching destinations:', err);
@@ -210,11 +213,39 @@ const DestinationsPage = () => {
 
       if (!response.ok) throw new Error('Fehler beim Speichern der Reihenfolge');
       toast.success('Reihenfolge erfolgreich gespeichert!');
+      setSavedOrder([...destinations]);
     } catch (err) {
       console.error('Fehler beim Speichern der neuen Reihenfolge:', err);
       toast.error('Beim Speichern ist ein Fehler aufgetreten.');
     }
   };
+
+  const toggleReorderMode = () => {
+    if (!isReorderMode) {
+      // Reorder-Mode aktivieren, aktuelle Reihenfolge merken
+      setOriginalOrder([...destinations]);
+      setIsReorderMode(true);
+    } else {
+      // Reorder-Mode deaktivieren
+      if (savedOrder) {
+        setDestinations([...savedOrder]); // gespeicherte Reihenfolge anwenden
+      } else {
+        setDestinations([...originalOrder]); // ursprüngliche Reihenfolge wiederherstellen
+      }
+      setIsReorderMode(false);
+    }
+  };
+
+  const isSameOrder = (a: Destination[], b: Destination[]) => {
+    if (a.length !== b.length) return false;
+    return a.every((dest, idx) => dest.id === b[idx].id);
+  };
+
+  const hasOrderChanged = useMemo(
+    () => !isSameOrder(destinations, originalOrder),
+    [destinations, originalOrder]
+  );
+
 
   return (
     <div className="container max-w-6xl mx-auto px-4">
@@ -225,7 +256,7 @@ const DestinationsPage = () => {
       {/* Button zum Aktivieren des Reorder-Modus */}
       <div className="flex justify-between mb-3">
         <button
-          onClick={() => setIsReorderMode(!isReorderMode)}
+          onClick={toggleReorderMode}
           className={`px-3 py-1 text-xl cursor-pointer transition-all duration-300 ease-in-out transform active:scale-95
             ${isReorderMode ? 'opacity-70' : 'opacity-100'} hover:scale-115`}
         >
@@ -450,7 +481,12 @@ const DestinationsPage = () => {
           >
             <button
               onClick={saveNewOrder}
-              className={`px-4 py-2 bg-blue-500 text-white rounded-xl hover:bg-blue-600 cursor-pointer`}
+              disabled={!hasOrderChanged}
+              className={`px-4 py-2 font-light bg-blue-500 rounded text-white rounded-xl transition ${
+                hasOrderChanged
+                  ? 'opacity-100 hover:bg-blue-600 cursor-pointer'
+                  : 'opacity-50'
+              }`}
             >
               💾 Save
             </button>
