@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useRedirectIfAuthenticated } from '../utils/authRedirects';
+import { AnimatePresence, motion } from 'framer-motion';
 import Link from 'next/link';
 
 const About = () => {
@@ -25,26 +26,42 @@ const About = () => {
         {/* Overlay */}
         <div className="absolute inset-0 z-10 flex items-center justify-center pointer-events-none">
           <div className="pointer-events-auto transition-opacity duration-500 flex flex-col items-center justify-center text-center">
-            {showButton ? (
-              <div>
-              <h2 className="text-white mb-4 text-3xl sm:text-4xl md:text-5xl font-extrabold text-center transition-colors duration-500 drop-shadow-lg">
-                Register and find out:
-              </h2>
-              <Link href="/register">
-                <button
-                  className="border-2 mt-4 border-white text-white px-6 py-3 text-lg font-semibold rounded-lg transition-all duration-300 hover:bg-white hover:text-black"
-                  onMouseEnter={() => setIsButtonHovered(true)}
-                  onMouseLeave={() => setIsButtonHovered(false)}
+            <AnimatePresence mode="wait">
+              {showButton ? (
+                <motion.div
+                  key="with-button"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  transition={{ duration: 0.3 }}
+                  className="flex flex-col items-center"
                 >
-                  Register
-                </button>
-              </Link>
-              </div>
-            ) : (
-              <h2 className="text-white text-3xl sm:text-4xl md:text-5xl font-extrabold text-center transition-colors duration-500 drop-shadow-lg">
-                Which adventure awaits you?
-              </h2>
-            )}
+                  <h2 className="text-white mb-4 text-3xl sm:text-4xl md:text-5xl font-extrabold text-center transition-colors duration-500 drop-shadow-lg">
+                    Register and find out:
+                  </h2>
+                  <Link href="/register">
+                    <button
+                      className="border-2 mt-4 cursor-pointer border-white text-white px-6 py-3 text-lg font-semibold rounded-lg transition-all duration-300 hover:bg-white hover:text-black"
+                      onMouseEnter={() => setIsButtonHovered(true)}
+                      onMouseLeave={() => setIsButtonHovered(false)}
+                    >
+                      Register
+                    </button>
+                  </Link>
+                </motion.div>
+              ) : (
+                <motion.h2
+                  key="without-button"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  transition={{ duration: 0.3 }}
+                  className="text-white text-3xl sm:text-4xl md:text-5xl font-extrabold text-center drop-shadow-lg"
+                >
+                  Which adventure awaits you?
+                </motion.h2>
+              )}
+            </AnimatePresence>
           </div>
         </div>
 

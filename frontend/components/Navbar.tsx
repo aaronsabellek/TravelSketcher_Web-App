@@ -28,7 +28,7 @@ const Navbar = () => {
                 <Link href="/user/profile" className="hover:underline">Profile</Link>
                 <button
                   onClick={logout}
-                  className="inline-block bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-semibold transition"
+                  className="inline-block cursor-pointer bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-semibold transition"
                 >
                   Logout
                 </button>

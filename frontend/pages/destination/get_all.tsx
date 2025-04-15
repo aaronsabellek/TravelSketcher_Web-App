@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/router';
 import { motion, AnimatePresence } from "framer-motion";
+import { toast } from "sonner";
 import { useRedirectIfNotAuthenticated } from '../../utils/authRedirects';
 import Link from 'next/link';
 import BASE_URL from '../../utils/config';
@@ -208,10 +209,10 @@ const DestinationsPage = () => {
       });
 
       if (!response.ok) throw new Error('Fehler beim Speichern der Reihenfolge');
-      alert('Reihenfolge erfolgreich gespeichert!');
+      toast.success('Reihenfolge erfolgreich gespeichert!');
     } catch (err) {
       console.error('Fehler beim Speichern der neuen Reihenfolge:', err);
-      alert('Beim Speichern ist ein Fehler aufgetreten.');
+      toast.error('Beim Speichern ist ein Fehler aufgetreten.');
     }
   };
 
@@ -228,7 +229,7 @@ const DestinationsPage = () => {
           className={`px-3 py-1 text-xl cursor-pointer transition-all duration-300 ease-in-out transform active:scale-95
             ${isReorderMode ? 'opacity-70' : 'opacity-100'} hover:scale-115`}
         >
-          🔁
+          <img src="/change_icon.png" className="h-7" />
         </button>
       </div>
 
@@ -237,11 +238,7 @@ const DestinationsPage = () => {
       {error && <p className="text-red-500">{error}</p>}
 
       {/* Destinations */}
-      <motion.div
-        layout
-        className="grid grid-cols-2 xs:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 gap-4"
-      >
-        <AnimatePresence>
+      <div className="grid grid-cols-2 xs:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 gap-4">
           {destinations.map((destination, index) => {
 
             const isExpanded = expandedCard === destination.id;
@@ -250,53 +247,47 @@ const DestinationsPage = () => {
             return (
               <motion.div
                 key={destination.id}
-                layout // 💡 Wichtig für das sanfte Umsortieren
-                transition={{
-                  layout: { duration: 0.4, ease: [0.25, 1, 0.5, 1] }, // sanfteres easing
-                }}
-                initial={{ opacity: 0, y: -10 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: 10 }}
-                className="relative"
+                layout="position"
+                transition={{ duration: 0.5, ease: "easeOut" }}
+                className="relative flex flex-col items-center space-y-2"
               >
 
                 {/* Reorder buttons mit eigener Animation */}
-                <div className="flex justify-center ">
-                  <AnimatePresence mode="wait">
-                    {isReorderMode && (
-                      <motion.div
-                        key={`reorder-buttons-${index}`}
-                        layout // 💡 NEU
-                        layoutId={`reorder-${destination.id}`}
-                        initial={{ opacity: 0, y: -5 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        exit={{ opacity: 0, y: -5 }}
-                        transition={{ duration: 0.3 }}
-                        className="flex space-x-4 px-2 py-1 rounded-md"
+                <AnimatePresence>
+                  {isReorderMode && (
+                    <motion.div
+                      key={`reorder-buttons-${destination.id}`}
+                      layout
+                      layoutId={`reorder-${destination.id}`}
+                      initial={{ opacity: 0, y: -10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: -10 }}
+                      transition={{ duration: 0.5 }}
+                      className="absolute -top-4 z-30 flex space-x-4"
+                      data-ignore-click
+                    >
+                      <button
+                        onClick={() => moveDestinationUp(index)}
+                        disabled={index === 0}
+                        className="transition-transform duration-200 hover:scale-125"
                       >
-                        <button
-                          onClick={() => moveDestinationUp(index)}
-                          disabled={index === 0}
-                          className="transition-transform duration-200 hover:scale-125"
-                        >
-                          ⬅️
-                        </button>
-                        <button
-                          onClick={() => moveDestinationDown(index)}
-                          disabled={index === destinations.length - 1}
-                          className="transition-transform duration-200 hover:scale-125"
-                        >
-                          ➡️
-                        </button>
-                      </motion.div>
-                    )}
-                  </AnimatePresence>
-                </div>
+                        <img src="/left_icon.png" className="h-3" />
+                      </button>
+                      <button
+                        onClick={() => moveDestinationDown(index)}
+                        disabled={index === destinations.length - 1}
+                        className="transition-transform duration-200 hover:scale-125"
+                      >
+                        <img src="/right_icon.png" className="h-3" />
+                      </button>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
 
                 {/* Destination container */}
                 <div
                   key={destination.id}
-                  className="bg-white hover:brightness-95 rounded-lg pb-2"
+                  className="w-full mt-3 bg-white hover:brightness-95 rounded-lg pb-2"
                   onClick={(e) => {
                     const target = e.target as HTMLElement;
                     if (target.closest('[data-ignore-click]')) return; // Events ignorieren
@@ -363,20 +354,31 @@ const DestinationsPage = () => {
                     </div>
 
                     {/* Tags */}
-                    <div
-                      className={`mt-2 px-2 ${
-                        isExpanded ? 'flex flex-wrap gap-2' : 'overflow-x-auto whitespace-nowrap pb-2'
-                      }`}
+                    <motion.div
+                      layout
+                      initial={false}
+                      animate={{ opacity: 1 }}
+                      transition={{ layout: { duration: 0.4, ease: "easeInOut" } }}
+                      className="px-2 mt-2"
                     >
-                      {destination.tags.split(',').map((tag, idx) => (
-                        <span
-                          key={idx}
-                          className="text-xs bg-gray-200 rounded-full px-2 py-1 mr-2 mb-1 inline-block"
-                        >
-                          {tag.trim()}
-                        </span>
-                      ))}
-                    </div>
+                      <div
+                        className={
+                          isExpanded
+                            ? "flex flex-wrap gap-2"
+                            : "whitespace-nowrap overflow-x-auto pb-2"
+                        }
+                      >
+                        {destination.tags.split(",").map((tag, idx) => (
+                          <motion.span
+                            layout
+                            key={idx}
+                            className="text-xs bg-gray-200 rounded-full px-2 py-1 mr-2 mb-1 inline-block"
+                          >
+                            {tag.trim()}
+                          </motion.span>
+                        ))}
+                      </div>
+                    </motion.div>
 
                     {/* Link icons */}
                     <div className="flex justify-between space-x-4 p-2">
@@ -432,8 +434,8 @@ const DestinationsPage = () => {
               </motion.div>
             );
           })}
-        </AnimatePresence>
-      </motion.div>
+
+      </div>
 
       {/* Add and Reorder */}
       <AnimatePresence mode="wait">
@@ -448,7 +450,7 @@ const DestinationsPage = () => {
           >
             <button
               onClick={saveNewOrder}
-              className="px-4 py-2 bg-blue-500 text-white rounded-xl hover:bg-blue-600 cursor-pointer"
+              className={`px-4 py-2 bg-blue-500 text-white rounded-xl hover:bg-blue-600 cursor-pointer`}
             >
               💾 Save
             </button>
@@ -564,12 +566,12 @@ const DestinationsPage = () => {
                 <textarea
                   value={noteText}
                   onChange={(e) => setNoteText(e.target.value)}
-                  maxLength={500}
+                  maxLength={1000}
                   rows={8}
                   className="w-full p-2 border rounded resize-none whitespace-pre-wrap break-words text-sm"
                 />
                 <div className="text-right text-sm text-gray-500 mt-1">
-                  {noteText.length}/500 Zeichen
+                  {noteText.length}/1000 Zeichen
                 </div>
                 <div className="flex justify-end space-x-4 mt-4">
                   <button
