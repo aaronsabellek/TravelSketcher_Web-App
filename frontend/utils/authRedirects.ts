@@ -2,7 +2,7 @@ import { useEffect } from 'react';
 import { useRouter } from 'next/router';
 import { useAuth } from '../contexts/AuthContext';
 
-export const useRedirectIfAuthenticated = (redirectTo: string = '/user/profile') => {
+export const useRedirectIfAuthenticated = (redirectTo: string = '/destination/get_all') => {
   const { isLoggedIn, isLoading } = useAuth();
   const router = useRouter();
 

@@ -55,17 +55,22 @@ const Register = () => {
     <Container title="Register">
       <form onSubmit={handleSubmit}>
         {[
-          { label: 'Username', id: 'username', value: username, setValue: setUsername },
-          { label: 'Email', id: 'email', value: email, setValue: setEmail },
-          { label: 'Password', id: 'password', value: password, setValue: setPassword, type: 'password' },
+          { label: 'Username', id: 'username', value: username, setValue: setUsername, required: true },
+          { label: 'Email', id: 'email', value: email, setValue: setEmail, required: true },
+          { label: 'Password', id: 'password', value: password, setValue: setPassword, type: 'password', required: true },
           { label: 'City', id: 'city', value: city, setValue: setCity },
           { label: 'Country', id: 'country', value: country, setValue: setCountry },
-          { label: 'Longitude', id: 'longitude', value: longitude, setValue: setLongitude },
-          { label: 'Latitude', id: 'latitude', value: latitude, setValue: setLatitude },
-          { label: 'Currency', id: 'currency', value: currency, setValue: setCurrency },
-        ].map(({ label, id, value, setValue, type = 'text' }) => (
+        ].map(({ label, id, value, setValue, type = 'text', required }) => (
           <div className="mb-4" key={id}>
-            <label htmlFor={id} className="block text-sm font-medium text-gray-700">{label}</label>
+            <label htmlFor={id} className="block text-sm font-medium text-gray-700">
+              {label}
+              {required && (
+                <>
+                  {" "}
+                  (<span className="text-red-500">*</span>required)
+                </>
+              )}
+            </label>
             <input
               type={type}
               id={id}
@@ -79,7 +84,7 @@ const Register = () => {
 
         <button
           type="submit"
-          className="w-full py-2 px-4 bg-blue-500 text-white font-semibold rounded-lg hover:bg-blue-600"
+          className="w-full py-2 px-4 bg-blue-500 text-white font-semibold rounded-lg cursor-pointer hover:bg-blue-600"
         >
           Register
         </button>

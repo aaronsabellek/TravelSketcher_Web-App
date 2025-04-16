@@ -13,13 +13,10 @@ interface Destination {
   country: string;
   status: string;
   tags: string;
-  duration: string;
-  time: string;
-  pricing: string;
-  travel_duration_flight: string;
-  trip_pricing_flight: string;
   free_text: string;
 }
+
+// Drei Punkte (Optionen) besser sichtbar machen
 
 const DestinationsPage = () => {
   const [destinations, setDestinations] = useState<Destination[]>([]);
@@ -60,8 +57,6 @@ const DestinationsPage = () => {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
-          // Hier könntest du eventuell noch einen Authentifizierungsheader hinzufügen, wenn nötig
-          // 'Authorization': `Bearer ${token}`
         },
       });
 
@@ -330,9 +325,9 @@ const DestinationsPage = () => {
                   <div className="relative aspect-[16/12] w-full rounded-lg overflow-hidden">
                     <Link href="/user/profile">
                       <img
-                        src='/travel-img-2.png'
+                        src={destination.img_link}
                         alt={destination.title}
-                        className="w-full h-full object-cover hover:brightness-75 hover:scale-105 transition-all duration-500"
+                        className="w-full h-full object-cover hover:scale-105 transition-all duration-500"
                       />
                     </Link>
 
