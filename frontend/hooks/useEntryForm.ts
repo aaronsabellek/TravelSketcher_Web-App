@@ -28,15 +28,15 @@ export const useEntryForm = ({ onSubmit, initialData }: UseEntryFormProps) => {
     setTagsArray(tagsArray.filter(tag => tag !== tagToRemove));
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleFormSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!title.trim()) return;
     setIsSaving(true);
 
-    const formData: FormData = {
+    const formData = {
       title,
       country,
-      img_link: selectedImageUrl,  // Hier den selectedImageUrl als img_link übergeben
+      img_link: selectedImageUrl,
       status,
       tags: tagsArray.join(','),
     };
@@ -58,7 +58,7 @@ export const useEntryForm = ({ onSubmit, initialData }: UseEntryFormProps) => {
     setTagsArray,
     removeTag,
     isSaving,
-    handleSubmit,
+    handleFormSubmit,
     selectedImageUrl,
     setSelectedImageUrl,
   };

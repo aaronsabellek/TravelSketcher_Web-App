@@ -3,8 +3,7 @@ import { useEntryForm } from '../../hooks/useEntryForm';
 import { useImageSearch } from '../../hooks/useImageSearch';
 import ImageSearchModal from './ImageSearchModal';
 import TagsInput from './TagsInput';
-
-// Automatisches Weiterladen von Bildern
+import { useFormSync } from '../../hooks/useFormSync';
 
 // Props-Typ definieren
 interface EntryFormProps {
@@ -19,10 +18,11 @@ interface EntryFormProps {
   submitLabel: string;
 }
 
-const EntryForm: React.FC<EntryFormProps> = ({ onSubmit, initialData, submitLabel }) => {
+const EntryForm: React.FC<EntryFormProps> = ({ onSubmit, initialData }) => {
   const form = useEntryForm({ onSubmit, initialData });
+
   const {
-    updateTitle, // Titel aktualisieren
+    updateTitle,
     selectedImageUrl,
     handleImageSelect,
     imageSearchTerm,
@@ -35,6 +35,7 @@ const EntryForm: React.FC<EntryFormProps> = ({ onSubmit, initialData, submitLabe
     isModalOpen,
     openModal,
     closeModal,
+    handleScroll,
     imageResults,
     isSearching,
     loadMoreImages,
@@ -45,75 +46,82 @@ const EntryForm: React.FC<EntryFormProps> = ({ onSubmit, initialData, submitLabe
     setHasManuallyEditedSearch,
   } = useImageSearch();
 
-  // Den title an den Hook übergeben, wenn er sich ändert
-  useEffect(() => {
-    if (form.title) {
-      updateTitle(form.title); // Titel im Hook aktualisieren
-    }
-  }, [form.title, updateTitle]); // Hook wird jedes Mal aufgerufen, wenn sich der title ändert
 
-  // Wenn ein Bild aus der Bildsuche ausgewählt wurde, ins Formular übernehmen
-  useEffect(() => {
-    if (selectedImageUrl) {
-      form.setSelectedImageUrl(selectedImageUrl); // Bild ins Formular übernehmen
-    }
-  }, [selectedImageUrl, form]);
+  // Sync title with image search
+  useFormSync({ form, selectedImageUrl, updateTitle });
 
   return (
-    <form onSubmit={form.handleSubmit}>
-      {/* Title Field */}
+    <form onSubmit={form.handleFormSubmit}>
+
+      {/* Title */}
       <div className="mb-4">
-        <label className="block text-sm font-medium text-gray-700">Title</label>
+        <label htmlFor="title" className="block text-sm font-medium text-gray-700">
+            Title (<span className="text-red-500">*</span>required)
+        </label>
         <input
-          type="text"
-          value={form.title}
-          onChange={(e) => form.setTitle(e.target.value)}
-          required
-          className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm"
+            type="text"
+            id="title"
+            value={form.title}
+            placeholder="Paris, New York, Tokyo, ..."
+            onChange={(e) => form.setTitle(e.target.value)}
+            required
+            className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm bg-white"
         />
       </div>
 
-      {/* Country Field */}
+      {/* Country */}
       <div className="mb-4">
-        <label className="block text-sm font-medium text-gray-700">Country</label>
+        <label htmlFor="country" className="block text-sm font-medium text-gray-700">
+          Country
+        </label>
         <input
-          type="text"
-          value={form.country}
-          onChange={(e) => form.setCountry(e.target.value)}
-          className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm"
+            type="text"
+            id="country"
+            value={form.country}
+            onChange={(e) => form.setCountry(e.target.value)}
+            className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm bg-white"
         />
       </div>
 
-      {/* Selected image */}
-      {form.selectedImageUrl && (
-        <div className="mb-4">
-          <img src={form.selectedImageUrl} alt="Ausgewähltes Bild" className="w-full max-h-60 object-cover rounded" />
-        </div>
-      )}
+      {/* Search Image */}
+      <div className="mb-4">
+        <label className="block text-sm font-medium text-gray-700">
+          Image
+        </label>
+        {form.selectedImageUrl && (
+          <div className="flex justify-center">
+            <img
+                src={selectedImageUrl}
+                alt="Ausgewähltes Bild"
+                className="w-[280px] aspect-[16/12] object-cover rounded-lg mb-2 border border-gray-300 overflow-hidden"
+            />
+          </div>
+        )}
 
-      {/* Image search field & button */}
-      <div className="flex gap-2">
+        {/* Image search field & button */}
+        <div className="flex gap-2">
           <input
               type="text"
               value={imageSearchTerm}
               onChange={(e) => {
-                setImageSearchTerm(e.target.value);
-                setHasManuallyEditedSearch(true);
+                  setImageSearchTerm(e.target.value);
+                  setHasManuallyEditedSearch(true);
                 }}
               className="flex-1 px-3 py-2 border border-gray-300 rounded-md shadow-sm bg-white"
           />
           <button
-              type="button"
-              onClick={searchImages}
-              disabled={!imageSearchTerm.trim()}
-              className={`py-2 px-4 bg-blue-500 text-white rounded-md transition cursor-pointer hover:bg-blue-600 ${
+            type="button"
+            onClick={searchImages}
+            disabled={!imageSearchTerm.trim()}
+            className={`py-2 px-4 bg-blue-500 text-white rounded-md transition cursor-pointer hover:bg-blue-600 ${
                 imageSearchTerm.trim()
-                    ? 'hover:bg-blue-600'
-                    : 'opacity-50 cursor-not-allowed'
-                }`}
+                  ? 'hover:bg-blue-600'
+                  : 'opacity-50 cursor-not-allowed'
+              }`}
           >
-              Search Image
+            Search Image
           </button>
+        </div>
       </div>
 
       {/* Tags Input */}
@@ -127,14 +135,20 @@ const EntryForm: React.FC<EntryFormProps> = ({ onSubmit, initialData, submitLabe
 
       {/* Status Dropdown */}
       <div className="mb-4">
-        <label className="block text-sm font-medium text-gray-700">Status</label>
+        <label
+          htmlFor="status"
+          className="block text-sm font-medium text-gray-700"
+        >
+          Status
+        </label>
         <select
+          id="status"
           value={form.status}
           onChange={(e) => form.setStatus(e.target.value as 'planned' | 'done')}
-          className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm"
+          className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm bg-white"
         >
-          <option value="planned">Planned</option>
-          <option value="done">Done</option>
+          <option value="planned">planned</option>
+          <option value="done">done</option>
         </select>
       </div>
 
@@ -149,6 +163,7 @@ const EntryForm: React.FC<EntryFormProps> = ({ onSubmit, initialData, submitLabe
         openModal={openModal}
         closeModal={closeModal}
         isModalOpen={isModalOpen}
+        handleScroll={handleScroll}
         searchImages={searchImages}
         handleImageSelect={handleImageSelect}
         handleConfirmSelection={handleConfirmSelection}
@@ -162,19 +177,20 @@ const EntryForm: React.FC<EntryFormProps> = ({ onSubmit, initialData, submitLabe
       />
 
       {/* Submit Button */}
-      <div className="flex justify-center mt-6">
+      <div className="flex justify-center items-center">
         <button
           type="submit"
           disabled={!form.title.trim() || form.isSaving}
-          className={`py-2 px-4 rounded-lg text-white transition ${
-            form.isSaving || !form.title.trim()
-              ? 'bg-gray-400 cursor-not-allowed'
-              : 'bg-blue-500 hover:bg-blue-600'
+          className={`py-2 px-4 font-light rounded-lg cursor-pointer transition ${
+            !form.title.trim() || form.isSaving
+              ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
+              : 'bg-blue-500 text-white hover:bg-blue-600'
           }`}
         >
-          {form.isSaving ? 'Speichern…' : submitLabel}
+          {form.isSaving ? 'Speichern...' : 'Destination speichern'}
         </button>
       </div>
+
     </form>
   );
 };

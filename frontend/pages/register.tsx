@@ -58,7 +58,7 @@ const Register = () => {
           { label: 'Username', id: 'username', value: username, setValue: setUsername, required: true },
           { label: 'Email', id: 'email', value: email, setValue: setEmail, required: true },
           { label: 'Password', id: 'password', value: password, setValue: setPassword, type: 'password', required: true },
-          { label: 'City', id: 'city', value: city, setValue: setCity },
+          { label: 'City', id: 'city', value: city, setValue: setCity, required: true },
           { label: 'Country', id: 'country', value: country, setValue: setCountry },
         ].map(({ label, id, value, setValue, type = 'text', required }) => (
           <div className="mb-4" key={id}>

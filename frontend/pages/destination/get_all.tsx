@@ -16,8 +16,6 @@ interface Destination {
   free_text: string;
 }
 
-// Drei Punkte (Optionen) besser sichtbar machen
-
 const DestinationsPage = () => {
   const [destinations, setDestinations] = useState<Destination[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
@@ -45,6 +43,8 @@ const DestinationsPage = () => {
 
   // User
   const [userCity, setUserCity] = useState<string | null>(null);
+
+  const default_img = 'https://images.unsplash.com/photo-1486184885347-1464b5f10296?q=80&w=1168&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D'
 
   // Redirect if user is not logged in
   useRedirectIfNotAuthenticated();
@@ -325,9 +325,12 @@ const DestinationsPage = () => {
                   <div className="relative aspect-[16/12] w-full rounded-lg overflow-hidden">
                     <Link href="/user/profile">
                       <img
-                        src={destination.img_link}
+                        src={destination.img_link || `${default_img}`}
                         alt={destination.title}
                         className="w-full h-full object-cover hover:scale-105 transition-all duration-500"
+                        onError={(e) => {
+                          (e.currentTarget as HTMLImageElement).src = `${default_img}`;
+                        }}
                       />
                     </Link>
 
@@ -338,7 +341,7 @@ const DestinationsPage = () => {
                           e.stopPropagation(); // verhindert, dass das Card-Click-Event ausgelöst wird
                           setMenuOpenFor(destination.id === menuOpenFor ? null : destination.id);
                         }}
-                        className="text-xl transition-size duration-300 hover:text-2xl w-7 cursor-pointer"
+                        className="w-8 h-8 flex items-center justify-center rounded-full bg-gray-500/10 hover:bg-gray-500/20 transition-transform duration-200 hover:scale-110 cursor-pointer"
                       >
                         ⋮
                       </button>
@@ -351,13 +354,13 @@ const DestinationsPage = () => {
                         >
                           <button
                             onClick={() => handleEdit(destination.id)}
-                            className="block w-full text-left px-4 py-2 hover:bg-gray-100"
+                            className="block w-full text-left px-4 py-2 hover:bg-gray-100 cursor-pointer"
                           >
                             ✏️ Edit
                           </button>
                           <button
                             onClick={() => handleDeleteConfirm(destination.id)}
-                            className="block w-full text-left px-4 py-2 hover:bg-gray-100 text-red-600"
+                            className="block w-full text-left px-4 py-2 hover:bg-gray-100 text-red-600 cursor-pointer"
                           >
                             🗑️ Delete
                           </button>
@@ -380,31 +383,33 @@ const DestinationsPage = () => {
                     </div>
 
                     {/* Tags */}
-                    <motion.div
-                      layout
-                      initial={false}
-                      animate={{ opacity: 1 }}
-                      transition={{ layout: { duration: 0.4, ease: "easeInOut" } }}
-                      className="px-2 mt-2"
-                    >
-                      <div
-                        className={
-                          isExpanded
-                            ? "flex flex-wrap gap-2"
-                            : "whitespace-nowrap overflow-x-auto pb-2"
-                        }
+                    {destination.tags && destination.tags.trim() !== "" && (
+                      <motion.div
+                        layout
+                        initial={false}
+                        animate={{ opacity: 1 }}
+                        transition={{ layout: { duration: 0.4, ease: "easeInOut" } }}
+                        className="px-2 mt-2"
                       >
-                        {destination.tags.split(",").map((tag, idx) => (
-                          <motion.span
-                            layout
-                            key={idx}
-                            className="text-xs bg-gray-200 rounded-full px-2 py-1 mr-2 mb-1 inline-block"
-                          >
-                            {tag.trim()}
-                          </motion.span>
-                        ))}
-                      </div>
-                    </motion.div>
+                        <div
+                          className={
+                            isExpanded
+                              ? "flex flex-wrap gap-2"
+                              : "whitespace-nowrap overflow-x-auto pb-2"
+                          }
+                        >
+                          {destination.tags.split(",").map((tag, idx) => (
+                            <motion.span
+                              layout
+                              key={idx}
+                              className="text-xs bg-gray-200 rounded-full px-2 py-1 mr-2 mb-1 inline-block"
+                            >
+                              {tag.trim()}
+                            </motion.span>
+                          ))}
+                        </div>
+                      </motion.div>
+                    )}
 
                     {/* Link icons */}
                     <div className="flex justify-between space-x-4 p-2">

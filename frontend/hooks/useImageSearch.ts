@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import BASE_URL from '../utils/config';
 
 export interface UnsplashImage {
@@ -61,11 +61,6 @@ export const useImageSearch = () => {
     }
   };
 
-  const handleScroll = (e: React.UIEvent<HTMLDivElement, UIEvent>) => {
-    const bottom = e.currentTarget.scrollHeight === e.currentTarget.scrollTop + e.currentTarget.clientHeight;
-    setIsAtBottom(bottom); // Wenn das Ende erreicht ist, setzen wir isAtBottom auf true
-  };
-
   const searchImages = async () => {
     if (!imageSearchTerm) return;
     setIsSearching(true);
@@ -82,24 +77,35 @@ export const useImageSearch = () => {
     }
   };
 
-  const loadMoreImages = async () => {
+  const loadMoreImages = useCallback(async () => {
     if (loadingMore) return;
+
     setLoadingMore(true);
     setIsAtBottom(false);
 
-    const nextPage = currentPage + 1;
-
     try {
-      const response = await fetch(`${BASE_URL}/search-images?query=${encodeURIComponent(imageSearchTerm)}&page=${nextPage}`);
-      const data = await response.json();
-      setImageResults((prev) => [...prev, ...data.results]);
-      setCurrentPage(nextPage);
-    } catch (err) {
-      console.error('Fehler beim Nachladen:', err);
+      const res = await fetch(`${BASE_URL}/search-images?query=${encodeURIComponent(imageSearchTerm)}&page=${currentPage + 1}`);
+      const data = res.ok ? await res.json() : null;
+
+      if (data?.results?.length) {
+        setImageResults((prev) => [...prev, ...data.results]);
+        setCurrentPage((p) => p + 1);
+      }
     } finally {
       setLoadingMore(false);
     }
-  };
+  }, [loadingMore, imageSearchTerm, currentPage]);
+
+
+  const handleScroll = useCallback((e: React.UIEvent<HTMLDivElement, UIEvent>) => {
+    const container = e.currentTarget;
+    const bottom = container.scrollHeight - container.scrollTop === container.clientHeight;
+
+    if (bottom && !loadingMore) {
+      loadMoreImages();
+    }
+  }, [loadingMore, loadMoreImages]);
+
 
   return {
     imageSearchTerm,
@@ -111,12 +117,12 @@ export const useImageSearch = () => {
     isModalOpen,
     openModal,
     closeModal,
-    handleScroll,
     hasManuallyEditedSearch,
     setHasManuallyEditedSearch,
     searchImages,
     handleImageSelect,
     handleConfirmSelection,
+    handleScroll,
     imageResults,
     isSearching,
     loadMoreImages,
