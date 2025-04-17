@@ -14,7 +14,7 @@ interface UseEntryFormProps {
   };
 }
 
-export const useEntryForm = ({ onSubmit, initialData }: UseEntryFormProps) => {
+export const useEntryForm = ({ onSubmit }: UseEntryFormProps) => {
   const [title, setTitle] = useState('');
   const [country, setCountry] = useState('');
   const [status, setStatus] = useState<'planned' | 'done'>('planned');
@@ -22,10 +22,13 @@ export const useEntryForm = ({ onSubmit, initialData }: UseEntryFormProps) => {
   const [tagsArray, setTagsArray] = useState<string[]>([]);
   const [isSaving, setIsSaving] = useState(false);
 
-  const [selectedImageUrl, setSelectedImageUrl] = useState(initialData?.imageUrl || '');
+  const [selectedImageUrl, setSelectedImageUrl] = useState('');
 
   const removeTag = (tagToRemove: string) => {
-    setTagsArray(tagsArray.filter(tag => tag !== tagToRemove));
+    setTagsArray((prevTags) => {
+      const updated = prevTags.filter((tag) => tag !== tagToRemove);
+      return updated;
+    });
   };
 
   const handleFormSubmit = async (e: React.FormEvent) => {

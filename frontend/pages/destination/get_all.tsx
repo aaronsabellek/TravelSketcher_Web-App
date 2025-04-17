@@ -323,7 +323,7 @@ const DestinationsPage = () => {
 
                   {/* Image */}
                   <div className="relative aspect-[16/12] w-full rounded-lg overflow-hidden">
-                    <Link href="/user/profile">
+                    <Link href={`/activity/add/${destination.id}`}>
                       <img
                         src={destination.img_link || `${default_img}`}
                         alt={destination.title}

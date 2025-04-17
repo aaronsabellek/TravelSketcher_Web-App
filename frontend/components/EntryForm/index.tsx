@@ -5,21 +5,38 @@ import ImageSearchModal from './ImageSearchModal';
 import TagsInput from './TagsInput';
 import { useFormSync } from '../../hooks/useFormSync';
 
+// Add und Edit activity testen
+// Genau schauen: Welche hooks als eigene Dateien, welche drin behalten?
+// Welche Elemente sollten eigene components werden?
+// User routes integrieren
+// Backend überarbeiten
+
 // Props-Typ definieren
 interface EntryFormProps {
+  type: 'destination' | 'activity';
   onSubmit: (data: any) => void;
   initialData?: {
     title?: string;
-    country?: string;
+    country?: string; // Nur für Destination
     status?: 'planned' | 'done';
     tags?: string[];
-    imageUrl?: string;
+    img_link?: string;
   };
   submitLabel: string;
 }
 
-const EntryForm: React.FC<EntryFormProps> = ({ onSubmit, initialData }) => {
+const EntryForm: React.FC<EntryFormProps> = ({ type, onSubmit, initialData, submitLabel }) => {
   const form = useEntryForm({ onSubmit, initialData });
+
+  // When edit: Load data
+  useEffect(() => {
+    if (!initialData) return;
+      if (initialData.title) form.setTitle(initialData.title);
+      if (initialData.country) form.setCountry(initialData.country);
+      if (initialData.status) form.setStatus(initialData.status);
+      if (initialData.tags) form.setTagsArray(initialData.tags);
+      if (initialData.img_link) form.setSelectedImageUrl(initialData.img_link);
+  }, [initialData]);
 
   const {
     updateTitle,
@@ -46,7 +63,6 @@ const EntryForm: React.FC<EntryFormProps> = ({ onSubmit, initialData }) => {
     setHasManuallyEditedSearch,
   } = useImageSearch();
 
-
   // Sync title with image search
   useFormSync({ form, selectedImageUrl, updateTitle });
 
@@ -70,18 +86,20 @@ const EntryForm: React.FC<EntryFormProps> = ({ onSubmit, initialData }) => {
       </div>
 
       {/* Country */}
-      <div className="mb-4">
-        <label htmlFor="country" className="block text-sm font-medium text-gray-700">
-          Country
-        </label>
-        <input
-            type="text"
-            id="country"
-            value={form.country}
-            onChange={(e) => form.setCountry(e.target.value)}
-            className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm bg-white"
-        />
-      </div>
+      {type === 'destination' && (
+        <div className="mb-4">
+          <label htmlFor="country" className="block text-sm font-medium text-gray-700">
+            Country
+          </label>
+          <input
+              type="text"
+              id="country"
+              value={form.country}
+              onChange={(e) => form.setCountry(e.target.value)}
+              className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm bg-white"
+          />
+        </div>
+      )}
 
       {/* Search Image */}
       <div className="mb-4">
@@ -91,7 +109,7 @@ const EntryForm: React.FC<EntryFormProps> = ({ onSubmit, initialData }) => {
         {form.selectedImageUrl && (
           <div className="flex justify-center">
             <img
-                src={selectedImageUrl}
+                src={form.selectedImageUrl}
                 alt="Ausgewähltes Bild"
                 className="w-[280px] aspect-[16/12] object-cover rounded-lg mb-2 border border-gray-300 overflow-hidden"
             />
@@ -180,6 +198,7 @@ const EntryForm: React.FC<EntryFormProps> = ({ onSubmit, initialData }) => {
       <div className="flex justify-center items-center">
         <button
           type="submit"
+
           disabled={!form.title.trim() || form.isSaving}
           className={`py-2 px-4 font-light rounded-lg cursor-pointer transition ${
             !form.title.trim() || form.isSaving
@@ -187,7 +206,7 @@ const EntryForm: React.FC<EntryFormProps> = ({ onSubmit, initialData }) => {
               : 'bg-blue-500 text-white hover:bg-blue-600'
           }`}
         >
-          {form.isSaving ? 'Speichern...' : 'Destination speichern'}
+          {form.isSaving ? 'Saving...' : submitLabel}
         </button>
       </div>
 
