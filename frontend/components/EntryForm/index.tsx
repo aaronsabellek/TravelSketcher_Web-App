@@ -5,12 +5,6 @@ import ImageSearchModal from './ImageSearchModal';
 import TagsInput from './TagsInput';
 import { useFormSync } from '../../hooks/useFormSync';
 
-// Add und Edit activity testen
-// Genau schauen: Welche hooks als eigene Dateien, welche drin behalten?
-// Welche Elemente sollten eigene components werden?
-// User routes integrieren
-// Backend überarbeiten
-
 // Props-Typ definieren
 interface EntryFormProps {
   type: 'destination' | 'activity';

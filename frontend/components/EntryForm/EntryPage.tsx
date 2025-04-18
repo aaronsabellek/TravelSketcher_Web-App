@@ -4,7 +4,7 @@ import EntryForm from '../../components/EntryForm';
 import { useRouter } from 'next/router';
 import Container from '../../components/Container';
 import { toast } from 'sonner';
-import BASE_URL from '../../utils/config';
+import { BASE_URL } from '../../utils/config';
 
 interface EntryPageProps {
     mode: 'add' | 'edit';

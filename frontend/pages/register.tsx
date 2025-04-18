@@ -3,7 +3,7 @@ import { useRouter } from 'next/router';
 import { useRedirectIfAuthenticated } from '../utils/authRedirects';
 import Container from '../components/Container';
 import Link from 'next/link';
-import BASE_URL from '../utils/config';
+import { BASE_URL } from '../utils/config';
 
 const Register = () => {
   const [username, setUsername] = useState('');

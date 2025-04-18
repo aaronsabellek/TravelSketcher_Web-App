@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
 import { useRedirectIfNotAuthenticated } from '../../utils/authRedirects';
 import Container from '../../components/Container';
-import BASE_URL from '../../utils/config';
+import { BASE_URL } from '../../utils/config';
 
 interface User {
   username: string;

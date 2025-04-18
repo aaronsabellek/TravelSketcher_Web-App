@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useRedirectIfAuthenticated } from '../utils/authRedirects';
 import Container from '../components/Container';
-import BASE_URL from '../utils/config';
+import { BASE_URL } from '../utils/config';
 
 const ResendVerification = () => {
     const [email, setEmail] = useState('');

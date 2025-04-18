@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
-import BASE_URL from '../utils/config';
+import { BASE_URL } from '../utils/config';
 
 export interface UnsplashImage {
   id: string;

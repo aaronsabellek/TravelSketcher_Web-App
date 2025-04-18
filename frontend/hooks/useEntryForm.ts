@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { FormData } from '../src/formData';
-import BASE_URL from '../utils/config';
+import { BASE_URL } from '../utils/config';
 import selectedImageUrl from '../components/EntryForm/ImageSearchModal'
 
 interface UseEntryFormProps {

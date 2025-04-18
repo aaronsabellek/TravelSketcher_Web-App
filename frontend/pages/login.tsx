@@ -3,7 +3,7 @@ import { useAuth } from '../contexts/AuthContext';
 import { useRedirectIfAuthenticated } from '../utils/authRedirects';
 import Container from '../components/Container';
 import Link from 'next/link';
-import BASE_URL from '../utils/config';
+import { BASE_URL } from '../utils/config';
 
 const Login = () => {
   const [identifier, setIdentifier] = useState('');

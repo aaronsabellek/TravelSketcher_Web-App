@@ -1,6 +1,6 @@
 import { createContext, useContext, useState, ReactNode, useEffect } from 'react';
 import { useRouter } from 'next/router';
-import BASE_URL from '../utils/config';
+import { BASE_URL } from '../utils/config';
 
 type User = {
   username: string;
