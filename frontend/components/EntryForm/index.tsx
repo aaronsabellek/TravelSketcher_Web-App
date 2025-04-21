@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useEffect } from 'react';
 import { useEntryForm } from '../../hooks/useEntryForm';
 import { useImageSearch } from '../../hooks/useImageSearch';
 import ImageSearchModal from './ImageSearchModal';
@@ -144,25 +144,6 @@ const EntryForm: React.FC<EntryFormProps> = ({ type, onSubmit, initialData, subm
         setTagsArray={form.setTagsArray}
         onRemoveTag={form.removeTag}
       />
-
-      {/* Status Dropdown */}
-      <div className="mb-4">
-        <label
-          htmlFor="status"
-          className="block text-sm font-medium text-gray-700"
-        >
-          Status
-        </label>
-        <select
-          id="status"
-          value={form.status}
-          onChange={(e) => form.setStatus(e.target.value as 'planned' | 'done')}
-          className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm bg-white"
-        >
-          <option value="planned">planned</option>
-          <option value="done">done</option>
-        </select>
-      </div>
 
       {/* ImageSearch Modal */}
       <ImageSearchModal

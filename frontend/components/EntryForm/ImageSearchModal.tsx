@@ -1,6 +1,5 @@
-import React, { useEffect, useRef } from 'react';
+import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion'
-import { useImageSearch } from '../../hooks/useImageSearch';
 import { useClickOutside } from '../../hooks/useClickOutside';
 
 interface UnsplashImage {

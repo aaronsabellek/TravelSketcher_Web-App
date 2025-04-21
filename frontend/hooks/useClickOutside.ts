@@ -1,7 +1,7 @@
 import { useEffect } from 'react';
 
 export const useClickOutside = (
-  ref: React.RefObject<HTMLElement>,
+  ref: React.RefObject<HTMLDivElement | null>,
   handler: () => void,
   active: boolean = true
 ) => {
@@ -11,11 +11,11 @@ export const useClickOutside = (
       handler();
     };
 
-    if (active) {
-      document.addEventListener('mousedown', listener);
-      return () => {
-        document.removeEventListener('mousedown', listener);
-      };
-    }
+    if (!active) return;
+
+    document.addEventListener('mousedown', listener, { passive: true });
+    return () => {
+      document.removeEventListener('mousedown', listener);
+    };
   }, [ref, handler, active]);
 };

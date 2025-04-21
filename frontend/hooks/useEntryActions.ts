@@ -5,9 +5,10 @@ import { Destination, Activity } from '../types/models';
 
 type Item = Destination | Activity;
 
-export function useDestinationActions<T extends Item>(
+export function useEntryActions<T extends Item>(
   items: T[],
-  setItems: React.Dispatch<React.SetStateAction<T[]>>
+  setItems: React.Dispatch<React.SetStateAction<T[]>>,
+  routeBase: string,
 ) {
 
   const router = useRouter();
@@ -34,7 +35,7 @@ export function useDestinationActions<T extends Item>(
 
   // Edit
   const handleEdit = (id: string) => {
-    router.push(`/destination/edit/${id}`);
+    router.push(`${routeBase}/edit/${id}`);
   };
 
   // Delete confirm
@@ -69,7 +70,7 @@ export function useDestinationActions<T extends Item>(
     setSavingNote(true);
 
     try {
-      const response = await fetch(`${BASE_URL}/destination/edit_notes/${noteForId}`, {
+      const response = await fetch(`${BASE_URL}/${routeBase}/edit_notes/${noteForId}`, {
         method: 'POST',
         credentials: 'include',
         headers: { 'Content-Type': 'application/json' },

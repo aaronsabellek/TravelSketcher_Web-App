@@ -15,6 +15,7 @@ export interface Activity {
     status: string;
     tags: string;
     free_text: string;
+    web_link: string;
     destination_id: string;
 }
 

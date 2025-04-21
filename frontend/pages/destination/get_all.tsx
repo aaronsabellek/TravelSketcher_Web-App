@@ -1,13 +1,15 @@
 import { useDestinations } from '../../hooks/useDestinations';
-import EntryOverviewPage from '../../components/EntryOverviewPage';
+import EntryOverview from '../../components/EntryOverview';
 
 export default function Destinations() {
   return (
-    <EntryOverviewPage
-      title="My Destinations"
+    <EntryOverview
+      title='My Destinations'
       fetchHook={useDestinations}
-      addRoute="/destination/add"
+      addRoute='/destination/add'
+      routeBase='/destination'
       showUserCity
+      type="destination"
     />
   );
 };

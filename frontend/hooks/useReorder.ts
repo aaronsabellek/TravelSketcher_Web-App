@@ -4,6 +4,7 @@ import { toast } from "sonner";
 import { BASE_URL } from '../utils/config';
 
 export const useReorder = <T extends Destination | Activity>(
+  type: 'destination'| 'activity',
   items: T[],
   setItems: (items: T[]) => void
 ) => {
@@ -13,16 +14,16 @@ export const useReorder = <T extends Destination | Activity>(
 
   const moveDestinationUp = (index: number) => {
     if (index === 0) return;
-    const newDestinations = [...items];
-    [newDestinations[index - 1], newDestinations[index]] = [newDestinations[index], newDestinations[index - 1]];
-    setItems(newDestinations);
+    const newItems = [...items];
+    [newItems[index - 1], newItems[index]] = [newItems[index], newItems[index - 1]];
+    setItems(newItems);
   };
 
   const moveDestinationDown = (index: number) => {
     if (index === items.length - 1) return;
-    const newDestinations = [...items];
-    [newDestinations[index + 1], newDestinations[index]] = [newDestinations[index], newDestinations[index + 1]];
-    setItems(newDestinations);
+    const newItems = [...items];
+    [newItems[index + 1], newItems[index]] = [newItems[index], newItems[index + 1]];
+    setItems(newItems);
   };
 
   const isSameOrder = (a: T[], b: T[]) =>
@@ -42,8 +43,20 @@ export const useReorder = <T extends Destination | Activity>(
 
   const saveNewOrder = async () => {
     try {
-      const orderedIds = items.map(dest => dest.id);
-      const response = await fetch(`${BASE_URL}/destination/reorder`, {
+      const orderedIds = items.map(item => item.id);
+
+      let endpoint = `${BASE_URL}/${type}/reorder`;
+
+      if (type === 'activity') {
+        const firstActivity = items[0] as Activity;
+        const activityDestinationId = firstActivity?.destination_id;
+        if (!activityDestinationId) {
+          throw new Error("Keine destination_id bei activity gefunden.");
+        }
+        endpoint = `${BASE_URL}/activity/reorder/${activityDestinationId}`;
+      }
+
+      const response = await fetch(endpoint, {
         method: "POST",
         credentials: "include",
         headers: { "Content-Type": "application/json" },

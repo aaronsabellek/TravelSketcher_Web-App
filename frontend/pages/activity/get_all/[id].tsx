@@ -1,70 +1,39 @@
-import { useEffect, useState } from 'react';
 import { useRouter } from 'next/router';
-import EntryOverviewPage from '../../../components/EntryOverviewPage';
+import EntryOverview from '../../../components/EntryOverview';
 import { useActivities } from '../../../hooks/useActivities';
-import { BASE_URL } from '../../../utils/config';
-import { Activity } from '../../../types/models';
 
 export default function ActivitiesByDestination() {
   const router = useRouter();
   const { id } = router.query;
 
-  const { items, setItems } = useActivities();
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [destinationName, setDestinationName] = useState('');
+  // Wenn ID noch nicht verfügbar ist (z.B. während des Ladevorgangs)
+  if (typeof id !== 'string') return <div>Lade Aktivitäten...</div>;
 
-  useEffect(() => {
-    const fetchActivities = async () => {
-      if (typeof id !== 'string') return;
+  // Hier nutzen wir die useActivities Hook mit der destinationId
+  const {
+    items,
+    setItems,
+    loading,
+    error,
+    destinationTitle,
+    destinationCountry,
+  } = useActivities(id);  // ID wird hier übergeben
 
-      try {
-        const res = await fetch(`${BASE_URL}/activity/get_all/${id}`, {
-          credentials: 'include',
-          method: 'GET',
-        });
-        const data = await res.json();
+  // Ladezustand anzeigen
+  if (loading) return <div>Lade Aktivitäten...</div>;
 
-        if (data && Array.isArray(data.activities)) {
-          setItems(data.activities);  // Hier setzen wir die Aktivitäten
-        } else {
-          setItems([]);  // Wenn kein Array vorhanden ist, setzen wir `items` auf ein leeres Array
-        }
+  // Fehlerzustand
+  if (error) return <div>{error}</div>;
 
-      } catch (err) {
-        console.error('Fehler beim Laden der Aktivitäten:', err);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    const fetchDestinationName = async () => {
-      if (typeof id !== 'string') return;
-      try {
-        const res = await fetch(`${BASE_URL}/destination/${id}`, {
-          credentials: 'include',
-        });
-        const data = await res.json();
-        setDestinationName(data.name);
-      } catch (err) {
-        console.error('Fehler beim Laden des Namens:', err);
-      }
-    };
-
-    if (id) {
-      fetchActivities();
-      fetchDestinationName();
-    }
-  }, [id]);
-
-  if (loading || typeof id !== 'string') return <div>Lade Aktivitäten...</div>;
-
+  // Weitergabe der Daten an EntryOverview
   return (
-    <EntryOverviewPage
-      title={`Aktivitäten in ${destinationName || '...'} `}
+    <EntryOverview
+      title={`Activities in ${destinationTitle || '...'}, ${destinationCountry || ''} `}
       fetchHook={() => ({ items, setItems, loading, error })}
       addRoute={`/activity/add/${id}`}
+      routeBase='/activity'
       showUserCity={false}
+      type='activity'
     />
   );
 }

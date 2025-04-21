@@ -1,7 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
-import { FormData } from '../src/formData';
-import { BASE_URL } from '../utils/config';
-import selectedImageUrl from '../components/EntryForm/ImageSearchModal'
+import { useState } from 'react';
 
 interface UseEntryFormProps {
   onSubmit: (data: any) => void;

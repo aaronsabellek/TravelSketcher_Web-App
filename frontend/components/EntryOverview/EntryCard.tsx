@@ -1,14 +1,10 @@
 import React from 'react';
-import { Destination, Activity } from '../types/models';
+import { Destination, Activity } from '../../types/models';
 import { motion, AnimatePresence } from 'framer-motion';
-import Link from 'next/link';
-
-function isDestination(data: Destination | Activity): data is Destination {
-  return (data as Destination).country !== undefined;
-}
 
 interface Props<T> {
   data: T;
+  type: 'destination' | 'activity';
   isExpanded: boolean;
   onExpand: () => void;
   onCollapse: () => void;
@@ -25,11 +21,13 @@ interface Props<T> {
   moveDestinationDown: (index: number) => void;
   items: T[];
   setExpandedCard: (id: string | null) => void;
-  userCity: string | null;
+  onLinkClick?: (id: string, web_link?: string) => void;
+  userCity?: string | null;
 }
 
 const DestinationCard = <T extends Destination | Activity>({
   data,
+  type,
   isExpanded,
   onExpand,
   onCollapse,
@@ -44,6 +42,7 @@ const DestinationCard = <T extends Destination | Activity>({
   index,
   moveDestinationUp,
   moveDestinationDown,
+  onLinkClick,
   items,
   setExpandedCard,
   userCity
@@ -98,7 +97,12 @@ const DestinationCard = <T extends Destination | Activity>({
       >
         {/* Image */}
         <div className="relative aspect-[16/12] w-full rounded-lg overflow-hidden">
-          <Link href={`/activity/get_all/${data.id}`}>
+          <a
+            href={type === 'destination' ? `/activity/get_all/${data.id}` : (data as Activity).web_link || '#'}
+            target={type === 'activity' ? "_blank" : ''}
+            rel={type === 'activity' ? 'noopener noreferrer' : ''}
+            className={type === 'activity' && !(data as Activity).web_link ? 'pointer-events-none cursor-not-allowed' : ''}
+          >
             <img
               src={data.img_link || default_img}
               alt={data.title}
@@ -107,7 +111,7 @@ const DestinationCard = <T extends Destination | Activity>({
                 (e.currentTarget as HTMLImageElement).src = default_img;
               }}
             />
-          </Link>
+          </a>
 
           {/* Edit/Delete Menu */}
           <div className="absolute top-2 right-2 text-white">
@@ -148,11 +152,16 @@ const DestinationCard = <T extends Destination | Activity>({
         <div>
           <div className="flex p-2">
             <div className="mr-5">
-              <Link href="/user/profile">
+              <a
+                href={type === 'destination' ? `/activity/get_all/${data.id}` : (data as Activity).web_link || '#'}
+                target={type === 'activity' ? "_blank" : ''}
+                rel={type === 'activity' ? 'noopener noreferrer' : ''}
+                className={type === 'activity' && !(data as Activity).web_link ? 'pointer-events-none cursor-not-allowed' : ''}
+              >
                 <h2 className="text-xl font-semibold hover:underline">{data.title}</h2>
-              </Link>
-              {isDestination(data) && (
-                <p className="text-sm text-gray-500">{data.country}</p>
+              </a>
+              {type === 'destination' && (
+                <p className="text-sm text-gray-500">{(data as Destination).country}</p>
               )}
             </div>
           </div>
@@ -186,17 +195,28 @@ const DestinationCard = <T extends Destination | Activity>({
           <div className="flex justify-between space-x-4 p-2">
             <div className="grid grid-cols-3 gap-3">
 
-              {userCity && (
+              {type === 'destination' && userCity ? (
                 <button
-                onClick={() =>
-                  window.open(`https://www.rome2rio.com/map/${userCity}/${data.title}`, '_blank')
-                }
-                className="text-blue-500 hover:text-blue-700 cursor-pointer"
-              >
-                <img src="/rome2rio_icon.png" className="h-7 hover:scale-115" />
-              </button>
-              )}
+                  onClick={() =>
+                    window.open(`https://www.rome2rio.com/map/${userCity}/${data.title}`, '_blank')
+                  }
+                  className="text-blue-500 hover:text-blue-700 cursor-pointer"
+                >
+                  <img src="/rome2rio_icon.png" className="h-7 hover:scale-115" />
+                </button>
+              ) : type === 'activity' ? (
+                <button
+                  onClick={() => onLinkClick?.(data.id, (data as any).web_link)}
+                  className={`cursor-pointer ${(data as any).web_link ? 'text-blue-500' : 'text-gray-400'}`}
+                >
+                  <img
+                    src="/link_icon.png"
+                    className={`h-6 hover:scale-110 ${(data as any).web_link ? '' : 'opacity-50'}`}
+                  />
+                </button>
+              ) : null}
 
+              {type === 'destination' && (
               <button
                 onClick={() =>
                   window.open(`https://www.booking.com/${data.title}`, '_blank')
@@ -205,11 +225,12 @@ const DestinationCard = <T extends Destination | Activity>({
               >
                 <img src="/booking_icon.png" className="h-7 hover:scale-115" />
               </button>
+              )}
 
               <button
                 onClick={() =>
-                  {isDestination(data) ? (
-                    window.open(`https://www.google.com/search?q=${data.title} ${data.country}`, '_blank')
+                  {type === 'destination' ? (
+                    window.open(`https://www.google.com/search?q=${data.title} ${(data as Destination).country}`, '_blank')
                   ) : (
                     window.open(`https://www.google.com/search?q=${data.title}`, '_blank')
                   )}

@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
-import { Destination } from '../types/models';
 import { toast } from "sonner";
-import { BASE_URL } from '../utils/config';
+import { BASE_URL } from '../../utils/config';
 
 interface NoteModalProps<T> {
+  type: 'destination' | 'activity';
   noteText: string;
   setNoteText: (text: string) => void;
   editingNote: boolean;
@@ -17,6 +17,7 @@ interface NoteModalProps<T> {
 }
 
 const NoteModal = <T extends { id: string; free_text?: string }>({
+  type,
   noteText,
   setNoteText,
   editingNote,
@@ -36,7 +37,7 @@ const NoteModal = <T extends { id: string; free_text?: string }>({
 
     setSavingNote(true);
     try {
-      const response = await fetch(`${BASE_URL}/destination/edit_notes/${noteForId}`, {
+      const response = await fetch(`${BASE_URL}/${type}/edit_notes/${noteForId}`, {
         method: 'POST',
         credentials: 'include',
         headers: { 'Content-Type': 'application/json' },
@@ -66,7 +67,7 @@ const NoteModal = <T extends { id: string; free_text?: string }>({
   return (
     <div data-ignore-click className="fixed inset-0 flex items-center justify-center bg-black/20 z-50">
       <div className="bg-white p-6 rounded-lg shadow-xl w-[90%] max-w-md relative">
-        <h2 className="text-lg font-semibold mb-4">Notizen zur Destination</h2>
+        <h2 className="text-lg font-semibold mb-4">Notizen zur {type}</h2>
 
         {!editingNote ? (
           <>
