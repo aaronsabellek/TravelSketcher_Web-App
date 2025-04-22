@@ -183,6 +183,7 @@ const EntryOverviewPage = <T extends Destination | Activity>({
           }
         }}
         deleting={deleting}
+        itemType={type}
       />
 
       <NoteModal

@@ -88,7 +88,7 @@ const DestinationCard = <T extends Destination | Activity>({
 
       {/* Destination container */}
       <div
-        className="w-full mt-3 bg-white hover:brightness-95 rounded-lg pb-2"
+        className="w-full mt-3 bg-white hover:brightness-95 rounded-t-lg pb-2"
         onClick={(e) => {
           const target = e.target as HTMLElement;
           if (target.closest('[data-ignore-click]')) return; // Events ignorieren
@@ -96,7 +96,7 @@ const DestinationCard = <T extends Destination | Activity>({
         }}
       >
         {/* Image */}
-        <div className="relative aspect-[16/12] w-full rounded-lg overflow-hidden">
+        <div className="relative aspect-[16/12] w-full rounded-t-lg overflow-hidden">
           <a
             href={type === 'destination' ? `/activity/get_all/${data.id}` : (data as Activity).web_link || '#'}
             target={type === 'activity' ? "_blank" : ''}

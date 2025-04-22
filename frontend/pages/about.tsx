@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useRedirectIfAuthenticated } from '../utils/authRedirects';
 import { AnimatePresence, motion } from 'framer-motion';
 import Link from 'next/link';
@@ -7,11 +7,30 @@ const About = () => {
   const [isAreaHovered, setIsAreaHovered] = useState(false);
   const [hoveredImageIndex, setHoveredImageIndex] = useState<number | null>(null);
   const [isButtonHovered, setIsButtonHovered] = useState(false);
+  const [imagesLoaded, setImagesLoaded] = useState([false, false, false]);
 
   const showButton = isAreaHovered;
 
   // Redirect if user is authenticated
   useRedirectIfAuthenticated();
+
+  useEffect(() => {
+    const imageUrls = ['/travel-img-1.png', '/travel-img-2.png', '/travel-img-3.png'];
+
+    imageUrls.forEach((url, index) => {
+      const img = new Image();
+      img.src = url;
+      img.onload = () => {
+        setImagesLoaded((prev) => {
+          const updated = [...prev];
+          updated[index] = true;
+          return updated;
+        });
+      };
+    });
+  }, []);
+
+  const allImagesLoaded = imagesLoaded.every(Boolean);
 
   return (
     <div>
@@ -66,34 +85,40 @@ const About = () => {
         </div>
 
         {/* Image Gallery */}
-        <div className="flex justify-between">
-          {[1, 2, 3].map((num, index) => {
-            const isHovered = hoveredImageIndex === index;
-            const brightness =
-              isHovered ? 'brightness-75' : index === 1 ? 'brightness-100' : 'brightness-90';
+        {allImagesLoaded ? (
+          <div className="flex justify-between">
+            {[1, 2, 3].map((num, index) => {
+              const isHovered = hoveredImageIndex === index;
+              const brightness =
+                isHovered ? 'brightness-75' : index === 1 ? 'brightness-100' : 'brightness-90';
 
-            return (
-              <div
-                key={num}
-                className="relative flex-1 min-w-0 overflow-hidden"
-                onMouseEnter={() => setHoveredImageIndex(index)}
-                onMouseLeave={() => setHoveredImageIndex(null)}
-              >
+              return (
                 <div
-                  className={`
-                    bg-cover bg-center
-                    ${brightness}
-                    ${isHovered ? 'scale-105' : ''}
-                    transition-all duration-500 w-full h-[500px]
-                  `}
-                  style={{
-                    backgroundImage: `url(/travel-img-${num}.png)`,
-                  }}
-                />
-              </div>
-            );
-          })}
-        </div>
+                  key={num}
+                  className="relative flex-1 min-w-0 overflow-hidden"
+                  onMouseEnter={() => setHoveredImageIndex(index)}
+                  onMouseLeave={() => setHoveredImageIndex(null)}
+                >
+                  <div
+                    className={`
+                      bg-cover bg-center
+                      ${brightness}
+                      ${isHovered ? 'scale-105' : ''}
+                      transition-all duration-500 w-full h-[500px]
+                    `}
+                    style={{
+                      backgroundImage: `url(/travel-img-${num}.png)`,
+                    }}
+                  />
+                </div>
+              );
+            })}
+          </div>
+        ) : (
+          <div className="h-[500px] w-full flex items-center justify-center">
+            <span className="text-white text-lg">Loading...</span>
+          </div>
+        )}
       </div>
 
       {/* About Text */}

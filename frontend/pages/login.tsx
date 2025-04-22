@@ -4,11 +4,11 @@ import { useRedirectIfAuthenticated } from '../utils/authRedirects';
 import Container from '../components/Container';
 import Link from 'next/link';
 import { BASE_URL } from '../utils/config';
+import { toast } from 'sonner';
 
 const Login = () => {
   const [identifier, setIdentifier] = useState('');
   const [password, setPassword] = useState('');
-  const [error, setError] = useState('');
   const { isLoading, login } = useAuth();
 
   // Redirect if user is authenticated
@@ -16,7 +16,6 @@ const Login = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError('');
 
     try {
       const response = await fetch(`${BASE_URL}/login`, {
@@ -30,7 +29,7 @@ const Login = () => {
 
       if (!response.ok) {
         const data = await response.json();
-        setError(data.error || 'Login fehlgeschlagen');
+        toast.error(data.error || 'Login fehlgeschlagen');
         return;
       }
 
@@ -38,8 +37,7 @@ const Login = () => {
       login(userData);
 
     } catch (err) {
-      console.error(err);
-      setError('Ein Fehler ist beim Login aufgetreten.');
+      toast.error('Ein Fehler ist beim Login aufgetreten.');
     }
   };
 
@@ -79,6 +77,14 @@ const Login = () => {
           Login
         </button>
       </form>
+
+      <p className="mt-4 text-sm text-center">
+        Forgot password?{' '}
+        <Link href="/user/forgot_password">
+          <span className="text-blue-600 underline cursor-pointer">Reset here</span>
+        </Link>
+      </p>
+
       <p className="mt-4 text-sm text-center">
         No verification email received?{' '}
         <Link href="/resend_verification">
@@ -87,7 +93,6 @@ const Login = () => {
           </span>
         </Link>
       </p>
-      {error && <p className="text-red-500 mt-4 text-center">{error}</p>}
     </Container>
   );
 };

@@ -173,7 +173,6 @@ const EntryForm: React.FC<EntryFormProps> = ({ type, onSubmit, initialData, subm
       <div className="flex justify-center items-center">
         <button
           type="submit"
-
           disabled={!form.title.trim() || form.isSaving}
           className={`py-2 px-4 font-light rounded-lg cursor-pointer transition ${
             !form.title.trim() || form.isSaving

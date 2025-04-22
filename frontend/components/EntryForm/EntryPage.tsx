@@ -1,5 +1,4 @@
 import { useState, useEffect } from 'react';
-import { FormData } from '../../src/formData';
 import EntryForm from '../../components/EntryForm';
 import { useRouter } from 'next/router';
 import Container from '../../components/Container';
@@ -22,7 +21,6 @@ const EntryPage: React.FC<EntryPageProps> = ({ mode, type }) => {
   type EntryFormData = {
     title?: string;
     country?: string;
-    status?: 'planned' | 'done';
     tags?: string[];
     img_link?: string;
     destination_id?: string;
@@ -34,9 +32,8 @@ const EntryPage: React.FC<EntryPageProps> = ({ mode, type }) => {
     if (!router.isReady || !rawId) return;
 
     let endpoint = '';
-    const isEdit = mode === 'edit';
 
-    if (isEdit) {
+    if (mode === 'edit') {
       endpoint = `${BASE_URL}/${type}/get/${rawId}`;
 
       fetch(endpoint, {

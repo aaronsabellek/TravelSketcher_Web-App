@@ -24,7 +24,6 @@ const Navbar = () => {
             {isLoggedIn ? (
               <>
                 <Link href="/destination/get_all" className="hover:underline">Destinations</Link>
-                <Link href="/search" className="hover:underline">Search</Link>
                 <Link href="/user/profile" className="hover:underline">Profile</Link>
                 <button
                   onClick={logout}

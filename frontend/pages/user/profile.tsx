@@ -1,20 +1,20 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
+import Link from 'next/link';
 import { useRedirectIfNotAuthenticated } from '../../utils/authRedirects';
 import Container from '../../components/Container';
 import { BASE_URL } from '../../utils/config';
-
-interface User {
-  username: string;
-  city: string;
-  country: string;
-}
+import { UserProfile } from '../../types/models';
+import DeleteAccountModal from '../../components/DeleteAccountModal';
 
 const Profile: React.FC = () => {
-  const [user, setUser] = useState<User | null>(null);
+  const [user, setUser] = useState<UserProfile | null>(null);
   const [error, setError] = useState<string>('');
   const [loading, setLoading] = useState<boolean>(true);
   const router = useRouter();
+
+  // State for delete modal
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
 
   // Redirect user if not authenticated
   useRedirectIfNotAuthenticated();
@@ -25,18 +25,18 @@ const Profile: React.FC = () => {
 
       try {
         const res = await fetch(`${BASE_URL}/user/profile`, {
-          credentials: 'include', // Inlcude cookies
+          credentials: 'include',
         });
 
         if (!res.ok) {
           const err = await res.json();
-          setError(err?.error || 'Fehler beim Abrufen des Profils');
+          setError(err?.error || 'Error retrieving profile');
         } else {
           const data = await res.json();
           setUser(data);
         }
       } catch (err) {
-        setError('Serverfehler oder keine Antwort erhalten.');
+        setError('Server error or no response received.');
       } finally {
         setLoading(false);
       }
@@ -45,27 +45,62 @@ const Profile: React.FC = () => {
     fetchUserProfile();
   }, [router]);
 
-  // Loading display
-  if (loading) {
-    return <div>Profil wird geladen...</div>;
-  }
-
-  // Error display
-  if (error) {
-    return <div style={{ color: 'red' }}>Fehler: {error}</div>;
-  }
-
-  // If no user was found
-  if (!user) {
-    return <div>No user found.</div>;
-  }
+  // Loading / Error
+  if (loading) return <div>Loading profile...</div>;
+  if (error) return <div style={{ color: 'red' }}>Error: {error}</div>;
+  if (!user) return <div>No user found.</div>;
 
   // Show profile data
   return (
     <Container title="User profile">
-      <p>Username: {user.username}</p>
-      <p>City: {user.city}</p>
-      <p>Country: {user.country}</p>
+
+          {/* Username */}
+          <div className="mb-4">
+            <label htmlFor="identifier" className="block text-sm font-medium text-gray-700">Username</label>
+            <p className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm">{user.username}</p>
+          </div>
+
+          {/* City */}
+          <div className="mb-4">
+            <label htmlFor="identifier" className="block text-sm font-medium text-gray-700">City</label>
+            <p className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm">{user.city}</p>
+          </div>
+
+          {/* Country */}
+          {user.country && (
+          <div className="mb-4">
+            <label htmlFor="identifier" className="block text-sm font-medium text-gray-700">Country</label>
+            <p className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm">{user.country}</p>
+          </div>
+          )}
+
+          {/* Email */}
+          <div className="mb-4">
+            <label htmlFor="identifier" className="block text-sm font-medium text-gray-700">Email</label>
+            <p className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm">{user.email}</p>
+          </div>
+
+          {/* Buttons */}
+          <div className="pt-4 flex flex-col items-center space-y-3">
+            <Link href="/user/edit">
+              <button className="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 rounded-lg transition-all cursor-pointer">
+                Edit profile
+              </button>
+            </Link>
+
+            <button
+              onClick={() => setShowDeleteModal(true)}
+              className="text-red-600 hover:underline text-sm cursor-pointer"
+            >
+              Delete account
+            </button>
+          </div>
+
+      <DeleteAccountModal
+        isOpen={showDeleteModal}
+        onClose={() => setShowDeleteModal(false)}
+        onDeleted={() => router.push('/about')}
+      />
     </Container>
   );
 };
