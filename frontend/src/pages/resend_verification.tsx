@@ -1,7 +1,8 @@
 import { useState } from 'react';
-import { useRedirectIfAuthenticated } from '../utils/authRedirects';
-import Container from '../components/Container';
-import { BASE_URL } from '../utils/config';
+
+import Container from '@/components/Container';
+import { useRedirectIfAuthenticated } from '@/hooks/authRedirects';
+import { BASE_URL } from '@/utils/config';
 
 const ResendVerification = () => {
   // Redirect if user is authenticated

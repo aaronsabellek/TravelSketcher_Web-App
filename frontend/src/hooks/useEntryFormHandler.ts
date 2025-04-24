@@ -1,7 +1,8 @@
 import { useEffect, useState, useCallback } from 'react';
 import { useRouter } from 'next/router';
 import { toast } from 'sonner';
-import { BASE_URL } from '../utils/config';
+
+import { BASE_URL } from '@/utils/config';
 
 export type EntryFormData = {
   title?: string;
@@ -11,13 +12,19 @@ export type EntryFormData = {
   destination_id?: string;
 };
 
-export function useEntryFormHandler(mode: 'add' | 'edit', type: 'destination' | 'activity') {
+// Handle entry form
+export function useEntryFormHandler(
+  mode: 'add' | 'edit',
+  type: 'destination' | 'activity'
+) {
+
   const router = useRouter();
   const rawId = router.query.id as string | undefined;
 
   const [initialData, setInitialData] = useState<EntryFormData | null>(null);
   const [destinationId, setDestinationId] = useState<string | null>(null);
 
+  // Fetch entry data
   const fetchItemData = useCallback(async () => {
     const endpoint = `${BASE_URL}/${type}/get/${rawId}`;
     try {
@@ -25,6 +32,7 @@ export function useEntryFormHandler(mode: 'add' | 'edit', type: 'destination' | 
       const data = await res.json();
       const itemData = data[type];
 
+      // Handle display of tags
       if (typeof itemData.tags === 'string') {
         itemData.tags = itemData.tags
           .split(',')
@@ -34,21 +42,26 @@ export function useEntryFormHandler(mode: 'add' | 'edit', type: 'destination' | 
 
       setInitialData(itemData);
 
+      // Set destination_id for activity
       if (type === 'activity' && itemData.destination_id) {
         setDestinationId(itemData.destination_id);
       }
+
+      // Error handling
     } catch (err) {
       console.error(err);
-      toast.error('Fehler beim Laden.');
+      toast.error('Error loading.');
     }
   }, [rawId, type]);
 
+  // Add Activity to specific destination
   const handleAddActivityDestination = () => {
     if (type === 'activity' && rawId) {
       setDestinationId(rawId);
     }
   };
 
+  // Handle mode ('edit' or 'add')
   useEffect(() => {
     if (!router.isReady || !rawId) return;
 
@@ -59,6 +72,7 @@ export function useEntryFormHandler(mode: 'add' | 'edit', type: 'destination' | 
     }
   }, [router.isReady, mode, rawId, type, fetchItemData]);
 
+  // Get endpoint of link
   const getEndpoint = (): string | null => {
     if (mode === 'add' && type === 'destination') {
       return `${BASE_URL}/destination/add`;
@@ -66,7 +80,7 @@ export function useEntryFormHandler(mode: 'add' | 'edit', type: 'destination' | 
 
     if (mode === 'add' && type === 'activity') {
       if (!destinationId) {
-        toast.error('Destination ID fehlt.');
+        toast.error('Destination ID missing.');
         return null;
       }
       return `${BASE_URL}/activity/add/${destinationId}`;
@@ -74,22 +88,24 @@ export function useEntryFormHandler(mode: 'add' | 'edit', type: 'destination' | 
 
     if (mode === 'edit') {
       if (!rawId) {
-        toast.error('ID fehlt.');
+        toast.error('ID missing.');
         return null;
       }
       return `${BASE_URL}/${type}/edit/${rawId}`;
     }
 
-    toast.error('Unbekannter Modus oder Typ.');
+    toast.error('Unknown mode or type.');
     return null;
   };
 
+  // Submit
   const handleSubmit = async (formData: EntryFormData) => {
     if (!router.isReady) {
-      toast.error('Router ist noch nicht bereit.');
+      toast.error('Router is not ready yet.');
       return;
     }
 
+    // Get endpoint
     const endpoint = getEndpoint();
     if (!endpoint) return;
 
@@ -101,9 +117,9 @@ export function useEntryFormHandler(mode: 'add' | 'edit', type: 'destination' | 
         body: JSON.stringify(formData),
       });
 
-      if (!response.ok) throw new Error('Fehler beim Speichern');
+      if (!response.ok) throw new Error('Error saving');
 
-      toast.success(mode === 'add' ? 'Erfolgreich hinzugefügt!' : 'Erfolgreich aktualisiert!');
+      toast.success(mode === 'add' ? 'Added successfully!' : 'Edited successfully!');
 
       const pushRoute =
         type === 'destination'
@@ -111,9 +127,11 @@ export function useEntryFormHandler(mode: 'add' | 'edit', type: 'destination' | 
           : `/activity/get_all/${destinationId}`;
 
       router.push(pushRoute);
+
+      // Error
     } catch (err) {
       console.error(err);
-      toast.error('Fehler beim Speichern.');
+      toast.error('Error saving.');
     }
   };
 

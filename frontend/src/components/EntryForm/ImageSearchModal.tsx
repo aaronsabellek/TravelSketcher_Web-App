@@ -1,8 +1,8 @@
 import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion'
 
-import { useClickOutside } from '../../hooks/useClickOutside';
-import { UnsplashImage } from '../../types/models';
+import { useClickOutside } from '@/hooks/useClickOutside';
+import { UnsplashImage } from '@/types/models';
 
 interface ImageSearchModalProps {
   selectedImageUrl: string;
@@ -27,6 +27,7 @@ interface ImageSearchModalProps {
   modalRef: React.RefObject<HTMLDivElement>;
 }
 
+// Opens a window to show and select an image from Unsplash for an entry
 const ImageSearchModal: React.FC<ImageSearchModalProps> = ({
   tempSelectedImageUrl,
   closeModal,
@@ -40,8 +41,8 @@ const ImageSearchModal: React.FC<ImageSearchModalProps> = ({
   modalRef,
 }) => {
 
-  // Close modal with click outside
-  useClickOutside(modalRef, closeModal, isModalOpen);
+  // Close image modal with click outside
+  useClickOutside([modalRef], closeModal, isModalOpen);
 
   return (
     <AnimatePresence>

@@ -1,17 +1,20 @@
 import React, { ReactNode } from 'react';
 
-interface AuthContainerProps {
+interface ContainerProps {
   title: string;
   children: ReactNode;
 }
 
-const AuthContainer: React.FC<AuthContainerProps> = ({ title, children }) => {
+// Visible container
+const Container: React.FC<ContainerProps> = ({ title, children }) => {
   return (
     <div className="max-w-md mx-auto mt-10 p-6 border rounded-lg shadow-md border-gray-300 bg-gray-300/25">
-      <h1 className="text-2xl font-bold text-center mb-4">{title}</h1>
+      <h1 className="text-2xl font-bold text-center mb-4">
+        {title}
+      </h1>
       {children}
     </div>
   );
 };
 
-export default AuthContainer;
+export default Container;

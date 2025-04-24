@@ -2,10 +2,9 @@ import { useEffect } from 'react';
 
 import ImageSearchModal from './ImageSearchModal';
 import TagsInput from './TagsInput';
-import { useImageSearch } from '../../hooks/useImageSearch';
-import { useEntryFormState } from '../../hooks/useEntryFormState';
+import { useImageSearch } from '@/hooks/useImageSearch';
+import { useEntryFormState } from '@/hooks/useEntryFormState';
 
-// Props-Typ definieren
 interface EntryFormProps {
   type: 'destination' | 'activity';
   onSubmit: (data: any) => Promise<void>;
@@ -19,6 +18,7 @@ interface EntryFormProps {
   };
 }
 
+// Adds or edits an entry
 const EntryForm: React.FC<EntryFormProps> = ({ type, onSubmit, initialData, submitLabel }) => {
 
   const {
@@ -37,7 +37,6 @@ const EntryForm: React.FC<EntryFormProps> = ({ type, onSubmit, initialData, subm
     handleFormSubmit,
   } = useEntryFormState({ type, initialData, onSubmit });
 
-  // Image search hook
   const {
     updateTitle,
     selectedImageUrl: imageSearchSelectedImageUrl,
@@ -63,12 +62,12 @@ const EntryForm: React.FC<EntryFormProps> = ({ type, onSubmit, initialData, subm
     setHasManuallyEditedSearch,
   } = useImageSearch();
 
-  // Sync title with image search
+  // Sync entry title with image search
   useEffect(() => {
     if (title) updateTitle(title);
   }, [title, updateTitle]);
 
-  // Sync image URL
+  // Select image
   useEffect(() => {
     if (imageSearchSelectedImageUrl) {
       setSelectedImageUrl(imageSearchSelectedImageUrl);

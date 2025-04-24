@@ -1,7 +1,10 @@
 import { useEffect, useState } from 'react';
-import { BASE_URL } from '../utils/config';
 
+import { BASE_URL } from '@/utils/config';
+
+// Get city from user
 export const useUserCity = () => {
+
   const [city, setCity] = useState<string | null>(null);
   const [loadingCity, setLoadingCity] = useState<boolean>(true);
   const [errorCity, setErrorCity] = useState<string | null>(null);
@@ -14,17 +17,17 @@ export const useUserCity = () => {
           credentials: 'include',
         });
 
-        if (!res.ok) throw new Error('Fehler beim Abrufen der Stadt');
+        if (!res.ok) throw new Error('Error retrieving city');
         const data = await res.json();
 
         if (data.city) {
           setCity(data.city);
         } else {
-          throw new Error('Stadt nicht vorhanden');
+          throw new Error('City not present');
         }
       } catch (err) {
-        console.error('Fehler beim Laden der Stadt:', err);
-        setErrorCity('Stadt konnte nicht geladen werden');
+        console.error('Error loading city:', err);
+        setErrorCity('City could not be loaded');
       } finally {
         setLoadingCity(false);
       }

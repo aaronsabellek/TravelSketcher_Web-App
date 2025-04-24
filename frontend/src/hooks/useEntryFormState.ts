@@ -12,7 +12,9 @@ interface UseEntryFormStateProps {
   onSubmit: (data: any) => Promise<void>;
 }
 
+// Hooks for EntryForm
 export function useEntryFormState({ type, initialData, onSubmit }: UseEntryFormStateProps) {
+
   const [title, setTitle] = useState('');
   const [country, setCountry] = useState('');
   const [status, setStatus] = useState<'planned' | 'done'>('planned');
@@ -21,11 +23,14 @@ export function useEntryFormState({ type, initialData, onSubmit }: UseEntryFormS
   const [isSaving, setIsSaving] = useState(false);
   const [selectedImageUrl, setSelectedImageUrl] = useState('');
 
+  // Remove tags
   const removeTag = (tagToRemove: string) => {
     setTagsArray((prevTags) => prevTags.filter((tag) => tag !== tagToRemove));
   };
 
+  // Submit
   const handleFormSubmit = async (e: React.FormEvent) => {
+
     e.preventDefault();
     if (!title.trim()) return;
 
@@ -43,7 +48,7 @@ export function useEntryFormState({ type, initialData, onSubmit }: UseEntryFormS
     setIsSaving(false);
   };
 
-  // Load initial data (edit mode)
+  // Load initial data in edit mode
   useEffect(() => {
     if (!initialData) return;
     const { title, country, status, tags, img_link } = initialData;

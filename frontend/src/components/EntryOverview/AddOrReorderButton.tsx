@@ -1,4 +1,4 @@
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence } from 'framer-motion';
 
 interface Props {
   isReorderMode: boolean;
@@ -7,6 +7,7 @@ interface Props {
   handleAddClick: () => void;
 }
 
+// Buttons to push to add site or to save new order of entries
 const AddOrReorderButton: React.FC<Props> = ({
   isReorderMode,
   hasOrderChanged,
@@ -16,6 +17,8 @@ const AddOrReorderButton: React.FC<Props> = ({
   return (
     <AnimatePresence mode="wait">
       {isReorderMode ? (
+
+        // Save new order button
         <motion.div
           key="save-button"
           initial={{ opacity: 0, scale: 0.95 }}
@@ -37,6 +40,8 @@ const AddOrReorderButton: React.FC<Props> = ({
           </button>
         </motion.div>
       ) : (
+
+        // Push to add page button
         <motion.div
           key="add-button"
           initial={{ opacity: 0, scale: 0.95 }}

@@ -8,6 +8,7 @@ interface TagsInputProps {
   onRemoveTag: (tag: string) => void;
 }
 
+// Administers tag usage
 const TagsInput: React.FC<TagsInputProps> = ({
   tagInput,
   setTagInput,

@@ -1,9 +1,8 @@
 import { useState } from 'react';
 import { toast } from 'sonner';
-import { useRouter } from 'next/router';
 
-import { BASE_URL } from '../utils/config';
-import { useAuth } from '../contexts/AuthContext';
+import { BASE_URL } from '@/utils/config';
+import { useAuth } from '@/contexts/AuthContext';
 
 interface Props {
   isOpen: boolean;
@@ -11,17 +10,20 @@ interface Props {
   onDeleted: () => void;
 }
 
+// Administers deletion of user account
 const DeleteAccountModal: React.FC<Props> = ({ isOpen, onClose, onDeleted }) => {
+
   const [password, setPassword] = useState('');
   const [deleting, setDeleting] = useState(false);
 
   const { setIsLoggedIn } = useAuth();
 
-  const router = useRouter();
-
   if (!isOpen) return null;
 
+  // Handle delition of user account
   const handleDelete = async () => {
+
+    // Check for password
     if (!password) return toast.error('Please enter password');
 
     setDeleting(true);
@@ -70,6 +72,7 @@ const DeleteAccountModal: React.FC<Props> = ({ isOpen, onClose, onDeleted }) => 
         {/* Fake password field to prevent password autofill */}
         <input type="password" style={{ display: 'none' }} />
 
+        {/* Input field for apssword */}
         <input
           type="password"
           value={password}
@@ -77,13 +80,18 @@ const DeleteAccountModal: React.FC<Props> = ({ isOpen, onClose, onDeleted }) => 
           placeholder="Password"
           className="w-full border rounded px-3 py-2 text-sm mb-4"
         />
+
         <div className="flex justify-end space-x-3">
+
+          {/* Cancel button */}
           <button
             onClick={onClose}
             className="text-gray-600 hover:text-black text-sm cursor-pointer"
           >
             Cancel
           </button>
+
+          {/* Delete button */}
           <button
             onClick={handleDelete}
             disabled={deleting}
@@ -91,6 +99,7 @@ const DeleteAccountModal: React.FC<Props> = ({ isOpen, onClose, onDeleted }) => 
           >
             {deleting ? 'Deleting...' : 'Delete'}
           </button>
+
         </div>
       </div>
     </div>

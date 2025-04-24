@@ -1,24 +1,24 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
-import Container from '../../components/Container';
-import { BASE_URL } from '../../utils/config';
 import { toast } from 'sonner';
-import { useRedirectIfNotAuthenticated } from '../../utils/authRedirects';
 
+import Container from '@/components/Container';
+import { BASE_URL } from '@/utils/config';
+import { useRedirectIfNotAuthenticated } from '@/hooks/authRedirects';
+import { isValidEmail } from '@/utils/validation';
+
+// Edit user email page
 const EditEmailPage: React.FC = () => {
+
+  // Redirect user if he is not logged in
   const { isReady } = useRedirectIfNotAuthenticated();
 
   const [email, setEmail] = useState('');
   const [currentEmail, setCurrentEmail] = useState('');
-  const [error, setError] = useState('');
   const [saving, setSaving] = useState(false);
   const router = useRouter();
 
-  // Check for valid email format
-  const isValidEmail = (email: string) =>
-    /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
-
-  // Hole aktuelle E-Mail beim Laden
+  // Fetch current email from user
   useEffect(() => {
     const fetchProfile = async () => {
       try {
@@ -28,18 +28,17 @@ const EditEmailPage: React.FC = () => {
         const data = await res.json();
         setCurrentEmail(data.email);
       } catch (err) {
-        setError('Fehler beim Laden des Profils.');
+        toast.error('Error loading profile.');
       }
     };
 
     fetchProfile();
   }, []);
 
-  // Submit Handler
+  // Submit new email
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setSaving(true);
-    setError('');
 
     try {
       const res = await fetch(`${BASE_URL}/user/edit_email`, {
@@ -52,59 +51,80 @@ const EditEmailPage: React.FC = () => {
       const data = await res.json();
 
       if (!res.ok) {
-        throw new Error(data.error || 'Unbekannter Fehler');
+        throw new Error(data.error || 'Unknown error');
       }
 
-      toast.success('Bestätigungs-E-Mail wurde versendet.');
+      toast.success('Confirmation email has been sent.');
       router.push('/user/profile');
     } catch (err: any) {
-      setError(err.message);
       toast.error(err.message);
     } finally {
       setSaving(false);
     }
   };
 
+  // Wait until authentication state is ready
   if (!isReady) return null;
 
   return (
     <Container title="Edit Email">
       <form onSubmit={handleSubmit} className="space-y-4 max-w-md mx-auto">
-        {error && <p className="text-red-600">{error}</p>}
 
+        {/* Current email */}
         <div>
-          <label className="block text-sm font-medium text-gray-700">Current E-Mail</label>
+          <label className="block text-sm font-medium text-gray-700">
+            Current email
+          </label>
           <p className="text-gray-600 mt-1 px-3 py-2 border border-gray-300 rounded-md bg-gray-100">
-            {currentEmail || 'Lädt...'}
+            {currentEmail || 'Loading...'}
           </p>
         </div>
 
+        {/* New email */}
         <div>
           <label className="block text-sm font-medium text-gray-700">
-            New E-Mail
+            New email
           </label>
           <input
             type="email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             required
-            className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm bg-white"
+            pattern="[^\s@]+@[^\s@]+\.[^\s@]+"
+            className={`
+              mt-1 block w-full px-3 py-2 border rounded-md shadow-sm bg-white
+              ${email && !isValidEmail(email)
+                ? 'border-red-500 focus:border-red-500 focus:ring-red-500'
+                : 'border-gray-300 focus:border-blue-500 focus:ring-blue-500'}
+              focus:ring-1
+              focus:outline-none
+            `}
           />
+
+          {/* input condition */}
+          {!isValidEmail(email) && (
+            <p className="text-red-500 text-sm mt-1">
+              Email has to have valid format.
+            </p>
+          )}
+
         </div>
 
+        {/* Button submit */}
         <div className="flex flex-col items-center space-x-4">
           <button
             type="submit"
             disabled={!isValidEmail(email) || saving}
             className={`px-5 py-2 rounded text-white transition ${
-                !isValidEmail(email) || saving
+              !isValidEmail(email) || saving
                 ? 'bg-gray-400 text-gray-500 cursor-not-allowed'
                 : 'bg-blue-500 text-white hover:bg-blue-600 cursor-pointer'
             }`}
           >
-            {saving ? 'Sending...' : 'Send verification email'}
+            {saving ? 'Sending...' : 'Edit email'}
           </button>
 
+          {/* Button cancel */}
           <button
             type="button"
             onClick={() => router.push('/user/profile')}

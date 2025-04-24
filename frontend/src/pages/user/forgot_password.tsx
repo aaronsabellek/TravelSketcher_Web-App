@@ -1,25 +1,23 @@
 import { useState } from 'react';
-import { BASE_URL } from '../../utils/config';
-import Container from '../../components/Container';
-import { useRedirectIfNotAuthenticated } from '../../utils/authRedirects';
+import { toast } from 'sonner';
+
+import { BASE_URL } from '@/utils/config';
+import Container from '@/components/Container';
+import { useRedirectIfAuthenticated } from '@/hooks/authRedirects';
+import { isValidEmail } from '@/utils/validation';
 
 
 const ForgotPassword = () => {
-  const { isReady } = useRedirectIfNotAuthenticated();
+
+  // Redirect user if he is logged in
+  const { isReady } = useRedirectIfAuthenticated();
 
   const [email, setEmail] = useState('');
-  const [message, setMessage] = useState('');
-  const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
-  // Check for valid email format
-  const isValidEmail = (email: string) =>
-    /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
-
+  // Handle submit
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setMessage('');
-    setError('');
     setLoading(true);
 
     try {
@@ -35,43 +33,65 @@ const ForgotPassword = () => {
         throw new Error(data.error || 'Fehler beim Anfordern des Links.');
       }
 
-      setMessage(data.message);
+      toast.success(data.message);
     } catch (err: any) {
-      setError(err.message);
+      toast.error
     } finally {
       setLoading(false);
     }
   };
 
+  // Wait until authentication state is ready
   if (!isReady) return null;
 
   return (
     <Container title="Forgot password">
       <form onSubmit={handleSubmit} className="max-w-md mx-auto space-y-4">
-        <label className="block text-sm font-medium text-gray-700">
-          E-Mail-Adresse
+        <div>
+
+          {/* Email input */}
+          <label className="block text-sm font-medium text-gray-700">
+            Email
+          </label>
+
           <input
             type="email"
             required
             value={email}
+            pattern="[^\s@]+@[^\s@]+\.[^\s@]+"
             onChange={(e) => setEmail(e.target.value)}
-            className="mt-1 w-full px-3 py-2 border rounded border-gray-300 bg-white"
+            className={`
+              mt-1 block w-full px-3 py-2 border rounded-md shadow-sm bg-white
+              ${email && !isValidEmail(email)
+                ? 'border-red-500 focus:border-red-500 focus:ring-red-500'
+                : 'border-gray-300 focus:border-blue-500 focus:ring-blue-500'}
+              focus:ring-1
+              focus:outline-none
+            `}
           />
-        </label>
+
+          {/* Input condition */}
+          {!isValidEmail(email) && (
+            <p className="text-red-500 text-sm mt-1">
+              Email has to have valid format.
+            </p>
+          )}
+
+        </div>
+
+        {/* Submit button */}
         <button
           type="submit"
           disabled={!isValidEmail(email) || loading}
-          className={`w-full bg-blue-600 text-white px-5 py-2 rounded hover:bg-blue-700 transition${
+          className={`w-full text-white px-5 py-2 rounded transition${
             !isValidEmail(email) || loading
-            ? 'bg-gray-300 text-gray-500 opacity-50 cursor-not-allowed'
-            : 'bg-blue-500 text-white hover:bg-blue-600 cursor-pointer'
+              ? 'bg-gray-400 text-gray-500 cursor-not-allowed'
+              : 'bg-blue-500 text-white hover:bg-blue-600 cursor-pointer'
         }`}
         >
           {loading ? 'Send link...' : 'Reset password'}
         </button>
 
-        {message && <p className="text-green-600">{message}</p>}
-        {error && <p className="text-red-600">{error}</p>}
       </form>
     </Container>
   );

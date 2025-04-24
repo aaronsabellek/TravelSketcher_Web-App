@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { useRedirectIfAuthenticated } from '../utils/authRedirects';
-import { AnimatePresence, motion } from 'framer-motion';
 import Link from 'next/link';
+import { AnimatePresence, motion } from 'framer-motion';
+
+import { useRedirectIfAuthenticated } from '@/hooks/authRedirects';
 
 const About = () => {
   // Redirect if user is authenticated

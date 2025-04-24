@@ -1,12 +1,14 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/router';
-import { toast } from 'sonner';
-import Container from '../../components/Container';
-import { BASE_URL } from '../../utils/config';
-import { useRedirectIfNotAuthenticated } from '../../utils/authRedirects';
-import { UserProfile } from '../../types/models';
 import Link from 'next/link';
+import { toast } from 'sonner';
 
+import Container from '@/components/Container';
+import { BASE_URL } from '@/utils/config';
+import { UserProfile } from '@/types/models';
+import { useRedirectIfNotAuthenticated } from '@/hooks/authRedirects';
+
+// Edit user profile
 export default function EditUserProfile() {
   const { isReady } = useRedirectIfNotAuthenticated();
 
@@ -21,7 +23,7 @@ export default function EditUserProfile() {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
 
-  // Lade aktuelle Userdaten
+  // Load durrent user data
   useEffect(() => {
     const fetchProfile = async () => {
       try {
@@ -48,12 +50,12 @@ export default function EditUserProfile() {
     fetchProfile();
   }, []);
 
-  // Formularänderungen
+  // From changes
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setUserData({ ...userData, [e.target.name]: e.target.value });
   };
 
-  // Speichern
+  // Submit changes
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setSaving(true);
@@ -66,12 +68,12 @@ export default function EditUserProfile() {
         body: JSON.stringify(userData),
       });
 
-      if (!res.ok) throw new Error('Fehler beim Speichern');
+      if (!res.ok) throw new Error('Error saving');
 
       toast.success('Profile edited successfully.')
       router.push('/user/profile');
     } catch (err) {
-      toast.error('Änderung fehlgeschlagen.');
+      toast.error('Edition failed.');
     } finally {
       setSaving(false);
     }
@@ -81,34 +83,69 @@ export default function EditUserProfile() {
 
   if (!isReady) return null;
 
+  // Check for valid username and required fields
+  const usernameInvalid = userData.username.trim() === '' || userData.username.includes('@');
+  const cityInvalid = userData.city.trim() === '';
+
   return (
     <Container title="Edit profile">
       <form onSubmit={handleSubmit} className="space-y-4 max-w-md mx-auto">
         {error && <p className="text-red-600">{error}</p>}
 
+        {/* USername */}
         <div>
-          <label className="block text-sm font-medium text-gray-700">Username (<span className="text-red-500">*</span>required)</label>
+          <label className="block text-sm font-medium text-gray-700">
+            Username (<span className="text-red-500">*</span>required)
+          </label>
           <input
             name="username"
             value={userData.username}
             onChange={handleChange}
-            className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm bg-white"
+            className={`mt-1 block w-full px-3 py-2 border rounded-md shadow-sm bg-white
+              ${usernameInvalid
+                ? 'border-red-500 focus:border-red-500 focus:ring-red-500'
+                : 'border-gray-300 focus:border-blue-500 focus:ring-blue-500'}
+              focus:ring-1 focus:outline-none
+            `}
             required
           />
+
+          {/* Condition note */}
+          {usernameInvalid && (
+            <p className="text-red-500 text-sm mt-1">Username must not be empty or contain '@'.</p>
+          )}
         </div>
 
+        {/* City */}
         <div>
-          <label className="block text-sm font-medium text-gray-700">City (<span className="text-red-500">*</span>required)</label>
+          <label className="block text-sm font-medium text-gray-700">
+            City (<span className="text-red-500">*</span>required)
+          </label>
           <input
             name="city"
             value={userData.city}
             onChange={handleChange}
-            className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm bg-white"
+            className={`mt-1 block w-full px-3 py-2 border rounded-md shadow-sm bg-white
+              ${cityInvalid
+                ? 'border-red-500 focus:border-red-500 focus:ring-red-500'
+                : 'border-gray-300 focus:border-blue-500 focus:ring-blue-500'}
+              focus:ring-1 focus:outline-none
+            `}
           />
+
+          {/* Condition note */}
+          {cityInvalid && (
+            <p className="text-red-500 text-sm mt-1">
+              City must not be empty
+            </p>
+          )}
         </div>
 
+        {/* Country */}
         <div>
-          <label className="block text-sm font-medium text-gray-700">Country</label>
+          <label className="block text-sm font-medium text-gray-700">
+            Country
+          </label>
           <input
             type="text"
             name="country"
@@ -118,11 +155,13 @@ export default function EditUserProfile() {
           />
         </div>
 
+        {/* Email (not editable here) */}
         <div>
           <label className="block text-sm font-medium text-gray-700">Email</label>
           <p className="text-gray-600 mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm">{userData.email}</p>
         </div>
 
+        {/* Link: Edit email */}
         <div>
           <Link href="/user/edit_email">
             <button className="text-blue-600 hover:underline text-sm cursor-pointer">
@@ -131,6 +170,7 @@ export default function EditUserProfile() {
           </Link>
         </div>
 
+        {/* Link: Edit password */}
         <div>
           <Link href="/user/edit_password">
             <button className="text-blue-600 hover:underline text-sm cursor-pointer">
@@ -138,7 +178,11 @@ export default function EditUserProfile() {
             </button>
           </Link>
         </div>
+
+        {/* Buttons */}
         <div className="flex flex-col items-center space-x-4">
+
+            {/* Submit button */}
             <button
               type="submit"
               disabled={userData.username.trim() === '' || userData.city.trim() === '' || saving}
@@ -151,6 +195,7 @@ export default function EditUserProfile() {
               {saving ? 'Saving...' : 'Save changes'}
             </button>
 
+            {/* Cancel button */}
             <Link href="/user/profile">
               <button
                   type="button"
@@ -159,6 +204,7 @@ export default function EditUserProfile() {
                   Cancel
               </button>
             </Link>
+
         </div>
       </form>
     </Container>

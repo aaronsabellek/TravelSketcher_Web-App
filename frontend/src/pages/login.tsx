@@ -1,10 +1,11 @@
 import { useState } from 'react';
-import { useAuth } from '../contexts/AuthContext';
-import { useRedirectIfAuthenticated } from '../utils/authRedirects';
-import Container from '../components/Container';
 import Link from 'next/link';
-import { BASE_URL } from '../utils/config';
 import { toast } from 'sonner';
+
+import { useAuth } from '@/contexts/AuthContext';
+import { useRedirectIfAuthenticated } from '@/hooks/authRedirects';
+import Container from '@/components/Container';
+import { BASE_URL } from '@/utils/config';
 
 const Login = () => {
   // Redirect if user is authenticated

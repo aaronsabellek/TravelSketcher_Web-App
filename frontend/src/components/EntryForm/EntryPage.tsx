@@ -1,13 +1,13 @@
 import EntryForm from '.';
-import Container from '../Container';
-import { useEntryFormHandler } from '../../hooks/useEntryFormHandler';
-
+import Container from '@/components/Container';
+import { useEntryFormHandler } from '@/hooks/useEntryFormHandler';
 
 interface EntryPageProps {
   mode: 'add' | 'edit';
   type: 'destination' | 'activity';
 }
 
+// Administers the formular to add or edit
 const EntryPage: React.FC<EntryPageProps> = ({ mode, type }) => {
   const { initialData, handleSubmit } = useEntryFormHandler(mode, type);
 

@@ -1,10 +1,12 @@
 import { useState } from 'react';
 import { useRouter } from 'next/router';
-import { useRedirectIfAuthenticated } from '../utils/authRedirects';
-import Container from '../components/Container';
 import Link from 'next/link';
-import { BASE_URL } from '../utils/config';
 import { toast } from 'sonner';
+
+import { useRedirectIfAuthenticated } from '@/hooks/authRedirects';
+import Container from '@/components/Container';
+import { BASE_URL } from '@/utils/config';
+import { isValidEmail } from '@/utils/validation';
 
 const Register = () => {
   // Redirect if user is authenticated
@@ -18,7 +20,8 @@ const Register = () => {
 
   const router = useRouter();
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleFormSubmit = async (e: React.FormEvent) => {
+
     e.preventDefault();
 
     const data = { username, email, password, city, country };
@@ -49,11 +52,17 @@ const Register = () => {
 
   return (
     <Container title="Register">
-      <form onSubmit={handleSubmit}>
+      <form onSubmit={handleFormSubmit}>
         {[
           { label: 'Username', id: 'username', value: username, setValue: setUsername, required: true },
-          { label: 'Email', id: 'email', value: email, setValue: setEmail, required: true },
-          { label: 'Password', id: 'password', value: password, setValue: setPassword, type: 'password', required: true },
+          {
+            label: 'Email',
+            id: 'email',
+            value: email,
+            setValue: setEmail,
+            required: true,
+          },
+          { label: 'Password', id: 'password1', value: password, setValue: setPassword, type: 'password', required: true },
           { label: 'City', id: 'city', value: city, setValue: setCity, required: true },
           { label: 'Country', id: 'country', value: country, setValue: setCountry },
         ].map(({ label, id, value, setValue, type = 'text', required }) => (

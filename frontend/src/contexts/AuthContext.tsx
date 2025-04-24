@@ -1,8 +1,9 @@
 import { createContext, useContext, useState, ReactNode, useEffect } from 'react';
 import { useRouter } from 'next/router';
+import { toast } from 'sonner';
 
-import { BASE_URL } from '../utils/config';
-import { UserProfile } from '../types/models';
+import { BASE_URL } from '@/utils/config';
+import { UserProfile } from '@/types/models';
 
 type AuthContextType = {
   user: UserProfile | null;
@@ -15,13 +16,14 @@ type AuthContextType = {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
+// Handling login/logout-status of user
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<UserProfile | null>(null);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const router = useRouter();
 
-  // Benutzerstatus bei Initialisierung prüfen
+  // Check user status
   useEffect(() => {
     const checkLogin = async () => {
       try {
@@ -38,6 +40,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         }
       } catch (err) {
         console.error(err);
+        toast.error('Connection to server failed.');
         setUser(null);
         setIsLoggedIn(false);
       } finally {
@@ -48,20 +51,28 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     checkLogin();
   }, []);
 
+  // Handle login
   const login = (user: UserProfile) => {
     setUser(user);
     setIsLoggedIn(true);
-    router.replace('/user/profile');
+    router.replace('/destination/get_all');
   };
 
+  // Handle logout
   const logout = async () => {
-    await fetch(`${BASE_URL}/logout`, {
-      method: 'POST',
-      credentials: 'include',
-    });
-    setUser(null);
-    setIsLoggedIn(false);
-    router.replace('/login');
+    try {
+      await fetch(`${BASE_URL}/logout`, {
+        method: 'POST',
+        credentials: 'include',
+      });
+      toast.success('Erfolgreich ausgeloggt.');
+    } catch (err) {
+      toast.error('Logout fehlgeschlagen.');
+    } finally {
+      setUser(null);
+      setIsLoggedIn(false);
+      router.replace('/login');
+    }
   };
 
   return (

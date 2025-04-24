@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
-import { toast } from "sonner";
+import { toast } from 'sonner';
 
-import { BASE_URL } from '../../utils/config';
+import { BASE_URL } from '@/utils/config';
 
 interface NoteModalProps<T> {
   type: 'destination' | 'activity';
@@ -17,6 +17,7 @@ interface NoteModalProps<T> {
   textField?: string;
 }
 
+// Administers note of an entry
 const NoteModal = <T extends { id: string; free_text?: string }>({
   type,
   noteText,
@@ -33,6 +34,7 @@ const NoteModal = <T extends { id: string; free_text?: string }>({
 
   const [savingNote, setSavingNote] = useState(false);
 
+  // Save note
   const handleSaveNote = async () => {
     if (!noteForId) return;
 
@@ -63,16 +65,20 @@ const NoteModal = <T extends { id: string; free_text?: string }>({
     }
   };
 
+  // Get note
   const currentNote = items.find((d) => d.id === noteForId)?.free_text || '';
 
   return (
     <div data-ignore-click className="fixed inset-0 flex items-center justify-center bg-black/20 z-50">
       <div className="bg-white p-6 rounded-lg shadow-xl w-[90%] max-w-md relative">
-        <h2 className="text-lg font-semibold mb-4">Notizen zur {type}</h2>
+        <h2 className="text-lg font-semibold mb-4">Notes for {type}</h2>
 
+        {/* Show mode */}
         {!editingNote ? (
           <>
             <div className="whitespace-pre-wrap text-sm text-gray-800 overflow-y-auto max-h-64">
+
+              {/* Show links as links */}
               {noteText
                 .split(/(\s+)/)
                 .map((part, i) =>
@@ -90,24 +96,30 @@ const NoteModal = <T extends { id: string; free_text?: string }>({
                     part
                   )
                 )}
+
             </div>
+
+            {/* Edit button */}
             <button
               onClick={() => setEditingNote(true)}
               className="absolute top-4 right-4 text-sm text-blue-600 hover:underline"
             >
-              ✏️ Bearbeiten
+              ✏️ Edit
             </button>
+
+            {/* Close button */}
             <div className="flex justify-end mt-6">
               <button
                 className="px-4 py-2 text-gray-600 hover:text-black"
                 onClick={() => setNoteForId(null)}
               >
-                Schließen
+                Close
               </button>
             </div>
           </>
         ) : (
           <>
+            {/* Edit mode */}
             <textarea
               value={noteText}
               onChange={(e) => setNoteText(e.target.value)}
@@ -115,10 +127,15 @@ const NoteModal = <T extends { id: string; free_text?: string }>({
               rows={8}
               className="w-full p-2 border rounded resize-none whitespace-pre-wrap break-words text-sm"
             />
+
+            {/* Show characters */}
             <div className="text-right text-sm text-gray-500 mt-1">
-              {noteText.length}/1000 Zeichen
+              {noteText.length}/1000 characters
             </div>
+
             <div className="flex justify-end space-x-4 mt-4">
+
+              {/* Cancel button */}
               <button
                 className="px-4 py-2 text-gray-600 hover:text-black"
                 onClick={() => {
@@ -126,15 +143,18 @@ const NoteModal = <T extends { id: string; free_text?: string }>({
                   setNoteText(currentNote);
                 }}
               >
-                Abbrechen
+                Cancel
               </button>
+
+              {/* Save button */}
               <button
                 className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700"
                 onClick={handleSaveNote}
                 disabled={savingNote}
               >
-                {savingNote ? 'Speichere...' : 'Speichern'}
+                {savingNote ? 'Saving...' : 'Save'}
               </button>
+
             </div>
           </>
         )}

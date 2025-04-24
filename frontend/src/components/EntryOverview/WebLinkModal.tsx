@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { toast } from 'sonner';
 
-import { BASE_URL } from '../../utils/config';
+import { BASE_URL } from '@/utils/config';
 
 interface WebLinkModalProps<T> {
   items: T[];
@@ -29,6 +29,7 @@ const WebLinkModal = <T extends { id: string; web_link?: string }>({
   const currentLink = items.find((i) => i.id === linkForId)?.web_link || '';
   const [saving, setSaving] = useState(false);
 
+  // Saving link
   const handleSave = async () => {
     if (!linkForId) return;
 
@@ -64,6 +65,7 @@ const WebLinkModal = <T extends { id: string; web_link?: string }>({
       <div className="bg-white p-6 rounded-lg shadow-xl w-[90%] max-w-md relative">
         <h2 className="text-lg font-semibold mb-4">Web-Link zur Aktivität</h2>
 
+        {/* Show mode */}
         {!editingLink ? (
           <>
             {currentLink ? (
@@ -76,32 +78,40 @@ const WebLinkModal = <T extends { id: string; web_link?: string }>({
                 {currentLink}
               </a>
             ) : (
-              <p className="text-gray-500 italic">Kein Link vorhanden.</p>
+              <p className="text-gray-500 italic">No link yet.</p>
             )}
+
+            {/* Edit button */}
             <button
               onClick={() => setEditingLink(true)}
               className="absolute top-4 right-4 text-sm text-blue-600 hover:underline"
             >
-              ✏️ Bearbeiten
+              ✏️ Edit
             </button>
+
+            {/* Close button */}
             <div className="flex justify-end mt-6">
               <button
                 className="px-4 py-2 text-gray-600 hover:text-black"
                 onClick={() => setLinkForId(null)}
               >
-                Schließen
+                Close
               </button>
             </div>
           </>
         ) : (
           <>
+            {/* Edit mode */}
             <input
               value={webLink}
               onChange={(e) => setWebLink(e.target.value)}
               placeholder="https://example.com"
               className="w-full p-2 border rounded text-sm"
             />
+
             <div className="flex justify-end space-x-4 mt-4">
+
+              {/* Cancel button */}
               <button
                 className="px-4 py-2 text-gray-600 hover:text-black"
                 onClick={() => {
@@ -109,8 +119,10 @@ const WebLinkModal = <T extends { id: string; web_link?: string }>({
                   setWebLink(currentLink);
                 }}
               >
-                Abbrechen
+                Cancel
               </button>
+
+              {/* Save button */}
               <button
                 className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700"
                 onClick={handleSave}
@@ -118,6 +130,7 @@ const WebLinkModal = <T extends { id: string; web_link?: string }>({
               >
                 {saving ? 'Speichern...' : 'Speichern'}
               </button>
+
             </div>
           </>
         )}

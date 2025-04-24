@@ -1,10 +1,12 @@
+import { useState } from 'react';
 import { useRouter } from 'next/router';
-import { useRef, useEffect, useState } from 'react';
-import { BASE_URL } from '../utils/config';
-import { Destination, Activity } from '../types/models';
+
+import { BASE_URL } from '@/utils/config';
+import { Destination, Activity } from '@/types/models';
 
 type Item = Destination | Activity;
 
+// Actions for entries
 export function useEntryActions<T extends Item>(
   items: T[],
   setItems: React.Dispatch<React.SetStateAction<T[]>>,
@@ -13,32 +15,15 @@ export function useEntryActions<T extends Item>(
 
   const router = useRouter();
 
-  // Menu open/close
+  // Open/close menu
   const [menuOpenFor, setMenuOpenFor] = useState<string | null>(null);
-  const menuRef = useRef<HTMLDivElement | null>(null);
 
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
-        setMenuOpenFor(null);
-      }
-    };
-
-    if (menuOpenFor) {
-      document.addEventListener('mousedown', handleClickOutside);
-    }
-
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
-    };
-  }, [menuOpenFor]);
-
-  // Edit
+  // Push to edit entry
   const handleEdit = (id: string) => {
     router.push(`${routeBase}/edit/${id}`);
   };
 
-  // Delete confirm
+  // Confirm deletion of entry
   const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
   const [deleting, setDeleting] = useState(false);
 
@@ -53,6 +38,7 @@ export function useEntryActions<T extends Item>(
   const [editingNote, setEditingNote] = useState(false);
   const [savingNote, setSavingNote] = useState(false);
 
+  // Open note
   const openNote = (id: string) => {
     const item = items.find((d) => d.id === id);
     setNoteText(item?.free_text || '');
@@ -60,6 +46,7 @@ export function useEntryActions<T extends Item>(
     setEditingNote(false);
   };
 
+  // Save note
   const saveNote = async () => {
     if (!noteForId) return;
     if (noteText.length > 1000) {
@@ -92,9 +79,6 @@ export function useEntryActions<T extends Item>(
 
 
   return {
-    menuOpenFor,
-    setMenuOpenFor,
-    menuRef,
     handleEdit,
     handleDeleteConfirm,
     confirmDeleteId,

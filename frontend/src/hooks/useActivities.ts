@@ -1,7 +1,8 @@
 import { useState, useEffect, useCallback } from 'react';
-import { Activity } from '../types/models';
-import { BASE_URL } from '../utils/config';
+import { Activity } from '@/types/models';
+import { BASE_URL } from '@/utils/config';
 
+// Administer activities
 export const useActivities = (destination_id?: string) => {
   const [items, setItems] = useState<Activity[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
@@ -12,6 +13,7 @@ export const useActivities = (destination_id?: string) => {
   const [destinationTitle, setDestinationTitle] = useState<string>('');
   const [destinationCountry, setDestinationCountry] = useState<string>('');
 
+  // Fetch activities from specific destination
   const fetchActivities = useCallback(async (pageToLoad = 1) => {
     if (!destination_id) return;
 
@@ -21,7 +23,7 @@ export const useActivities = (destination_id?: string) => {
         method: 'GET',
       });
 
-      if (!res.ok) throw new Error('Fehler beim Laden der Aktivitäten');
+      if (!res.ok) throw new Error('Error laoding activities');
 
       const data = await res.json();
 
@@ -33,7 +35,7 @@ export const useActivities = (destination_id?: string) => {
 
       setHasMore(data.has_more);
     } catch (err) {
-      setError('Fehler beim Laden der Aktivitäten');
+      setError('Error loading activities');
       console.error(err);
     } finally {
       setLoading(false);
@@ -41,12 +43,14 @@ export const useActivities = (destination_id?: string) => {
     }
   }, [destination_id]);
 
+  // Start loading activities
   useEffect(() => {
     setLoading(true);
     setPage(1);
     fetchActivities(1);
   }, [fetchActivities]);
 
+  // Load more activities ...
   const loadMore = () => {
     if (loadingMore || !hasMore || !destination_id) return;
     setLoadingMore(true);
@@ -55,6 +59,7 @@ export const useActivities = (destination_id?: string) => {
     fetchActivities(nextPage);
   };
 
+  // ... when user scrollt to bottom
   useEffect(() => {
     const handleWindowScroll = () => {
       const scrollTop = window.scrollY;
@@ -70,6 +75,7 @@ export const useActivities = (destination_id?: string) => {
     return () => window.removeEventListener('scroll', handleWindowScroll);
   }, [hasMore, loadingMore, loadMore]);
 
+  // Get destination for activities from database
   useEffect(() => {
     if (!destination_id) return;
 
@@ -80,14 +86,14 @@ export const useActivities = (destination_id?: string) => {
           credentials: 'include',
         });
 
-        if (!res.ok) throw new Error('Fehler beim Laden des Zielorts');
+        if (!res.ok) throw new Error('Error loading destination');
 
         const data = await res.json();
         setDestinationTitle(data.destination.title);
         setDestinationCountry(data.destination.country);
       } catch (err) {
         console.error(err);
-        setError('Fehler beim Laden des Zielorts');
+        setError('Error loading destination');
       }
     };
 

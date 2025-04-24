@@ -2,28 +2,34 @@ import Link from 'next/link';
 import { useState, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion'
 
-import { useAuth } from '../contexts/AuthContext';
-import { useClickOutsideMultiple } from '../hooks/useClickOutsideMultiple';
+import { useAuth } from '@/contexts/AuthContext';
+import { useClickOutside } from '@/hooks/useClickOutside';
 
 const Navbar = () => {
+
   const { isLoggedIn, logout, isLoading } = useAuth();
   const [menuOpen, setMenuOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
   const buttonRef = useRef<HTMLButtonElement>(null);
 
   // Hook to close Burger Menu by clicking outside menu
-  useClickOutsideMultiple([menuRef, buttonRef], () => setMenuOpen(false), menuOpen);
+  useClickOutside([menuRef, buttonRef], () => setMenuOpen(false), menuOpen);
 
+  // Links for logged in user
   const loggedInLinks = [
     { href: '/destination/get_all', label: 'Destinations' },
     { href: '/user/profile', label: 'Profile' },
   ];
 
+  // Links not logged in
   const loggedOutLinks = [
     { href: '/about', label: 'About' },
     { href: '/register', label: 'Registration' }
   ];
 
+  const menuLinks = isLoggedIn ? loggedInLinks : loggedOutLinks;
+
+  // Menu visibility for effect
   const menuVariants = {
     hidden: {
       opacity: 0,
@@ -37,14 +43,14 @@ const Navbar = () => {
     },
   };
 
+  // Open/close burger menu
   const toggleMenu = () => setMenuOpen(prev => !prev);
   const handleLinkClick = () => setMenuOpen(false);
 
+  // Loading
   if (isLoading) {
     return <div>Loading...</div>;
   }
-
-  const menuLinks = isLoggedIn ? loggedInLinks : loggedOutLinks;
 
   return (
     <nav className="bg-white">
@@ -75,7 +81,7 @@ const Navbar = () => {
             </motion.button>
           </div>
 
-          {/* Navigation for Desktop screens */}
+          {/* Navigation for desktop screens */}
           <div className="hidden md:flex flex items-center space-x-6 text-gray-700 font-medium">
             {(isLoggedIn ? loggedInLinks : loggedOutLinks).map((link) => (
               <Link key={link.href} href={link.href} className="hover:underline">

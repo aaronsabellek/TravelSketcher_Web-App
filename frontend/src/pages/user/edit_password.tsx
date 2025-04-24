@@ -1,107 +1,96 @@
-import { useState } from 'react';
 import { useRouter } from 'next/router';
 import Link from 'next/link';
-import { BASE_URL } from '../../utils/config';
 import { toast } from 'sonner';
-import Container from '../../components/Container';
-import { useRedirectIfNotAuthenticated } from '../../utils/authRedirects';
 
+import Container from '@/components/Container';
+import PasswordInputGroup from '@/components/PasswordInputGroup';
+import { BASE_URL } from '@/utils/config';
+import { useRedirectIfNotAuthenticated } from '@/hooks/authRedirects';
+import { usePasswordValidation } from '@/hooks/usePasswordValidation';
+
+// Edit password
 const EditPassword = () => {
+
+  // Redirect user if he is not logged in
   const { isReady } = useRedirectIfNotAuthenticated();
 
   const router = useRouter();
-  const [password1, setPassword1] = useState('');
-  const [password2, setPassword2] = useState('');
-  const [saving, setSaving] = useState(false);
-  const [error, setError] = useState<string | null>(null);
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setSaving(true);
-    setError(null);
+  // Get password validation tools from hook
+  const {
+    password1,
+    password2,
+    setPassword1,
+    setPassword2,
+    ruleError,
+    matchError,
+    isDisabled,
+    saving,
+    handleSubmit,
+  } = usePasswordValidation({
+    initialPassword1: '',
+    initialPassword2: '',
+  });
 
-    if (password1 !== password2) {
-      setError('Passwords do not match.');
-      setSaving(false);
-      return;
+  // Handle password reset
+  const handleFormSubmit = async (password1: string, password2: string) => {
+
+    const res = await fetch(`${BASE_URL}/user/edit_password`, {
+      method: 'POST',
+      credentials: 'include',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ new_password_1: password1, new_password_2: password2 }),
+    });
+
+    if (!res.ok) {
+      const data = await res.json();
+      throw new Error(data.error || 'Error editing password.');
     }
 
-    try {
-      const res = await fetch(`${BASE_URL}/user/edit_password`, {
-        method: 'POST',
-        credentials: 'include',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ new_password_1: password1, new_password_2: password2 }),
-      });
-
-      if (!res.ok) {
-        const data = await res.json();
-        throw new Error(data.error || 'Error editing password.');
-      }
-
-      toast.success('Password edited successfully.');
-      router.push('/user/profile');
-    } catch (err: any) {
-      setError(err.message);
-      toast.error(err.message);
-    } finally {
-      setSaving(false);
-    }
+    toast.success('Password edited successfully.');
+    router.push('/user/profile');
   };
 
-  const isDisabled = saving || password1.trim() === '' || password2.trim() === '' || password1 !== password2;
-
+  // Wait until authentication state is ready
   if (!isReady) return null;
 
   return (
     <Container title="Edit password">
-      <form onSubmit={handleSubmit} className="space-y-4 max-w-md mx-auto">
-        {error && <p className="text-red-600">{error}</p>}
+      <form
+        onSubmit={(e) => handleSubmit(e, handleFormSubmit)}
+        className="space-y-4 max-w-md mx-auto"
+      >
 
         {/* Fake password field to prevent password autofill */}
         <input type="password" style={{ display: 'none' }} />
 
-        <div>
-          <label className="block text-sm font-medium text-gray-700">New password</label>
-          <input
-            type="password"
-            name="new_password_1"
-            value={password1}
-            onChange={(e) => setPassword1(e.target.value)}
-            className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm bg-white"
-            required
-          />
-        </div>
+        {/* Password user input  */}
+        <PasswordInputGroup
+          password1={password1}
+          password2={password2}
+          setPassword1={setPassword1}
+          setPassword2={setPassword2}
+          ruleError={ruleError}
+          matchError={matchError}
+        />
 
-        <div>
-          <label className="block text-sm font-medium text-gray-700">Confirm password</label>
-          <input
-            type="password"
-            name="new_password_2"
-            value={password2}
-            onChange={(e) => setPassword2(e.target.value)}
-            className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm bg-white"
-            required
-          />
-        </div>
-
-        <div>
-            <p>The password has to have at least 8 characters long and must contain at least one letter, one number and one special character.</p>
-        </div>
-
+        {/* Buttons*/}
         <div className="flex flex-col items-center space-x-4">
+
+          {/* Submit button */}
           <button
             type="submit"
             disabled={isDisabled}
             className={`px-5 py-2 rounded text-white transition ${
               isDisabled
               ? 'bg-gray-400 text-gray-500 cursor-not-allowed'
-              : 'bg-blue-500 hover:bg-blue-600'
+              : 'bg-blue-500 hover:bg-blue-600 cursor-pointer'
             }`}
           >
-            {saving ? 'Speichern...' : 'Edit password'}
+            {saving ? 'Saving...' : 'Edit password'}
           </button>
 
+          {/* Cancel button */}
           <Link href="/user/profile">
             <button
               type="button"
@@ -110,7 +99,9 @@ const EditPassword = () => {
               Cancel
             </button>
           </Link>
+
         </div>
+
       </form>
     </Container>
   );

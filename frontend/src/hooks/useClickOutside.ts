@@ -1,13 +1,18 @@
 import { useEffect } from 'react';
 
+// Close element when user clicks outside
 export const useClickOutside = (
-  ref: React.RefObject<HTMLDivElement | null>,
+  refs: React.RefObject<HTMLElement | null>[],
   handler: () => void,
   active: boolean = true
-) => {
+  ) => {
   useEffect(() => {
     const listener = (e: MouseEvent) => {
-      if (!ref.current || ref.current.contains(e.target as Node)) return;
+
+      const clickedInsideAny = refs.some(
+        ref => ref.current && ref.current.contains(e.target as Node)
+      );
+      if (clickedInsideAny) return;
       handler();
     };
 
@@ -17,5 +22,5 @@ export const useClickOutside = (
     return () => {
       document.removeEventListener('mousedown', listener);
     };
-  }, [ref, handler, active]);
+  }, [refs, handler, active]);
 };

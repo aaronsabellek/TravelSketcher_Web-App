@@ -1,7 +1,8 @@
-import React from 'react';
+import React, { useState, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 
-import { Destination, Activity } from '../../types/models';
+import { Destination, Activity } from '@/types/models';
+import { useClickOutside } from '@/hooks/useClickOutside';
 
 interface Props<T> {
   data: T;
@@ -12,47 +13,58 @@ interface Props<T> {
   onEdit: (id: string) => void;
   onDelete: (id: string) => void;
   onNote: (id: string) => void;
-  menuOpenFor: string | null;
-  setMenuOpenFor: (id: string | null) => void;
-  menuRef: React.RefObject<HTMLDivElement | null>;
   default_img?: string;
   isReorderMode: boolean;
   index: number;
-  moveDestinationUp: (index: number) => void;
-  moveDestinationDown: (index: number) => void;
+  moveEntry: (index: number, direction: 'up' | 'down') => void;
   items: T[];
   setExpandedCard: (id: string | null) => void;
   onLinkClick?: (id: string, web_link?: string) => void;
   userCity?: string | null;
 }
 
-const DestinationCard = <T extends Destination | Activity>({
+// Card for individual entry
+const EntryCard = <T extends Destination | Activity>({
   data,
   type,
   isExpanded,
   onEdit,
   onDelete,
   onNote,
-  menuOpenFor,
-  setMenuOpenFor,
-  menuRef,
   default_img = 'https://images.unsplash.com/photo-1486184885347-1464b5f10296?q=80&w=1168&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
   isReorderMode,
   index,
-  moveDestinationUp,
-  moveDestinationDown,
+  moveEntry,
   onLinkClick,
   items,
   setExpandedCard,
-  userCity
+  userCity,
 }: Props<T>) => {
+
+  // Data to open/close window for editing/delition of entry
+  const [menuOpen, setMenuOpen] = useState(false);
+  const menuRef = useRef<HTMLDivElement | null>(null);
+  const buttonRef = useRef<HTMLButtonElement | null>(null);
+
+  // Close element when user clicks outside
+  useClickOutside([menuRef, buttonRef], () => setMenuOpen(false), menuOpen);
+
+  // Open/close element with click on button
+  const handleButtonClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setMenuOpen((prev) => !prev);
+  };
+
   return (
+
+    // motion for reorder buttons
     <motion.div
       key={data.id}
       layout="position"
       transition={{ duration: 0.5, ease: 'easeOut' }}
       className="relative flex flex-col items-center space-y-2"
     >
+
       {/* Reorder buttons */}
       <AnimatePresence>
         {isReorderMode && (
@@ -67,20 +79,25 @@ const DestinationCard = <T extends Destination | Activity>({
             className="absolute -top-4 z-30 flex space-x-4"
             data-ignore-click
           >
+
+            {/* move up */}
             <button
-              onClick={() => moveDestinationUp(index)}
+              onClick={() => moveEntry(index, 'up')}
               disabled={index === 0}
               className="transition-transform duration-200 hover:scale-125"
             >
               <img src="/left_icon.png" className="h-3" />
             </button>
+
+            {/* move down */}
             <button
-              onClick={() => moveDestinationDown(index)}
+              onClick={() => moveEntry(index, 'down')}
               disabled={index === items.length - 1}
               className="transition-transform duration-200 hover:scale-125"
             >
               <img src="/right_icon.png" className="h-3" />
             </button>
+
           </motion.div>
         )}
       </AnimatePresence>
@@ -89,11 +106,20 @@ const DestinationCard = <T extends Destination | Activity>({
       <div
         className="w-full mt-3 bg-white hover:brightness-95 rounded-t-lg pb-2"
         onClick={(e) => {
+
+          // Do not expand card if user clicks on:
           const target = e.target as HTMLElement;
-          if (target.closest('[data-ignore-click]')) return; // Events ignorieren
+          if (
+            target.closest('img') ||
+            target.closest('h2') ||
+            target.closest('button')
+          ) {
+            return;
+          }
           setExpandedCard(isExpanded ? null : data.id);
         }}
       >
+
         {/* Image */}
         <div className="relative aspect-[16/12] w-full rounded-t-lg overflow-hidden">
           <a
@@ -112,38 +138,49 @@ const DestinationCard = <T extends Destination | Activity>({
             />
           </a>
 
-          {/* Edit/Delete Menu */}
+          {/* Edit/Delete button */}
           <div className="absolute top-2 right-2 text-white">
             <button
-              onClick={(e) => {
-                e.stopPropagation(); // verhindert, dass das Card-Click-Event ausgelöst wird
-                setMenuOpenFor(data.id === menuOpenFor ? null : data.id);
-              }}
+              ref={buttonRef}
+              onClick={handleButtonClick}
               className="w-8 h-8 flex items-center justify-center rounded-full bg-gray-500/10 hover:bg-gray-500/20 transition-transform duration-200 hover:scale-110 cursor-pointer"
             >
               ⋮
             </button>
 
-            {menuOpenFor === data.id && (
-              <div
-                ref={menuRef}
-                className="absolute right-0 mt-2 w-28 bg-white text-black rounded shadow-md z-50"
-                onClick={(e) => e.stopPropagation()} // damit der Card-Click nicht ausgelöst wird
-              >
-                <button
-                  onClick={() => onEdit(data.id)}
-                  className="block w-full text-left px-4 py-2 hover:bg-gray-100 cursor-pointer"
+            {/* Edit/Delete window */}
+            <AnimatePresence>
+              {menuOpen && (
+                <motion.div
+                  key="edit-delete-menu"
+                  ref={menuRef}
+                  initial={{ opacity: 0, height: 0 }}
+                  animate={{ opacity: 1, height: 'auto' }}
+                  exit={{ opacity: 0, height: 0 }}
+                  transition={{ duration: 0.15, ease: 'easeInOut' }}
+                  className="absolute right-0 mt-2 w-28 bg-white text-black rounded shadow-md z-50"
+                  onClick={(e) => e.stopPropagation()}
                 >
-                  ✏️ Edit
-                </button>
-                <button
-                  onClick={() => onDelete(data.id)}
-                  className="block w-full text-left px-4 py-2 hover:bg-gray-100 text-red-600 cursor-pointer"
-                >
-                  🗑️ Delete
-                </button>
-              </div>
-            )}
+
+                  {/* Edit button */}
+                  <button
+                    onClick={() => onEdit(data.id)}
+                    className="block w-full text-left px-4 py-2 hover:bg-gray-100 cursor-pointer"
+                  >
+                    ✏️ Edit
+                  </button>
+
+                  {/* Delete button */}
+                  <button
+                    onClick={() => onDelete(data.id)}
+                    className="block w-full text-left px-4 py-2 hover:bg-gray-100 text-red-600 cursor-pointer"
+                  >
+                    🗑️ Delete
+                  </button>
+
+                </motion.div>
+              )}
+            </AnimatePresence>
           </div>
         </div>
 
@@ -194,7 +231,8 @@ const DestinationCard = <T extends Destination | Activity>({
           <div className="flex justify-between space-x-4 p-2">
             <div className="grid grid-cols-3 gap-3">
 
-              {type === 'destination' && userCity ? (
+              {/* rome2rio for destinations */}
+              {type === 'destination' && userCity && (
                 <button
                   onClick={() =>
                     window.open(`https://www.rome2rio.com/map/${userCity}/${data.title}`, '_blank')
@@ -203,7 +241,23 @@ const DestinationCard = <T extends Destination | Activity>({
                 >
                   <img src="/rome2rio_icon.png" className="h-7 hover:scale-115" />
                 </button>
-              ) : type === 'activity' ? (
+
+              )}
+
+              {/* booking for destinations */}
+              {type === 'destination' && (
+                <button
+                  onClick={() =>
+                    window.open(`https://www.booking.com/${data.title}`, '_blank')
+                  }
+                  className="text-blue-500 relative right-2 hover:text-blue-700 cursor-pointer"
+                >
+                  <img src="/booking_icon.png" className="h-7 hover:scale-115" />
+                </button>
+              )}
+
+              {/* link icon for activities */}
+              {type === 'activity' && (
                 <button
                   onClick={() => onLinkClick?.(data.id, (data as any).web_link)}
                   className={`cursor-pointer ${(data as any).web_link ? 'text-blue-500' : 'text-gray-400'}`}
@@ -213,19 +267,9 @@ const DestinationCard = <T extends Destination | Activity>({
                     className={`h-6 hover:scale-110 ${(data as any).web_link ? '' : 'opacity-50'}`}
                   />
                 </button>
-              ) : null}
-
-              {type === 'destination' && (
-              <button
-                onClick={() =>
-                  window.open(`https://www.booking.com/${data.title}`, '_blank')
-                }
-                className="text-blue-500 relative right-2 hover:text-blue-700 cursor-pointer"
-              >
-                <img src="/booking_icon.png" className="h-7 hover:scale-115" />
-              </button>
               )}
 
+              {/* google icon for destinations and activities */}
               <button
                 onClick={() =>
                   {type === 'destination' ? (
@@ -238,12 +282,12 @@ const DestinationCard = <T extends Destination | Activity>({
               >
                 <img src="/google_icon.png" className="h-7 hover:scale-115" />
               </button>
+
             </div>
 
             {/* Notes icon */}
             <div>
               <button
-                data-ignore-click
                 onClick={(e) => {
                   e.stopPropagation();
                   onNote(data.id);
@@ -261,4 +305,4 @@ const DestinationCard = <T extends Destination | Activity>({
   );
 };
 
-export default DestinationCard;
+export default EntryCard;

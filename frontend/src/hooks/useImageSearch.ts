@@ -1,8 +1,11 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
-import { BASE_URL } from '../utils/config';
-import { UnsplashImage } from '../types/models';
 
+import { BASE_URL } from '@/utils/config';
+import { UnsplashImage } from '@/types/models';
+
+// Hooks for image handling
 export const useImageSearch = () => {
+
   const [imageSearchTerm, setImageSearchTerm] = useState('');
   const [hasManuallyEditedSearch, setHasManuallyEditedSearch] = useState(false);
   const [imageResults, setImageResults] = useState<UnsplashImage[]>([]);
@@ -13,7 +16,6 @@ export const useImageSearch = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [loadingMore, setLoadingMore] = useState(false);
   const [isAtBottom, setIsAtBottom] = useState(false);
-
   const [title, setTitle] = useState('');
 
   const scrollContainerRef = useRef<HTMLDivElement | null>(null);
@@ -22,32 +24,34 @@ export const useImageSearch = () => {
   const openModal = () => setIsModalOpen(true);
   const closeModal = () => setIsModalOpen(false);
 
+  // Select image
   const handleImageSelect = (url: string) => {
     setTempSelectedImageUrl(url);
   };
 
-  // Funktion, um den Titel zu setzen
+  // Set title
   const updateTitle = (newTitle: string) => {
-    setTitle(newTitle); // Titel setzen
+    setTitle(newTitle);
     if (!imageSearchTerm) {
-      setImageSearchTerm(newTitle); // Nur setzen, wenn imageSearchTerm noch leer ist
+      setImageSearchTerm(newTitle);
     }
   };
 
-   // Falls der title sich ändert, den imageSearchTerm setzen
+   // Set image search term
    useEffect(() => {
     if (!imageSearchTerm) {
-      setImageSearchTerm(title); // Nur setzen, wenn imageSearchTerm noch leer ist
+      setImageSearchTerm(title);
     }
-  }, [title, imageSearchTerm]); // Titel wird überwacht
+  }, [title, imageSearchTerm]);
 
-  // Synchronise fields for 'title' and 'image'
+  // Synchronise image search term with title
     useEffect(() => {
       if (!hasManuallyEditedSearch) {
         setImageSearchTerm(title);
       }
     }, [title, hasManuallyEditedSearch]);
 
+  // Confirm selection of image
   const handleConfirmSelection = () => {
     if (tempSelectedImageUrl) {
       setSelectedImageUrl(tempSelectedImageUrl);
@@ -56,6 +60,7 @@ export const useImageSearch = () => {
     }
   };
 
+  // Search images with Unspash API
   const searchImages = async () => {
     if (!imageSearchTerm) return;
     setIsSearching(true);
@@ -66,12 +71,13 @@ export const useImageSearch = () => {
       setImageResults(data.results);
       setIsModalOpen(true);
     } catch (err) {
-      console.error('Fehler bei der Bildsuche:', err);
+      console.error('Image search error:', err);
     } finally {
       setIsSearching(false);
     }
   };
 
+  // Load more images ...
   const loadMoreImages = useCallback(async () => {
     if (loadingMore) return;
 
@@ -91,7 +97,7 @@ export const useImageSearch = () => {
     }
   }, [loadingMore, imageSearchTerm, currentPage]);
 
-
+  // ... when user scrolls to bottom
   const handleScroll = useCallback((e: React.UIEvent<HTMLDivElement, UIEvent>) => {
     const container = e.currentTarget;
     const bottom = container.scrollHeight - container.scrollTop === container.clientHeight;

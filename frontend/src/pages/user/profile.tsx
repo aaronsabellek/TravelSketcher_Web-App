@@ -1,11 +1,12 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
 import Link from 'next/link';
-import { useRedirectIfNotAuthenticated } from '../../utils/authRedirects';
-import Container from '../../components/Container';
-import { BASE_URL } from '../../utils/config';
-import { UserProfile } from '../../types/models';
-import DeleteAccountModal from '../../components/DeleteAccountModal';
+
+import Container from '@/components/Container';
+import DeleteAccountModal from '@/components/DeleteAccountModal';
+import { useRedirectIfNotAuthenticated } from '@/hooks/authRedirects';
+import { BASE_URL } from '@/utils/config';
+import { UserProfile } from '@/types/models';
 
 const Profile: React.FC = () => {
   const { isReady } = useRedirectIfNotAuthenticated();

@@ -1,15 +1,21 @@
 import { useRouter } from 'next/router';
-import EntryOverview from '../../../components/EntryOverview';
-import { useActivities } from '../../../hooks/useActivities';
-import { useRedirectIfNotAuthenticated } from '../../../utils/authRedirects';
 
+import EntryOverview from '@/components/EntryOverview';
+import { useActivities } from '@/hooks/useActivities';
+import { useRedirectIfNotAuthenticated } from '@/hooks/authRedirects';
+
+// Show all activities page
 export default function ActivitiesByDestination() {
+
+  // Redirect user if he is not logged in
   const { isReady } = useRedirectIfNotAuthenticated();
 
   const router = useRouter();
+
+  // Get destination id from query
   const { id } = router.query;
 
-  // Hier nutzen wir die useActivities Hook mit der destinationId
+  // Get activity data with the destination ID
   const {
     items,
     setItems,
@@ -17,13 +23,11 @@ export default function ActivitiesByDestination() {
     error,
     destinationTitle,
     destinationCountry,
-  } = useActivities(typeof id === 'string' ? id : undefined);  // ID wird hier übergeben
+  } = useActivities(typeof id === 'string' ? id : undefined);
 
+  // Wait until authentication state is ready
   if (!isReady) return null;
-  if (loading) return <div>Lade Aktivitäten...</div>;
-  if (error) return <div>{error}</div>;
 
-  // Weitergabe der Daten an EntryOverview
   return (
     <EntryOverview
       title={`Activities in ${destinationTitle || '...'}, ${destinationCountry || ''} `}

@@ -8,6 +8,7 @@ interface DeleteConfirmModalProps {
   itemType: 'destination' | 'activity' | 'user';
 }
 
+// Confirmation window for deletion of element
 const DeleteConfirmModal: React.FC<DeleteConfirmModalProps> = ({
   isOpen,
   onClose,
@@ -15,41 +16,51 @@ const DeleteConfirmModal: React.FC<DeleteConfirmModalProps> = ({
   deleting,
   itemType
 }) => {
+
+  // Cancel if window is closed
   if (!isOpen) return null;
 
+  // Warning texts
   const getWarningText = () => {
     switch (itemType) {
       case 'destination':
-        return 'Bist du sicher, dass du diese Destination löschen möchtest? Dies kann nicht rückgängig gemacht werden.';
+        return 'Are you sure you want to delete this destination? This cannot be undone.';
       case 'activity':
-        return 'Bist du sicher, dass du diese Activity löschen möchtest? Dies kann nicht rückgängig gemacht werden.';
+        return 'Are you sure you want to delete this activity? This cannot be undone.';
       case 'user':
-        return 'Bist du sicher, dass du deinen Account löschen möchtest? Alle Daten werden dauerhaft entfernt.';
+        return 'Are you sure you want to delete your account? All data will be permanently deleted.';
       default:
-        return 'Bist du sicher, dass du dieses Element löschen möchtest?';
+        return 'Are you sure you want to delete this item?';
     }
   };
 
   return (
     <div className="fixed inset-0 flex items-center justify-center bg-black/20 z-50">
       <div className="bg-white p-6 rounded-lg shadow-xl w-80">
-        <h2 className="text-lg font-semibold mb-4">{itemType} löschen?</h2>
+
+        {/* Warning Text */}
+        <h2 className="text-lg font-semibold mb-4">Delete {itemType}?</h2>
         <p className="mb-4 text-sm text-gray-600">
           {getWarningText()}
         </p>
+
         <div className="flex justify-end space-x-4">
+
+          {/* Cancel button */}
           <button
             className="px-4 py-2 text-gray-600 hover:text-black"
             onClick={onClose}
           >
-            Abbrechen
+            Cancel
           </button>
+
+          {/* Delete Button */}
           <button
             className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700"
             onClick={onDelete}
             disabled={deleting}
           >
-            {deleting ? 'Lösche...' : 'Ja, löschen'}
+            {deleting ? 'Deleting...' : 'Delete'}
           </button>
         </div>
       </div>

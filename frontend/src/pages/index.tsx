@@ -1,6 +1,7 @@
 import { useEffect } from 'react';
 import { useRouter } from 'next/router';
-import { useAuth } from '../src/contexts/AuthContext';
+
+import { useAuth } from '@/contexts/AuthContext';
 
 const Home = () => {
   const { isLoggedIn, isLoading } = useAuth();

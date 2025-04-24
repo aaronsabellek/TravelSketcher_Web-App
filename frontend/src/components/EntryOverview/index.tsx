@@ -1,17 +1,17 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
+import { toast } from 'sonner';
 
 import EntryCard from './EntryCard';
 import NoteModal from './NoteModal';
 import DeleteConfirmModal from './DeleteConfirmModal';
 import WebLinkModal from './WebLinkModal';
 import AddOrReorderButton from './AddOrReorderButton';
-import { BASE_URL, default_img } from '../../utils/config';
-import { Destination, Activity } from '../../types/models';
-import { useReorder } from '../../hooks/useReorder';
-import { useUserCity } from '../../hooks/useUserCity';
-import { useEntryActions } from '../../hooks/useEntryActions';
-import { useClickOutside } from '../../hooks/useClickOutside';
+import { BASE_URL, default_img } from '@/utils/config';
+import { Destination, Activity } from '@/types/models';
+import { useReorder } from '@/hooks/useReorder';
+import { useUserCity } from '@/hooks/useUserCity';
+import { useEntryActions } from '@/hooks/useEntryActions';
 
 interface EntryOverviewPageProps<T> {
   title: string;
@@ -32,6 +32,7 @@ interface EntryOverviewPageProps<T> {
   };
 }
 
+// Show all destinations of user or activities of destination
 const EntryOverviewPage = <T extends Destination | Activity>({
   title,
   fetchHook,
@@ -41,12 +42,15 @@ const EntryOverviewPage = <T extends Destination | Activity>({
   showUserCity = false,
 }: EntryOverviewPageProps<T>) => {
 
-  const router = useRouter();
   const [expandedCard, setExpandedCard] = useState<string | null>(null);
-
   const [webLink, setWebLink] = useState('');
   const [editingLink, setEditingLink] = useState(false);
   const [linkForId, setLinkForId] = useState<string | null>(null);
+
+  const router = useRouter();
+
+  // Get city from user for rom2rio-link
+  const { city } = useUserCity();
 
   const {
     items,
@@ -56,13 +60,7 @@ const EntryOverviewPage = <T extends Destination | Activity>({
     loadingMore,
   } = fetchHook();
 
-  // Get city from user for rom2rio-link
-  const { city } = useUserCity();
-
   const {
-    menuOpenFor,
-    setMenuOpenFor,
-    menuRef,
     handleEdit,
     handleDeleteConfirm,
     confirmDeleteId,
@@ -82,22 +80,28 @@ const EntryOverviewPage = <T extends Destination | Activity>({
   const {
     isReorderMode,
     toggleReorderMode,
-    moveDestinationUp,
-    moveDestinationDown,
+    moveEntry,
     saveNewOrder,
     hasOrderChanged,
   } = useReorder<T>(type, items, setItems);
 
-  useClickOutside(menuRef, () => setMenuOpenFor(null), !!menuOpenFor)
-
+  // handle push to add-route after click
   const handleAddClick = () => {
     router.push(addRoute);
   };
+
+  // Show errors
+  useEffect(() => {
+    if (error) {
+      toast.error(error);
+    }
+  }, [error]);
 
   return (
     <div className="">
       <h1 className="text-3xl font-bold mb-2">{title}</h1>
 
+      {/* Reorder mode button */}
       <div className="flex justify-between mb-3">
         <button
           onClick={toggleReorderMode}
@@ -107,15 +111,22 @@ const EntryOverviewPage = <T extends Destination | Activity>({
         </button>
       </div>
 
+      {/* Loading */}
       {loading && <p>Loading...</p>}
-      {error && <p className="text-red-500">{error}</p>}
 
+      {/* entries */}
       <div className="grid grid-cols-1 xs:grid-cols-2 md:grid-cols-3 gap-4">
+
         {items.length === 0 ? (
+
+          // No entries yet
           <div className="col-span-1 xs:col-span-2 md:col-span-3 text-center p-4 text-gray-500">
             No entries yet. Click the add button and start your journey!
           </div>
+
         ) : (
+
+          // Show entries in EntryCards
           items.map((item, index) => (
             <EntryCard
               key={item.id}
@@ -127,14 +138,10 @@ const EntryOverviewPage = <T extends Destination | Activity>({
               onEdit={handleEdit}
               onDelete={handleDeleteConfirm}
               onNote={openNote}
-              menuOpenFor={menuOpenFor}
-              setMenuOpenFor={setMenuOpenFor}
-              menuRef={menuRef}
               default_img={default_img}
               isReorderMode={isReorderMode}
               index={index}
-              moveDestinationUp={moveDestinationUp}
-              moveDestinationDown={moveDestinationDown}
+              moveEntry={moveEntry}
               items={items}
               setExpandedCard={setExpandedCard}
               onLinkClick={(id, web_link) => {
@@ -148,6 +155,7 @@ const EntryOverviewPage = <T extends Destination | Activity>({
         )}
       </div>
 
+      {/* Add or Reorder button */}
       <AddOrReorderButton
         isReorderMode={isReorderMode}
         hasOrderChanged={hasOrderChanged}
@@ -155,6 +163,7 @@ const EntryOverviewPage = <T extends Destination | Activity>({
         handleAddClick={handleAddClick}
       />
 
+      {/* Modal to condirm delition of entry */}
       <DeleteConfirmModal
         isOpen={!!confirmDeleteId}
         onClose={() => setConfirmDeleteId(null)}
@@ -178,6 +187,7 @@ const EntryOverviewPage = <T extends Destination | Activity>({
         itemType={type}
       />
 
+      {/* Modal for notes of entry */}
       <NoteModal
         type={type}
         noteText={noteText}
@@ -191,6 +201,7 @@ const EntryOverviewPage = <T extends Destination | Activity>({
         setItems={setItems}
       />
 
+      {/* Modal for weblink of activity */}
       <WebLinkModal
         items={items}
         setItems={setItems}
@@ -202,11 +213,13 @@ const EntryOverviewPage = <T extends Destination | Activity>({
         setLinkForId={setLinkForId}
       />
 
+      {/* Loading more entries */}
       {loadingMore && (
         <div className="col-span-2 md:col-span-3 text-center py-4 text-gray-400">
           Loading more entries...
         </div>
       )}
+
     </div>
   );
 };
