@@ -1,11 +1,15 @@
+import { useState } from 'react';
 import { useRouter } from 'next/router';
 import { toast } from 'sonner';
 
 import Container from '@/components/Container';
-import PasswordInputGroup from '@/components/PasswordInputGroup';
-import { BASE_URL } from '@/utils/config';
+import InputField from '@/components/Form/InputField';
+import Button from '@/components/Buttons/Button';
+import Form from '@/components/Form/Form';
 import { useRedirectIfNotAuthenticated } from '@/hooks/authRedirects';
-import { usePasswordValidation } from '@/hooks/usePasswordValidation';
+import { BASE_URL } from '@/utils/config';
+import { validatePasswordField, validatePasswordMatchField } from '@/utils/formValidations';
+
 
 // Reset password of user
 const ResetPassword = () => {
@@ -13,44 +17,54 @@ const ResetPassword = () => {
   // Redirect user if he is not logged in
   const { isReady } = useRedirectIfNotAuthenticated();
 
+  const [password1, setPassword1] = useState('');
+  const [password2, setPassword2] = useState('');
+  const [saving, setSaving] = useState(false);
+
   const router = useRouter();
 
-  // Get password validation tools from hook
-  const {
-    password1,
-    password2,
-    setPassword1,
-    setPassword2,
-    ruleError,
-    matchError,
-    isDisabled,
-    saving,
-    handleSubmit,
-  } = usePasswordValidation({
-    initialPassword1: '',
-    initialPassword2: '',
-  });
+  const passwordErrors = validatePasswordField(password1);
+  const passwordMatchError = validatePasswordMatchField(password1, password2);
+
+  const allErrors = [...passwordErrors, ...passwordMatchError];
+
+  const isDisabled = allErrors.length > 0;
 
   // Get verification token from query
   const { token } = router.query;
 
   // Handle password reset
-  const handleFormSubmit = async (password1: string, password2: string) => {
+  const handleSubmit = async (e: React.FormEvent) => {
 
-    const res = await fetch(`${BASE_URL}/user/reset_password/${token}`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ new_password_1: password1, new_password_2: password2 }),
-    });
+    e.preventDefault();
+    setSaving(true);
 
-    const data = await res.json();
-
-    if (!res.ok) {
-      throw new Error(data.error || 'Error resetting password.');
+    if (allErrors.length > 0) {
+      allErrors.forEach((err) => toast.error(err));
+      setSaving(false);
+      return;
     }
 
-    toast.success('Password changed successfully. You will be redirected...');
-    setTimeout(() => router.push('/login'), 2500);
+    try {
+      const res = await fetch(`${BASE_URL}/user/reset_password/${token}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ new_password_1: password1, new_password_2: password2 }),
+      });
+
+      if (!res.ok) {
+        const data = await res.json();
+        throw new Error(data.error || 'Error resetting password.');
+      }
+
+      toast.success('Password changed successfully. You will be redirected...');
+      setTimeout(() => router.push('/login'), 2500);
+
+    } catch (err: any) {
+      toast.error(err.message || 'An unexpected error occurred.');
+    } finally {
+      setSaving(false)
+    }
   };
 
   // Wait until authentication state is ready
@@ -58,38 +72,40 @@ const ResetPassword = () => {
 
   return (
     <Container title="Neues Passwort setzen">
-      <form
-        onSubmit={(e) => handleSubmit(e, handleFormSubmit)}
-        className="max-w-md mx-auto space-y-4"
-      >
+
+      <Form onSubmit={handleSubmit}>
 
         {/* Fake password field to prevent password autofill */}
         <input type="password" style={{ display: 'none' }} />
 
-        {/* Password user input  */}
-        <PasswordInputGroup
-          password1={password1}
-          password2={password2}
-          setPassword1={setPassword1}
-          setPassword2={setPassword2}
-          ruleError={ruleError}
-          matchError={matchError}
+        {/* New password input */}
+        <InputField
+            label="New password"
+            type="password"
+            value={password1}
+            onChange={(e) => setPassword1(e.target.value)}
+            errors={passwordErrors}
+            required
+        />
+
+        {/* Confirm password input */}
+        <InputField
+            label="Confirm password"
+            type="password"
+            value={password2}
+            onChange={(e) => setPassword2(e.target.value)}
+            errors={passwordMatchError}
+            required
         />
 
         {/* Submit button */}
-        <button
+        <Button
+          text={saving ? 'Saving...' : 'Edit password'}
           type="submit"
-          disabled={isDisabled}
-            className={`px-5 py-2 rounded text-white transition ${
-              isDisabled
-              ? 'bg-gray-400 text-gray-500 cursor-not-allowed'
-              : 'bg-blue-500 hover:bg-blue-600 cursor-pointer'
-            }`}
-        >
-          {saving ? 'Saving...' : 'Save new password'}
-        </button>
+          isDisabled={isDisabled}
+        />
 
-      </form>
+      </Form>
     </Container>
   );
 };

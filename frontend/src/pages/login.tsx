@@ -2,6 +2,9 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { toast } from 'sonner';
 
+import InputField from '@/components/Form/InputField';
+import Button from '@/components/Buttons/Button';
+import Form from '@/components/Form/Form';
 import { useAuth } from '@/contexts/AuthContext';
 import { useRedirectIfAuthenticated } from '@/hooks/authRedirects';
 import Container from '@/components/Container';
@@ -14,6 +17,10 @@ const Login = () => {
   const [identifier, setIdentifier] = useState('');
   const [password, setPassword] = useState('');
   const { isLoading, login } = useAuth();
+
+  const isDisabled =
+    identifier.trim() === '' ||
+    password.trim() === '';
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -50,48 +57,43 @@ const Login = () => {
 
   return (
     <Container title="Login">
-      <form onSubmit={handleSubmit}>
-        <div className="mb-4">
-          <label htmlFor="identifier" className="block text-sm font-medium text-gray-700">Email or Username</label>
-          <input
+      <Form onSubmit={handleSubmit}>
+
+          <InputField
+            label="Username or email"
             type="text"
-            id="identifier"
             value={identifier}
             onChange={(e) => setIdentifier(e.target.value)}
             required
-            className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm bg-white"
           />
-        </div>
-        <div className="mb-6">
-          <label htmlFor="password" className="block text-sm font-medium text-gray-700">Password</label>
-          <input
+
+          <InputField
+            label="Password"
             type="password"
-            id="password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             required
-            className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm bg-white"
           />
-        </div>
-        <button
+
+        <Button
+          text="Login"
           type="submit"
-          className="w-full py-2 px-4 bg-blue-500 text-white font-semibold rounded-lg cursor-pointer hover:bg-blue-600"
-        >
-          Login
-        </button>
-      </form>
+          isDisabled={isDisabled}
+        />
+
+      </Form>
 
       <p className="mt-4 text-sm text-center">
         Forgot password?{' '}
         <Link href="/user/forgot_password">
-          <span className="text-blue-600 underline cursor-pointer">Reset here</span>
+          <span className="text-blue-600 hover:underline cursor-pointer">Reset here</span>
         </Link>
       </p>
 
       <p className="mt-4 text-sm text-center">
         No verification email received?{' '}
         <Link href="/resend_verification">
-          <span className="text-blue-600 underline cursor-pointer">
+          <span className="text-blue-600 hover:underline cursor-pointer">
             Send here again
           </span>
         </Link>

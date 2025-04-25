@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 import { toast } from 'sonner';
 
 import { BASE_URL } from '@/utils/config';
+import Button from '../Buttons/Button';
+import ModalCancelButton from '@/components/Buttons/ModalCancelButton'
 
 interface NoteModalProps<T> {
   type: 'destination' | 'activity';
@@ -99,22 +101,12 @@ const NoteModal = <T extends { id: string; free_text?: string }>({
 
             </div>
 
-            {/* Edit button */}
-            <button
-              onClick={() => setEditingNote(true)}
-              className="absolute top-4 right-4 text-sm text-blue-600 hover:underline"
-            >
-              ✏️ Edit
-            </button>
-
-            {/* Close button */}
             <div className="flex justify-end mt-6">
-              <button
-                className="px-4 py-2 text-gray-600 hover:text-black"
-                onClick={() => setNoteForId(null)}
-              >
-                Close
-              </button>
+              {/* Close button */}
+              <ModalCancelButton onClose={() => setNoteForId(null)} />
+
+              {/* Edit button */}
+              <Button text="Edit" onClick={() => setEditingNote(true)} />
             </div>
           </>
         ) : (
@@ -136,24 +128,20 @@ const NoteModal = <T extends { id: string; free_text?: string }>({
             <div className="flex justify-end space-x-4 mt-4">
 
               {/* Cancel button */}
-              <button
-                className="px-4 py-2 text-gray-600 hover:text-black"
-                onClick={() => {
+              <ModalCancelButton
+                onClose={() => {
                   setEditingNote(false);
                   setNoteText(currentNote);
                 }}
-              >
-                Cancel
-              </button>
+              />
 
               {/* Save button */}
-              <button
-                className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700"
+              <Button
+                text={savingNote ? 'Saving...' : 'Save'}
+                type="submit"
+                isDisabled={savingNote}
                 onClick={handleSaveNote}
-                disabled={savingNote}
-              >
-                {savingNote ? 'Saving...' : 'Save'}
-              </button>
+              />
 
             </div>
           </>

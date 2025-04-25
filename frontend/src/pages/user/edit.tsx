@@ -3,10 +3,17 @@ import { useRouter } from 'next/router';
 import Link from 'next/link';
 import { toast } from 'sonner';
 
+import InputField from '@/components/Form/InputField';
+import Button from '@/components/Buttons/Button';
+import CancelButton from '@/components/Buttons/CancelButton';
+import Form from '@/components/Form/Form';
 import Container from '@/components/Container';
+import InputDisplay from '@/components/Form/InputDisplay';
 import { BASE_URL } from '@/utils/config';
 import { UserProfile } from '@/types/models';
 import { useRedirectIfNotAuthenticated } from '@/hooks/authRedirects';
+import { validateUsernameField, validateCityField } from '@/utils/formValidations';
+import { Input } from 'postcss';
 
 // Edit user profile
 export default function EditUserProfile() {
@@ -21,7 +28,18 @@ export default function EditUserProfile() {
   });
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  const [error, setError] = useState('');
+
+  // Get errors
+  const usernameErrors = validateUsernameField(userData.username);
+  const cityErrors = validateCityField(userData.city)
+
+  const allErrors = [
+    ...usernameErrors,
+    ...cityErrors,
+  ];
+
+  // Disable submit button
+  const isDisabled = allErrors.length > 0;
 
   // Load durrent user data
   useEffect(() => {
@@ -60,6 +78,11 @@ export default function EditUserProfile() {
     e.preventDefault();
     setSaving(true);
 
+    if (allErrors.length > 0) {
+      allErrors.forEach((err) => toast.error(err));
+      return;
+    }
+
     try {
       const res = await fetch(`${BASE_URL}/user/edit`, {
         method: 'POST',
@@ -83,83 +106,40 @@ export default function EditUserProfile() {
 
   if (!isReady) return null;
 
-  // Check for valid username and required fields
-  const usernameInvalid = userData.username.trim() === '' || userData.username.includes('@');
-  const cityInvalid = userData.city.trim() === '';
-
   return (
     <Container title="Edit profile">
-      <form onSubmit={handleSubmit} className="space-y-4 max-w-md mx-auto">
-        {error && <p className="text-red-600">{error}</p>}
+      <Form onSubmit={handleSubmit}>
 
-        {/* USername */}
-        <div>
-          <label className="block text-sm font-medium text-gray-700">
-            Username (<span className="text-red-500">*</span>required)
-          </label>
-          <input
-            name="username"
-            value={userData.username}
-            onChange={handleChange}
-            className={`mt-1 block w-full px-3 py-2 border rounded-md shadow-sm bg-white
-              ${usernameInvalid
-                ? 'border-red-500 focus:border-red-500 focus:ring-red-500'
-                : 'border-gray-300 focus:border-blue-500 focus:ring-blue-500'}
-              focus:ring-1 focus:outline-none
-            `}
-            required
-          />
-
-          {/* Condition note */}
-          {usernameInvalid && (
-            <p className="text-red-500 text-sm mt-1">Username must not be empty or contain '@'.</p>
-          )}
-        </div>
+        {/* Username */}
+        <InputField
+          name="username"
+          label="Username"
+          value={userData.username}
+          onChange={handleChange}
+          errors={usernameErrors}
+          required
+        />
 
         {/* City */}
-        <div>
-          <label className="block text-sm font-medium text-gray-700">
-            City (<span className="text-red-500">*</span>required)
-          </label>
-          <input
-            name="city"
-            value={userData.city}
-            onChange={handleChange}
-            className={`mt-1 block w-full px-3 py-2 border rounded-md shadow-sm bg-white
-              ${cityInvalid
-                ? 'border-red-500 focus:border-red-500 focus:ring-red-500'
-                : 'border-gray-300 focus:border-blue-500 focus:ring-blue-500'}
-              focus:ring-1 focus:outline-none
-            `}
-          />
-
-          {/* Condition note */}
-          {cityInvalid && (
-            <p className="text-red-500 text-sm mt-1">
-              City must not be empty
-            </p>
-          )}
-        </div>
+        <InputField
+          name="city"
+          label="City"
+          value={userData.city}
+          onChange={handleChange}
+          errors={cityErrors}
+          required
+        />
 
         {/* Country */}
-        <div>
-          <label className="block text-sm font-medium text-gray-700">
-            Country
-          </label>
-          <input
-            type="text"
-            name="country"
-            value={userData.country ?? ''}
-            onChange={handleChange}
-            className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm bg-white"
-          />
-        </div>
+        <InputField
+          name="country"
+          label="Country"
+          value={userData.country ?? ''}
+          onChange={handleChange}
+        />
 
         {/* Email (not editable here) */}
-        <div>
-          <label className="block text-sm font-medium text-gray-700">Email</label>
-          <p className="text-gray-600 mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm">{userData.email}</p>
-        </div>
+        <InputDisplay label="Email" value={userData.email} />
 
         {/* Link: Edit email */}
         <div>
@@ -179,34 +159,17 @@ export default function EditUserProfile() {
           </Link>
         </div>
 
-        {/* Buttons */}
-        <div className="flex flex-col items-center space-x-4">
+        {/* Submit button */}
+        <Button
+          text={saving ? 'Saving...' : 'Save changes'}
+          type="submit"
+          isDisabled={isDisabled}
+        />
 
-            {/* Submit button */}
-            <button
-              type="submit"
-              disabled={userData.username.trim() === '' || userData.city.trim() === '' || saving}
-              className={`bg-blue-600 text-white px-5 py-2 rounded hover:bg-blue-700 transition${
-                  userData.username.trim() === '' || userData.city.trim() === '' || saving
-                  ? 'bg-gray-300 text-gray-500 opacity-50 cursor-not-allowed'
-                  : 'bg-blue-500 text-white hover:bg-blue-600 cursor-pointer'
-              }`}
-            >
-              {saving ? 'Saving...' : 'Save changes'}
-            </button>
+        {/* Cancel button */}
+        <CancelButton href="/user/profile" />
 
-            {/* Cancel button */}
-            <Link href="/user/profile">
-              <button
-                  type="button"
-                  className="px-5 py-2 cursor-pointer rounded text-red-500 hover:text-red-600"
-              >
-                  Cancel
-              </button>
-            </Link>
-
-        </div>
-      </form>
+      </Form>
     </Container>
   );
 }

@@ -4,6 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 
 import { useAuth } from '@/contexts/AuthContext';
 import { useClickOutside } from '@/hooks/useClickOutside';
+import Button from './Buttons/Button';
 
 const Navbar = () => {
 
@@ -91,17 +92,18 @@ const Navbar = () => {
 
             {!isLoggedIn ? (
               <Link href="/login">
-                <span className="inline-block bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-semibold transition">
-                  Login
-                </span>
+                <Button
+                  text="Login"
+                  onClick={handleLinkClick}
+                  type="button"
+                />
               </Link>
             ): (
-              <button
+              <Button
+                text="Logout"
                 onClick={logout}
-                className="inline-block cursor-pointer bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-semibold transition"
-              >
-                Logout
-              </button>
+                type="button"
+              />
             )}
 
           </div>
@@ -132,23 +134,21 @@ const Navbar = () => {
 
                 {!isLoggedIn ? (
                   <Link href="/login">
-                    <span
-                      className="block bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-semibold transition"
+                    <Button
+                      text="Login"
+                      type="button"
                       onClick={handleLinkClick}
-                    >
-                      Login
-                    </span>
+                    />
                   </Link>
                 ) : (
-                  <button
+                  <Button
+                    text="Logout"
                     onClick={() => {
                       logout();
                       handleLinkClick();
                     }}
-                    className="block w-full text-left bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-semibold transition"
-                  >
-                    Logout
-                  </button>
+                    type="button"
+                  />
                 )}
               </div>
             </motion.div>

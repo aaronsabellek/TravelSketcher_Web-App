@@ -1,6 +1,5 @@
 import { useEffect } from 'react';
 import { useRouter } from 'next/router';
-import { toast } from 'sonner';
 
 import { useAuth } from '@/contexts/AuthContext';
 
@@ -28,7 +27,6 @@ export const useRedirectIfNotAuthenticated = (redirectTo: string = '/login') => 
   useEffect(() => {
     console.log('Redirect Check:', { isLoading, isLoggedIn });
     if (!isLoading && !isLoggedIn) {
-      toast.info('Please login to continue.');
       router.replace(redirectTo);
     }
   }, [isLoggedIn, isLoading, router, redirectTo]);

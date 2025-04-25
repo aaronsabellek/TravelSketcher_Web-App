@@ -2,10 +2,15 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
 import { toast } from 'sonner';
 
+import InputField from '@/components/Form/InputField';
+import Button from '@/components/Buttons/Button';
+import CancelButton from '@/components/Buttons/CancelButton';
+import InputDisplay from '@/components/Form/InputDisplay';
+import Form from '@/components/Form/Form';
 import Container from '@/components/Container';
 import { BASE_URL } from '@/utils/config';
 import { useRedirectIfNotAuthenticated } from '@/hooks/authRedirects';
-import { isValidEmail } from '@/utils/validation';
+import { validateEmailField } from '@/utils/formValidations';
 
 // Edit user email page
 const EditEmailPage: React.FC = () => {
@@ -18,8 +23,13 @@ const EditEmailPage: React.FC = () => {
   const [saving, setSaving] = useState(false);
   const router = useRouter();
 
+  const emailErrors = validateEmailField(email);
+
+  const isDisabled = emailErrors.length > 0 || saving;
+
   // Fetch current email from user
   useEffect(() => {
+
     const fetchProfile = async () => {
       try {
         const res = await fetch(`${BASE_URL}/user/profile`, {
@@ -39,6 +49,11 @@ const EditEmailPage: React.FC = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setSaving(true);
+
+    if (emailErrors.length > 0) {
+      emailErrors.forEach((err) => toast.error(err));
+      return;
+    }
 
     try {
       const res = await fetch(`${BASE_URL}/user/edit_email`, {
@@ -68,72 +83,32 @@ const EditEmailPage: React.FC = () => {
 
   return (
     <Container title="Edit Email">
-      <form onSubmit={handleSubmit} className="space-y-4 max-w-md mx-auto">
+      <Form onSubmit={handleSubmit}>
 
         {/* Current email */}
-        <div>
-          <label className="block text-sm font-medium text-gray-700">
-            Current email
-          </label>
-          <p className="text-gray-600 mt-1 px-3 py-2 border border-gray-300 rounded-md bg-gray-100">
-            {currentEmail || 'Loading...'}
-          </p>
-        </div>
+        <InputDisplay label="Current email" value={currentEmail || 'Loading...'} />
 
         {/* New email */}
-        <div>
-          <label className="block text-sm font-medium text-gray-700">
-            New email
-          </label>
-          <input
-            type="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            required
-            pattern="[^\s@]+@[^\s@]+\.[^\s@]+"
-            className={`
-              mt-1 block w-full px-3 py-2 border rounded-md shadow-sm bg-white
-              ${email && !isValidEmail(email)
-                ? 'border-red-500 focus:border-red-500 focus:ring-red-500'
-                : 'border-gray-300 focus:border-blue-500 focus:ring-blue-500'}
-              focus:ring-1
-              focus:outline-none
-            `}
-          />
-
-          {/* input condition */}
-          {!isValidEmail(email) && (
-            <p className="text-red-500 text-sm mt-1">
-              Email has to have valid format.
-            </p>
-          )}
-
-        </div>
+        <InputField
+          label="New Email"
+          type="email"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          errors={emailErrors}
+          required
+        />
 
         {/* Button submit */}
-        <div className="flex flex-col items-center space-x-4">
-          <button
-            type="submit"
-            disabled={!isValidEmail(email) || saving}
-            className={`px-5 py-2 rounded text-white transition ${
-              !isValidEmail(email) || saving
-                ? 'bg-gray-400 text-gray-500 cursor-not-allowed'
-                : 'bg-blue-500 text-white hover:bg-blue-600 cursor-pointer'
-            }`}
-          >
-            {saving ? 'Sending...' : 'Edit email'}
-          </button>
+        <Button
+          text={saving ? 'Sending...' : 'Edit email'}
+          type="submit"
+          isDisabled={isDisabled}
+        />
 
-          {/* Button cancel */}
-          <button
-            type="button"
-            onClick={() => router.push('/user/profile')}
-            className="px-5 py-2 cursor-pointer rounded text-red-500 hover:text-red-600"
-          >
-            Cancel
-          </button>
-        </div>
-      </form>
+        {/* Button cancel */}
+        <CancelButton href="/user/profile" />
+
+      </Form>
     </Container>
   );
 };

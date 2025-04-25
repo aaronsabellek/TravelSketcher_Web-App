@@ -1,9 +1,15 @@
-import { useEffect } from 'react';
+import { useState, useEffect } from 'react';
+import { toast } from 'sonner';
 
 import ImageSearchModal from './ImageSearchModal';
 import TagsInput from './TagsInput';
+import Form from '../Form/Form';
+import CancelButton from '../Buttons/CancelButton';
+import InputField from '@/components/Form/InputField';
+import Button from '@/components/Buttons/Button';
 import { useImageSearch } from '@/hooks/useImageSearch';
 import { useEntryFormState } from '@/hooks/useEntryFormState';
+import { validateTitleField } from '@/utils/formValidations';
 
 interface EntryFormProps {
   type: 'destination' | 'activity';
@@ -32,9 +38,7 @@ const EntryForm: React.FC<EntryFormProps> = ({ type, onSubmit, initialData, subm
     setTagsArray,
     selectedImageUrl,
     setSelectedImageUrl,
-    isSaving,
     removeTag,
-    handleFormSubmit,
   } = useEntryFormState({ type, initialData, onSubmit });
 
   const {
@@ -62,6 +66,12 @@ const EntryForm: React.FC<EntryFormProps> = ({ type, onSubmit, initialData, subm
     setHasManuallyEditedSearch,
   } = useImageSearch();
 
+  const [isSaving, setIsSaving] = useState(false);
+
+  const titleErrors = validateTitleField(title);
+
+  const isDisabled = title.trim() === '' || isSaving;
+
   // Sync entry title with image search
   useEffect(() => {
     if (title) updateTitle(title);
@@ -74,43 +84,53 @@ const EntryForm: React.FC<EntryFormProps> = ({ type, onSubmit, initialData, subm
     }
   }, [imageSearchSelectedImageUrl]);
 
-  return (
-    <form onSubmit={handleFormSubmit}>
+  // Submit
+  const handleFormSubmit = async (e: React.FormEvent) => {
 
-      {/* Title */}
-      <div className="mb-4">
-        <label htmlFor="title" className="block text-sm font-medium text-gray-700">
-            Title (<span className="text-red-500">*</span>required)
-        </label>
-        <input
-            type="text"
-            id="title"
-            value={title}
-            placeholder="Paris, New York, Tokyo, ..."
-            onChange={(e) => setTitle(e.target.value)}
-            required
-            className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm bg-white"
-        />
-      </div>
+    e.preventDefault();
+
+    if (titleErrors.length > 0) {
+      titleErrors.forEach((err) => toast.error(err));
+      return;
+    }
+
+    setIsSaving(true);
+
+    const formData = {
+      title,
+      country,
+      img_link: selectedImageUrl,
+      tags: tagsArray.join(', '),
+    };
+
+    await onSubmit(formData);
+    setIsSaving(false);
+  };
+
+  return (
+    <Form onSubmit={handleFormSubmit}>
+
+      <InputField
+        label="Title"
+        type="text"
+        value={title}
+        placeholder="Paris, New York, Tokyo, ..."
+        onChange={(e) => setTitle(e.target.value)}
+        required
+      />
 
       {/* Country */}
       {type === 'destination' && (
-        <div className="mb-4">
-          <label htmlFor="country" className="block text-sm font-medium text-gray-700">
-            Country
-          </label>
-          <input
-              type="text"
-              id="country"
-              value={country}
-              onChange={(e) => setCountry(e.target.value)}
-              className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm bg-white"
-          />
-        </div>
+        <InputField
+          label="Country"
+          type="text"
+          value={country}
+          onChange={(e) => setCountry(e.target.value)}
+        />
       )}
 
       {/* Search Image */}
-      <div className="mb-4">
+      <div className="">
         <label className="block text-sm font-medium text-gray-700">
           Image
         </label>
@@ -126,6 +146,7 @@ const EntryForm: React.FC<EntryFormProps> = ({ type, onSubmit, initialData, subm
 
         {/* Image search field & button */}
         <div className="flex gap-2">
+
           <input
               type="text"
               value={imageSearchTerm}
@@ -135,11 +156,12 @@ const EntryForm: React.FC<EntryFormProps> = ({ type, onSubmit, initialData, subm
                 }}
               className="flex-1 px-3 py-2 border border-gray-300 rounded-md shadow-sm bg-white"
           />
+
           <button
             type="button"
             onClick={searchImages}
             disabled={!imageSearchTerm.trim()}
-            className={`py-2 px-4 bg-blue-500 text-white rounded-md transition cursor-pointer hover:bg-blue-600 ${
+            className={`py-2 px-4 bg-blue-500 text-white rounded-md transition cursor-pointer ${
                 imageSearchTerm.trim()
                   ? 'hover:bg-blue-600'
                   : 'opacity-50 cursor-not-allowed'
@@ -184,21 +206,15 @@ const EntryForm: React.FC<EntryFormProps> = ({ type, onSubmit, initialData, subm
       />
 
       {/* Submit Button */}
-      <div className="flex justify-center items-center">
-        <button
-          type="submit"
-          disabled={!title.trim() || isSaving}
-          className={`py-2 px-4 font-light rounded-lg cursor-pointer transition ${
-            !title.trim() || isSaving
-              ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
-              : 'bg-blue-500 text-white hover:bg-blue-600'
-          }`}
-        >
-          {isSaving ? 'Saving...' : submitLabel}
-        </button>
-      </div>
+      <Button
+        text={isSaving ? 'Saving...' : submitLabel}
+        type="submit"
+        isDisabled={isDisabled}
+      />
 
-    </form>
+      <CancelButton href="/destination/get_all" />
+
+    </Form>
   );
 };
 

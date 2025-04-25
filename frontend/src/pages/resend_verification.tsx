@@ -1,7 +1,11 @@
 import { useState } from 'react';
+import { toast } from 'sonner';
 
 import Container from '@/components/Container';
+import InputField from '@/components/Form/InputField';
+import Button from '@/components/Buttons/Button';
 import { useRedirectIfAuthenticated } from '@/hooks/authRedirects';
+import { validateEmailField } from '@/utils/formValidations';
 import { BASE_URL } from '@/utils/config';
 
 const ResendVerification = () => {
@@ -9,13 +13,16 @@ const ResendVerification = () => {
   const { isReady } = useRedirectIfAuthenticated();
 
   const [email, setEmail] = useState('');
-  const [message, setMessage] = useState('');
-  const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
+
+  const emailErrors = validateEmailField(email);
+
+  const isDisabled = emailErrors.length > 0;
 
   const handleSubmit = async (e: React.FormEvent) => {
+
     e.preventDefault();
-    setMessage('');
-    setError('');
+    setLoading(true);
 
     try {
       const response = await fetch(`${BASE_URL}/resend_verification`, {
@@ -24,19 +31,19 @@ const ResendVerification = () => {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({ email }),
-        credentials: 'include', // Hier wird das Cookie für die Session mitgeschickt
+        credentials: 'include',
       });
 
       const data = await response.json();
 
       if (!response.ok) {
-        setError(data.error || 'An error occurred while resending the verification email.');
+        toast.error(data.error || 'An error occurred while resending the verification email.');
       } else {
-        setMessage(data.message || 'An unexpected error occurred.');
+        toast.success(data.message || 'Verification email has been sent successfully.');
       }
-      } catch (err) {
-        console.error(err);
-        setError('An error occurred. Please try again later.');
+      } catch (err: any) {
+        toast.error(err.message || 'An error occurred. Please try again later.');
+        setLoading(false)
       }
     };
 
@@ -44,33 +51,24 @@ const ResendVerification = () => {
 
     return (
       <Container title="Resend Verification Email">
-        <form onSubmit={handleSubmit}>
-          <div className="mb-4">
-            <label
-              className="block text-sm font-medium text-gray-700"
-              htmlFor="email"
-            >
-              Email Address
-            </label>
-            <input
-              className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm bg-white"
-              type="email"
-              id="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
-            />
-          </div>
-          <button
-            type="submit"
-            className="w-full py-2 px-4 bg-blue-500 text-white font-semibold rounded-lg hover:bg-blue-600"
-          >
-            Resend Verification
-          </button>
-        </form>
+        <form onSubmit={handleSubmit} className="space-y-4 max-w-md mx-auto">
 
-        {message && <p className="success-message">{message}</p>}
-        {error && <p className="error-message">{error}</p>}
+          <InputField
+            label="Email address"
+            type="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            errors={emailErrors}
+            required
+          />
+
+          <Button
+            text='Resend verification'
+            type="submit"
+            isDisabled={isDisabled}
+          />
+
+        </form>
      </Container>
     );
   };

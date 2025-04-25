@@ -1,12 +1,16 @@
+import { useState } from 'react';
 import { useRouter } from 'next/router';
 import Link from 'next/link';
 import { toast } from 'sonner';
 
 import Container from '@/components/Container';
-import PasswordInputGroup from '@/components/PasswordInputGroup';
+import InputField from '@/components/Form/InputField';
+import Button from '@/components/Buttons/Button';
+import CancelButton from '@/components/Buttons/CancelButton';
+import Form from '@/components/Form/Form';
 import { BASE_URL } from '@/utils/config';
+import { validatePasswordField, validatePasswordMatchField } from '@/utils/formValidations';
 import { useRedirectIfNotAuthenticated } from '@/hooks/authRedirects';
-import { usePasswordValidation } from '@/hooks/usePasswordValidation';
 
 // Edit password
 const EditPassword = () => {
@@ -14,41 +18,52 @@ const EditPassword = () => {
   // Redirect user if he is not logged in
   const { isReady } = useRedirectIfNotAuthenticated();
 
+  const [password1, setPassword1] = useState('');
+  const [password2, setPassword2] = useState('');
+  const [saving, setSaving] = useState(false);
+
   const router = useRouter();
 
-  // Get password validation tools from hook
-  const {
-    password1,
-    password2,
-    setPassword1,
-    setPassword2,
-    ruleError,
-    matchError,
-    isDisabled,
-    saving,
-    handleSubmit,
-  } = usePasswordValidation({
-    initialPassword1: '',
-    initialPassword2: '',
-  });
+  const passwordErrors = validatePasswordField(password1);
+  const passwordMatchError = validatePasswordMatchField(password1, password2);
+
+  const allErrors = [...passwordErrors, ...passwordMatchError];
+
+  const isDisabled = allErrors.length > 0;
 
   // Handle password reset
-  const handleFormSubmit = async (password1: string, password2: string) => {
+  const handleSubmit = async (e: React.FormEvent) => {
 
-    const res = await fetch(`${BASE_URL}/user/edit_password`, {
-      method: 'POST',
-      credentials: 'include',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ new_password_1: password1, new_password_2: password2 }),
-    });
+    e.preventDefault();
+    setSaving(true);
 
-    if (!res.ok) {
-      const data = await res.json();
-      throw new Error(data.error || 'Error editing password.');
+    if (allErrors.length > 0) {
+      allErrors.forEach((err) => toast.error(err));
+      setSaving(false);
+      return;
     }
 
-    toast.success('Password edited successfully.');
-    router.push('/user/profile');
+    try {
+      const res = await fetch(`${BASE_URL}/user/edit_password`, {
+        method: 'POST',
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ new_password_1: password1, new_password_2: password2 }),
+      });
+
+      if (!res.ok) {
+        const data = await res.json();
+        throw new Error(data.error || 'Error editing password.');
+      }
+
+      toast.success('Password edited successfully!');
+      router.push('/user/profile');
+
+    } catch (err: any) {
+      toast.error(err.message || 'An unexpected error occurred.');
+    } finally {
+      setSaving(false)
+    }
   };
 
   // Wait until authentication state is ready
@@ -56,53 +71,42 @@ const EditPassword = () => {
 
   return (
     <Container title="Edit password">
-      <form
-        onSubmit={(e) => handleSubmit(e, handleFormSubmit)}
-        className="space-y-4 max-w-md mx-auto"
-      >
+      <Form onSubmit={handleSubmit}>
 
         {/* Fake password field to prevent password autofill */}
         <input type="password" style={{ display: 'none' }} />
 
-        {/* Password user input  */}
-        <PasswordInputGroup
-          password1={password1}
-          password2={password2}
-          setPassword1={setPassword1}
-          setPassword2={setPassword2}
-          ruleError={ruleError}
-          matchError={matchError}
+        {/* New password input */}
+        <InputField
+            label="New password"
+            type="password"
+            value={password1}
+            onChange={(e) => setPassword1(e.target.value)}
+            errors={passwordErrors}
+            required
         />
 
-        {/* Buttons*/}
-        <div className="flex flex-col items-center space-x-4">
+        {/* Confirm password input */}
+        <InputField
+            label="Confirm password"
+            type="password"
+            value={password2}
+            onChange={(e) => setPassword2(e.target.value)}
+            errors={passwordMatchError}
+            required
+        />
 
-          {/* Submit button */}
-          <button
-            type="submit"
-            disabled={isDisabled}
-            className={`px-5 py-2 rounded text-white transition ${
-              isDisabled
-              ? 'bg-gray-400 text-gray-500 cursor-not-allowed'
-              : 'bg-blue-500 hover:bg-blue-600 cursor-pointer'
-            }`}
-          >
-            {saving ? 'Saving...' : 'Edit password'}
-          </button>
+        {/* Submit button */}
+        <Button
+          text={saving ? 'Saving...' : 'Edit password'}
+          type="submit"
+          isDisabled={isDisabled}
+        />
 
-          {/* Cancel button */}
-          <Link href="/user/profile">
-            <button
-              type="button"
-              className="px-5 py-2 cursor-pointer rounded text-red-500 hover:text-red-600"
-            >
-              Cancel
-            </button>
-          </Link>
+        {/* Cancel button */}
+        <CancelButton href="/user/profile" />
 
-        </div>
-
-      </form>
+      </Form>
     </Container>
   );
 };

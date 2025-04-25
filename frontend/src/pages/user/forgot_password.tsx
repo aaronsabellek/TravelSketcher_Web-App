@@ -1,11 +1,13 @@
 import { useState } from 'react';
 import { toast } from 'sonner';
 
-import { BASE_URL } from '@/utils/config';
 import Container from '@/components/Container';
+import InputField from '@/components/Form/InputField';
+import Button from '@/components/Buttons/Button';
+import Form from '@/components/Form/Form';
 import { useRedirectIfAuthenticated } from '@/hooks/authRedirects';
-import { isValidEmail } from '@/utils/validation';
-
+import { BASE_URL } from '@/utils/config';
+import { validateEmailField } from '@/utils/formValidations';
 
 const ForgotPassword = () => {
 
@@ -15,8 +17,13 @@ const ForgotPassword = () => {
   const [email, setEmail] = useState('');
   const [loading, setLoading] = useState(false);
 
+  const emailErrors = validateEmailField(email);
+
+  const isDisabled = emailErrors.length > 0 || loading;
+
   // Handle submit
   const handleSubmit = async (e: React.FormEvent) => {
+
     e.preventDefault();
     setLoading(true);
 
@@ -35,7 +42,7 @@ const ForgotPassword = () => {
 
       toast.success(data.message);
     } catch (err: any) {
-      toast.error
+      toast.error(err)
     } finally {
       setLoading(false);
     }
@@ -46,53 +53,26 @@ const ForgotPassword = () => {
 
   return (
     <Container title="Forgot password">
-      <form onSubmit={handleSubmit} className="max-w-md mx-auto space-y-4">
-        <div>
+      <Form onSubmit={handleSubmit}>
 
-          {/* Email input */}
-          <label className="block text-sm font-medium text-gray-700">
-            Email
-          </label>
-
-          <input
-            type="email"
-            required
-            value={email}
-            pattern="[^\s@]+@[^\s@]+\.[^\s@]+"
-            onChange={(e) => setEmail(e.target.value)}
-            className={`
-              mt-1 block w-full px-3 py-2 border rounded-md shadow-sm bg-white
-              ${email && !isValidEmail(email)
-                ? 'border-red-500 focus:border-red-500 focus:ring-red-500'
-                : 'border-gray-300 focus:border-blue-500 focus:ring-blue-500'}
-              focus:ring-1
-              focus:outline-none
-            `}
-          />
-
-          {/* Input condition */}
-          {!isValidEmail(email) && (
-            <p className="text-red-500 text-sm mt-1">
-              Email has to have valid format.
-            </p>
-          )}
-
-        </div>
+        {/* Email input */}
+        <InputField
+          label="New Email"
+          type="email"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          errors={emailErrors}
+          required
+        />
 
         {/* Submit button */}
-        <button
+        <Button
+          text={loading ? 'Send link...' : 'Reset password'}
           type="submit"
-          disabled={!isValidEmail(email) || loading}
-          className={`w-full text-white px-5 py-2 rounded transition${
-            !isValidEmail(email) || loading
-              ? 'bg-gray-400 text-gray-500 cursor-not-allowed'
-              : 'bg-blue-500 text-white hover:bg-blue-600 cursor-pointer'
-        }`}
-        >
-          {loading ? 'Send link...' : 'Reset password'}
-        </button>
+          isDisabled={isDisabled}
+        />
 
-      </form>
+      </Form>
     </Container>
   );
 };

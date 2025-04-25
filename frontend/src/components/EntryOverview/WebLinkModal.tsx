@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 import { toast } from 'sonner';
 
 import { BASE_URL } from '@/utils/config';
+import Button from '../Buttons/Button';
+import ModalCancelButton from '@/components/Buttons/ModalCancelButton'
 
 interface WebLinkModalProps<T> {
   items: T[];
@@ -81,22 +83,12 @@ const WebLinkModal = <T extends { id: string; web_link?: string }>({
               <p className="text-gray-500 italic">No link yet.</p>
             )}
 
-            {/* Edit button */}
-            <button
-              onClick={() => setEditingLink(true)}
-              className="absolute top-4 right-4 text-sm text-blue-600 hover:underline"
-            >
-              ✏️ Edit
-            </button>
-
-            {/* Close button */}
             <div className="flex justify-end mt-6">
-              <button
-                className="px-4 py-2 text-gray-600 hover:text-black"
-                onClick={() => setLinkForId(null)}
-              >
-                Close
-              </button>
+              {/* Close button */}
+              <ModalCancelButton onClose={() => setLinkForId(null)} />
+
+              {/* Edit button */}
+              <Button text="Edit" onClick={() => setEditingLink(true)} />
             </div>
           </>
         ) : (
@@ -112,24 +104,20 @@ const WebLinkModal = <T extends { id: string; web_link?: string }>({
             <div className="flex justify-end space-x-4 mt-4">
 
               {/* Cancel button */}
-              <button
-                className="px-4 py-2 text-gray-600 hover:text-black"
-                onClick={() => {
+              <ModalCancelButton
+                onClose={() => {
                   setEditingLink(false);
                   setWebLink(currentLink);
                 }}
-              >
-                Cancel
-              </button>
+              />
 
               {/* Save button */}
-              <button
-                className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700"
+              <Button
+                text={saving ? 'Saving...' : 'Save'}
+                type="submit"
+                isDisabled={saving}
                 onClick={handleSave}
-                disabled={saving}
-              >
-                {saving ? 'Speichern...' : 'Speichern'}
-              </button>
+              />
 
             </div>
           </>

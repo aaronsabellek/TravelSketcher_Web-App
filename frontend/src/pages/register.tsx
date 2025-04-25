@@ -1,14 +1,17 @@
 import { useState } from 'react';
 import { useRouter } from 'next/router';
-import Link from 'next/link';
 import { toast } from 'sonner';
 
-import { useRedirectIfAuthenticated } from '@/hooks/authRedirects';
+import InputField from '@/components/Form/InputField';
+import Button from '@/components/Buttons/Button';
 import Container from '@/components/Container';
+import Form from '@/components/Form/Form';
+import { useRedirectIfAuthenticated } from '@/hooks/authRedirects';
 import { BASE_URL } from '@/utils/config';
-import { isValidEmail } from '@/utils/validation';
+import { validateUsernameField, validateEmailField, validatePasswordField, validateCityField } from '@/utils/formValidations';
 
 const Register = () => {
+
   // Redirect if user is authenticated
   const { isReady } = useRedirectIfAuthenticated();
 
@@ -20,11 +23,32 @@ const Register = () => {
 
   const router = useRouter();
 
+  // Get errors
+  const usernameErrors = validateUsernameField(username);
+  const emailErrors = validateEmailField(email);
+  const passwordErrors = validatePasswordField(password);
+  const cityErrors = validateCityField(city)
+
+  const allErrors = [
+    ...usernameErrors,
+    ...emailErrors,
+    ...passwordErrors,
+    ...cityErrors,
+  ];
+
+  // Disable submit button
+  const isDisabled = allErrors.length > 0;
+
   const handleFormSubmit = async (e: React.FormEvent) => {
 
     e.preventDefault();
 
-    const data = { username, email, password, city, country };
+    if (allErrors.length > 0) {
+      allErrors.forEach((err) => toast.error(err));
+      return;
+    }
+
+    const data = { username, email, password, city, country: country || '' };
 
     try {
       const response = await fetch(`${BASE_URL}/register`, {
@@ -36,15 +60,15 @@ const Register = () => {
       const result = await response.json();
 
       if (response.ok) {
-        toast.success(result.message || 'Registrierung erfolgreich!');
+        toast.success(result.message || 'Registration successful!');
         setTimeout(() => {
           router.push('/login');
         }, 2000);
       } else {
-        toast.error(result.error || 'Etwas ist schiefgegangen.');
+        toast.error(result.error || 'Something went wrong.');
       }
     } catch (err) {
-      toast.error('Ein Fehler ist beim Senden der Anfrage aufgetreten.');
+      toast.error('An error occurred while sending the request.');
     }
   };
 
@@ -52,64 +76,57 @@ const Register = () => {
 
   return (
     <Container title="Register">
-      <form onSubmit={handleFormSubmit}>
-        {[
-          { label: 'Username', id: 'username', value: username, setValue: setUsername, required: true },
-          {
-            label: 'Email',
-            id: 'email',
-            value: email,
-            setValue: setEmail,
-            required: true,
-          },
-          { label: 'Password', id: 'password1', value: password, setValue: setPassword, type: 'password', required: true },
-          { label: 'City', id: 'city', value: city, setValue: setCity, required: true },
-          { label: 'Country', id: 'country', value: country, setValue: setCountry },
-        ].map(({ label, id, value, setValue, type = 'text', required }) => (
-          <div className="mb-4" key={id}>
-            <label htmlFor={id} className="block text-sm font-medium text-gray-700">
-              {label}
-              {required && (
-                <>
-                  {" "}
-                  (<span className="text-red-500">*</span>required)
-                </>
-              )}
-            </label>
-            <input
-              type={type}
-              id={id}
-              value={value}
-              onChange={(e) => setValue(e.target.value)}
-              required
-              className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm bg-white"
-            />
-          </div>
-        ))}
+      <Form onSubmit={handleFormSubmit}>
 
-        <button
+        <InputField
+          label="Username"
+          type="text"
+          value={username}
+          onChange={(e) => setUsername(e.target.value)}
+          errors={usernameErrors}
+          required
+        />
+
+        <InputField
+          label="Email"
+          type="email"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          errors={emailErrors}
+          required
+        />
+
+        <InputField
+          label="Password"
+          type="password"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          errors={passwordErrors}
+          required
+        />
+
+        <InputField
+          label="City"
+          type="text"
+          value={city}
+          onChange={(e) => setCity(e.target.value)}
+          required
+        />
+
+        <InputField
+          label="Country"
+          type="text"
+          value={country}
+          onChange={(e) => setCountry(e.target.value)}
+        />
+
+        <Button
+          text="Register"
           type="submit"
-          className="w-full py-2 px-4 bg-blue-500 text-white font-semibold rounded-lg cursor-pointer hover:bg-blue-600"
-        >
-          Register
-        </button>
-      </form>
+          isDisabled={isDisabled}
+        />
 
-      <p className="mt-2 text-sm text-center">
-        Forgot password?{' '}
-        <Link href="/user/forgot_password">
-          <span className="text-blue-600 underline cursor-pointer">Reset here</span>
-        </Link>
-      </p>
-
-      <p className="mt-4 text-sm text-center">
-      No verification email received?{' '}
-        <Link href="/resend_verification">
-          <span className="text-blue-600 underline cursor-pointer">
-          Send here again
-          </span>
-        </Link>
-      </p>
+      </Form>
     </Container>
   );
 };

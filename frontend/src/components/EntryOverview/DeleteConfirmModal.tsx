@@ -1,5 +1,8 @@
 import React from 'react';
 
+import ModalCancelButton from '../Buttons/ModalCancelButton';
+import Button from '../Buttons/Button';
+
 interface DeleteConfirmModalProps {
   isOpen: boolean;
   onClose: () => void;
@@ -47,21 +50,15 @@ const DeleteConfirmModal: React.FC<DeleteConfirmModalProps> = ({
         <div className="flex justify-end space-x-4">
 
           {/* Cancel button */}
-          <button
-            className="px-4 py-2 text-gray-600 hover:text-black"
-            onClick={onClose}
-          >
-            Cancel
-          </button>
+          <ModalCancelButton onClose={onClose} />
 
           {/* Delete Button */}
-          <button
-            className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700"
-            onClick={onDelete}
-            disabled={deleting}
-          >
-            {deleting ? 'Deleting...' : 'Delete'}
-          </button>
+          <Button
+            text={deleting ? 'Deleting...' : 'Delete'}
+            isDisabled={deleting} // Button is disabled while deleting
+            onClick={onDelete} // onClick triggers the deletion
+          />
+
         </div>
       </div>
     </div>

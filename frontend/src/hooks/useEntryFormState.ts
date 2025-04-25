@@ -20,32 +20,11 @@ export function useEntryFormState({ type, initialData, onSubmit }: UseEntryFormS
   const [status, setStatus] = useState<'planned' | 'done'>('planned');
   const [tagInput, setTagInput] = useState('');
   const [tagsArray, setTagsArray] = useState<string[]>([]);
-  const [isSaving, setIsSaving] = useState(false);
   const [selectedImageUrl, setSelectedImageUrl] = useState('');
 
   // Remove tags
   const removeTag = (tagToRemove: string) => {
     setTagsArray((prevTags) => prevTags.filter((tag) => tag !== tagToRemove));
-  };
-
-  // Submit
-  const handleFormSubmit = async (e: React.FormEvent) => {
-
-    e.preventDefault();
-    if (!title.trim()) return;
-
-    setIsSaving(true);
-
-    const formData = {
-      title,
-      country,
-      img_link: selectedImageUrl,
-      status,
-      tags: tagsArray,
-    };
-
-    await onSubmit(formData);
-    setIsSaving(false);
   };
 
   // Load initial data in edit mode
@@ -72,8 +51,6 @@ export function useEntryFormState({ type, initialData, onSubmit }: UseEntryFormS
     setTagsArray,
     selectedImageUrl,
     setSelectedImageUrl,
-    isSaving,
     removeTag,
-    handleFormSubmit,
   };
 }

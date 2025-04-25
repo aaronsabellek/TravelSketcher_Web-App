@@ -3,6 +3,11 @@ import { toast } from 'sonner';
 
 import { BASE_URL } from '@/utils/config';
 import { useAuth } from '@/contexts/AuthContext';
+import InputField from '@/components/Form/InputField';
+import Button from '@/components/Buttons/Button';
+import ModalCancelButton from './Buttons/ModalCancelButton';
+import { validatePasswordField } from '@/utils/formValidations';
+
 
 interface Props {
   isOpen: boolean;
@@ -16,6 +21,9 @@ const DeleteAccountModal: React.FC<Props> = ({ isOpen, onClose, onDeleted }) => 
   const [password, setPassword] = useState('');
   const [deleting, setDeleting] = useState(false);
 
+  const passwordErrors = validatePasswordField(password);
+  const isDisabled = passwordErrors.length > 0 || deleting;
+
   const { setIsLoggedIn } = useAuth();
 
   if (!isOpen) return null;
@@ -24,7 +32,10 @@ const DeleteAccountModal: React.FC<Props> = ({ isOpen, onClose, onDeleted }) => 
   const handleDelete = async () => {
 
     // Check for password
-    if (!password) return toast.error('Please enter password');
+    if (passwordErrors.length > 0) {
+      passwordErrors.forEach((err) => toast.error(err));
+      return;
+    }
 
     setDeleting(true);
     try {
@@ -72,33 +83,26 @@ const DeleteAccountModal: React.FC<Props> = ({ isOpen, onClose, onDeleted }) => 
         {/* Fake password field to prevent password autofill */}
         <input type="password" style={{ display: 'none' }} />
 
-        {/* Input field for apssword */}
-        <input
+        {/* Input field for password */}
+        <InputField
+          label="Password"
           type="password"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
-          placeholder="Password"
-          className="w-full border rounded px-3 py-2 text-sm mb-4"
+          required
         />
 
-        <div className="flex justify-end space-x-3">
+        <div className="flex justify-end space-x-3 mt-3">
 
           {/* Cancel button */}
-          <button
-            onClick={onClose}
-            className="text-gray-600 hover:text-black text-sm cursor-pointer"
-          >
-            Cancel
-          </button>
+          <ModalCancelButton onClose={onClose} />
 
           {/* Delete button */}
-          <button
+          <Button
+            text={deleting ? 'Deleting...' : 'Delete'}
+            isDisabled={isDisabled}
             onClick={handleDelete}
-            disabled={deleting}
-            className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded text-sm cursor-pointer"
-          >
-            {deleting ? 'Deleting...' : 'Delete'}
-          </button>
+          />
 
         </div>
       </div>
