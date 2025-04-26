@@ -68,9 +68,9 @@ const EntryForm: React.FC<EntryFormProps> = ({ type, onSubmit, initialData, subm
 
   const [isSaving, setIsSaving] = useState(false);
 
+  // Errors
   const titleErrors = validateTitleField(title);
-
-  const isDisabled = title.trim() === '' || isSaving;
+  const isDisabled = titleErrors.length > 0 || isSaving;
 
   // Sync entry title with image search
   useEffect(() => {
@@ -89,6 +89,7 @@ const EntryForm: React.FC<EntryFormProps> = ({ type, onSubmit, initialData, subm
 
     e.preventDefault();
 
+    // Handle errors
     if (titleErrors.length > 0) {
       titleErrors.forEach((err) => toast.error(err));
       return;
@@ -110,6 +111,7 @@ const EntryForm: React.FC<EntryFormProps> = ({ type, onSubmit, initialData, subm
   return (
     <Form onSubmit={handleFormSubmit}>
 
+      {/* Title */}
       <InputField
         label="Title"
         type="text"
@@ -212,6 +214,7 @@ const EntryForm: React.FC<EntryFormProps> = ({ type, onSubmit, initialData, subm
         isDisabled={isDisabled}
       />
 
+      {/* Cancel button */}
       <CancelButton href="/destination/get_all" />
 
     </Form>

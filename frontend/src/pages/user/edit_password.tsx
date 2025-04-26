@@ -24,11 +24,11 @@ const EditPassword = () => {
 
   const router = useRouter();
 
+  // Errors
   const passwordErrors = validatePasswordField(password1);
   const passwordMatchError = validatePasswordMatchField(password1, password2);
 
   const allErrors = [...passwordErrors, ...passwordMatchError];
-
   const isDisabled = allErrors.length > 0;
 
   // Handle password reset

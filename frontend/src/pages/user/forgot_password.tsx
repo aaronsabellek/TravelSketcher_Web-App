@@ -17,8 +17,8 @@ const ForgotPassword = () => {
   const [email, setEmail] = useState('');
   const [loading, setLoading] = useState(false);
 
+  // Errors
   const emailErrors = validateEmailField(email);
-
   const isDisabled = emailErrors.length > 0 || loading;
 
   // Handle submit
@@ -26,6 +26,11 @@ const ForgotPassword = () => {
 
     e.preventDefault();
     setLoading(true);
+
+    if (emailErrors.length > 0) {
+      emailErrors.forEach((err) => toast.error(err));
+      return;
+    }
 
     try {
       const res = await fetch(`${BASE_URL}/user/request_password_reset`, {
@@ -37,7 +42,7 @@ const ForgotPassword = () => {
       const data = await res.json();
 
       if (!res.ok) {
-        throw new Error(data.error || 'Fehler beim Anfordern des Links.');
+        throw new Error(data.error || 'Error requesting link.');
       }
 
       toast.success(data.message);

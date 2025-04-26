@@ -4,6 +4,7 @@ type ModalCancelButtonProps = {
   onClose: () => void;
 };
 
+// Cacnel button for modals (close modal instead of redirecting user)
 const ModalCancelButton: React.FC<ModalCancelButtonProps> = ({ onClose }) => {
   return (
     <button

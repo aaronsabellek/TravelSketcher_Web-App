@@ -2,14 +2,15 @@ import { useEffect } from 'react';
 import { useRouter } from 'next/router';
 import { toast } from 'sonner'; // Oder eine andere Toast-Bibliothek, die du verwendest
 
+// 404 page
 const Custom404 = () => {
   const router = useRouter();
 
   useEffect(() => {
-    // Zeige einen Toast an, dass die Seite nicht gefunden wurde
-    toast.error('Diese Seite existiert nicht. Du wirst zur Startseite weitergeleitet.');
 
-    // Leite nach 3 Sekunden zur Startseite weiter
+    toast.error('This page does not exist. You will be redirected to the homepage.');
+
+    // Redirect to homepage after 3 seconds
     setTimeout(() => {
       router.push('/');
     }, 3000);
@@ -17,7 +18,7 @@ const Custom404 = () => {
 
   return (
     <div className="flex justify-center items-center h-screen">
-      <p className="text-center text-xl">Seite nicht gefunden. Du wirst zur Startseite weitergeleitet.</p>
+      <p className="text-center text-xl">Page not found. You will be redirected to the homepage.</p>
     </div>
   );
 };

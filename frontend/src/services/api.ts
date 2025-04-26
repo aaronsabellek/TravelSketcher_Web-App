@@ -10,7 +10,7 @@ export async function login(identifier: string, password: string): Promise<Login
     headers: {
       'Content-Type': 'application/json',
     },
-    credentials: "include", // Include cookies
+    credentials: 'include',
     body: JSON.stringify({
       identifier,
       password,

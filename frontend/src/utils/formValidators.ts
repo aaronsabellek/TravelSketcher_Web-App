@@ -1,13 +1,16 @@
+// Validate if field is not empty
 export const validateNotEmpty = (value: string): string | null =>
   value.trim() === '' ? 'This field must not be empty.' : null;
 
+// Validate if username contains no '@'
 export const validateUsername = (username: string): string | null =>
   username.includes('@') ? 'Username must not contain "@".' : null;
 
+// Validates email format
 export const validateEmailFormat = (email: string): string | null =>
   /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) ? null : 'Wrong email format.';
 
-  // Check if password matches requirements
+// Validates if password matches requirements
 export function validatePasswordRules(password: string): string | null {
   if (password.length < 8) {
     return 'Password must be at least 8 characters long.';
@@ -28,6 +31,7 @@ export function validatePasswordRules(password: string): string | null {
   return null;
 }
 
+// Valites if passwords match
 export const validatePasswordsMatch = (pw1: string, pw2: string): string | null =>
   pw1 === pw2 ? null : 'Oasswods do not match.';
 

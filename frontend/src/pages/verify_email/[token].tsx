@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/router';
 
+// Verify emai of user with token
 const EmailVerificationPage = () => {
   const router = useRouter();
 
@@ -26,12 +27,12 @@ const EmailVerificationPage = () => {
 
   return (
     <div style={{ maxWidth: '600px', margin: '50px auto', textAlign: 'center' }}>
-      {loading && <p>Verifiziere deine E-Mail...</p>}
+      {loading && <p>Verification of your email...</p>}
       {message && <p style={{ color: 'green' }}>{message}</p>}
       {error && <p style={{ color: 'red' }}>{error}</p>}
       {!loading && (
         <p style={{ marginTop: '1rem' }}>
-          Du wirst gleich weitergeleitet. <a href="/login">Oder hier klicken</a>.
+          You will be redirected immediately. <a href="/login">Or click here</a>.
         </p>
       )}
     </div>

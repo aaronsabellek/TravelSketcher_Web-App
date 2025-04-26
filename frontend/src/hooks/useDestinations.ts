@@ -35,6 +35,7 @@ export function useDestinations() {
       }
 
       setHasMore(data.has_more);
+
     } catch (err) {
       console.error('Error loading destinations:', err);
       setError('Error loading destinations');

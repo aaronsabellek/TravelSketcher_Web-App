@@ -23,8 +23,8 @@ const EditEmailPage: React.FC = () => {
   const [saving, setSaving] = useState(false);
   const router = useRouter();
 
+  // Errors
   const emailErrors = validateEmailField(email);
-
   const isDisabled = emailErrors.length > 0 || saving;
 
   // Fetch current email from user
@@ -47,11 +47,13 @@ const EditEmailPage: React.FC = () => {
 
   // Submit new email
   const handleSubmit = async (e: React.FormEvent) => {
+
     e.preventDefault();
     setSaving(true);
 
     if (emailErrors.length > 0) {
       emailErrors.forEach((err) => toast.error(err));
+      setSaving(false);
       return;
     }
 
@@ -71,6 +73,7 @@ const EditEmailPage: React.FC = () => {
 
       toast.success('Confirmation email has been sent.');
       router.push('/user/profile');
+
     } catch (err: any) {
       toast.error(err.message);
     } finally {

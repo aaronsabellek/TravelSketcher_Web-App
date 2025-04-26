@@ -13,23 +13,24 @@ import { BASE_URL } from '@/utils/config';
 import { UserProfile } from '@/types/models';
 import { useRedirectIfNotAuthenticated } from '@/hooks/authRedirects';
 import { validateUsernameField, validateCityField } from '@/utils/formValidations';
-import { Input } from 'postcss';
 
 // Edit user profile
 export default function EditUserProfile() {
-  const { isReady } = useRedirectIfNotAuthenticated();
 
+  const { isReady } = useRedirectIfNotAuthenticated();
   const router = useRouter();
+
   const [userData, setUserData] = useState<Pick<UserProfile, 'username' | 'email' |'city' | 'country'>>({
     username: '',
     email: '',
     city: '',
     country: '',
   });
+
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
 
-  // Get errors
+  // Errors
   const usernameErrors = validateUsernameField(userData.username);
   const cityErrors = validateCityField(userData.city)
 
@@ -38,10 +39,9 @@ export default function EditUserProfile() {
     ...cityErrors,
   ];
 
-  // Disable submit button
   const isDisabled = allErrors.length > 0;
 
-  // Load durrent user data
+  // Load current user data
   useEffect(() => {
     const fetchProfile = async () => {
       try {
@@ -68,13 +68,14 @@ export default function EditUserProfile() {
     fetchProfile();
   }, []);
 
-  // From changes
+  // Handle changes
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setUserData({ ...userData, [e.target.name]: e.target.value });
   };
 
   // Submit changes
   const handleSubmit = async (e: React.FormEvent) => {
+
     e.preventDefault();
     setSaving(true);
 
@@ -91,10 +92,14 @@ export default function EditUserProfile() {
         body: JSON.stringify(userData),
       });
 
-      if (!res.ok) throw new Error('Error saving');
+      if (!res.ok) {
+        const data = await res.json();
+        throw new Error(data.error || 'Error saving.');
+      }
 
       toast.success('Profile edited successfully.')
       router.push('/user/profile');
+
     } catch (err) {
       toast.error('Edition failed.');
     } finally {
@@ -104,6 +109,7 @@ export default function EditUserProfile() {
 
   if (loading) return <div>Load user data...</div>;
 
+  // Wait until authentication state is ready
   if (!isReady) return null;
 
   return (

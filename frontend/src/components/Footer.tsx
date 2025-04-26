@@ -1,3 +1,4 @@
+// Footer of website
 const Footer = () => {
   return (
     <footer className="bg-gray-100 border-t border-b border-gray-300 mt-8">

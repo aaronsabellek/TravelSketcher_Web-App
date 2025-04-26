@@ -21,6 +21,7 @@ const DeleteAccountModal: React.FC<Props> = ({ isOpen, onClose, onDeleted }) => 
   const [password, setPassword] = useState('');
   const [deleting, setDeleting] = useState(false);
 
+  // Errors
   const passwordErrors = validatePasswordField(password);
   const isDisabled = passwordErrors.length > 0 || deleting;
 
@@ -31,13 +32,13 @@ const DeleteAccountModal: React.FC<Props> = ({ isOpen, onClose, onDeleted }) => 
   // Handle delition of user account
   const handleDelete = async () => {
 
-    // Check for password
     if (passwordErrors.length > 0) {
       passwordErrors.forEach((err) => toast.error(err));
       return;
     }
 
     setDeleting(true);
+
     try {
       const res = await fetch(`${BASE_URL}/user/delete`, {
         method: 'POST',

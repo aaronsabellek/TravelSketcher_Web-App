@@ -29,9 +29,13 @@ const TagsInput: React.FC<TagsInputProps> = ({
 
   return (
     <div className="mb-4">
+
+      {/* Label */}
       <label htmlFor="tags" className="block text-sm font-medium text-gray-700">
         Tags
       </label>
+
+      {/* Input */}
       <input
         type="text"
         id="tags"
@@ -41,6 +45,8 @@ const TagsInput: React.FC<TagsInputProps> = ({
         placeholder="Separate with commas"
         className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm bg-white"
       />
+
+      {/* Tags */}
       <div className="mt-2 flex flex-wrap">
         {tagsArray.map((tag) => (
           <span

@@ -20,7 +20,6 @@ const DeleteConfirmModal: React.FC<DeleteConfirmModalProps> = ({
   itemType
 }) => {
 
-  // Cancel if window is closed
   if (!isOpen) return null;
 
   // Warning texts

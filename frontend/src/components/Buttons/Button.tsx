@@ -7,6 +7,7 @@ type ButtonProps = {
   onClick?: () => void;
 };
 
+// Main button used on website
 const Button: React.FC<ButtonProps> = ({ text, isDisabled, type = 'submit', onClick }) => {
   return (
     <button

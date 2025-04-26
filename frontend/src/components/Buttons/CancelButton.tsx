@@ -5,6 +5,7 @@ type CancelButtonProps = {
   className?: string;
 };
 
+// Main button used for canceling an action and go to another page
 const CancelButton: React.FC<CancelButtonProps> = ({ href, className = '' }) => {
   return (
     <div className={`flex justify-center ${className}`}>

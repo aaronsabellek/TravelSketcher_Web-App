@@ -3,6 +3,7 @@ import { useRouter } from 'next/router';
 
 import { useAuth } from '@/contexts/AuthContext';
 
+// Set index page for each verification status
 const Home = () => {
   const { isLoggedIn, isLoading } = useAuth();
   const router = useRouter();

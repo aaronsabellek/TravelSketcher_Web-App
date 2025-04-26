@@ -1,6 +1,8 @@
 import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion'
 
+import Button from '../Buttons/Button';
+import ModalCancelButton from '../Buttons/ModalCancelButton';
 import { useClickOutside } from '@/hooks/useClickOutside';
 import { UnsplashImage } from '@/types/models';
 
@@ -27,7 +29,7 @@ interface ImageSearchModalProps {
   modalRef: React.RefObject<HTMLDivElement>;
 }
 
-// Opens a window to show and select an image from Unsplash for an entry
+// Opens window to show and select images from Unsplash
 const ImageSearchModal: React.FC<ImageSearchModalProps> = ({
   tempSelectedImageUrl,
   closeModal,
@@ -41,7 +43,7 @@ const ImageSearchModal: React.FC<ImageSearchModalProps> = ({
   modalRef,
 }) => {
 
-  // Close image modal with click outside
+  // Close modal with click outside
   useClickOutside([modalRef], closeModal, isModalOpen);
 
   return (
@@ -90,25 +92,17 @@ const ImageSearchModal: React.FC<ImageSearchModalProps> = ({
             ))}
           </div>
 
-          {/* Buttons */}
           <div className="mt-6 flex justify-end gap-2">
-            <button
+            {/* Cancel Button */}
+            <ModalCancelButton onClose={closeModal} />
+
+            {/* Select button */}
+            <Button
+              text="Select"
               type="button"
-              onClick={closeModal}
-              className="px-4 py-2 bg-gray-300 rounded-lg mt-4 hover:bg-gray-400"
-            >
-              Cancel
-            </button>
-            <button
-              type="button"
+              isDisabled={!tempSelectedImageUrl}
               onClick={handleConfirmSelection}
-              disabled={!tempSelectedImageUrl}
-              className={`py-2 px-4 mt-4 bg-blue-500 text-white rounded-lg hover:bg-blue-600 ${
-                tempSelectedImageUrl ? '' : 'opacity-50 cursor-not-allowed'
-              }`}
-            >
-              Select
-            </button>
+            />
             </div>
           </motion.div>
         </div>

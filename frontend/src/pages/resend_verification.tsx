@@ -9,16 +9,18 @@ import { validateEmailField } from '@/utils/formValidations';
 import { BASE_URL } from '@/utils/config';
 
 const ResendVerification = () => {
+
   // Redirect if user is authenticated
   const { isReady } = useRedirectIfAuthenticated();
 
   const [email, setEmail] = useState('');
   const [loading, setLoading] = useState(false);
 
+  // Errors
   const emailErrors = validateEmailField(email);
-
   const isDisabled = emailErrors.length > 0;
 
+  // Handle subnmit
   const handleSubmit = async (e: React.FormEvent) => {
 
     e.preventDefault();
@@ -47,14 +49,16 @@ const ResendVerification = () => {
       }
     };
 
+    // Wait until authentication state is ready
     if (!isReady) return null;
 
     return (
       <Container title="Resend Verification Email">
         <form onSubmit={handleSubmit} className="space-y-4 max-w-md mx-auto">
 
+          {/* Email */}
           <InputField
-            label="Email address"
+            label="Email"
             type="email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
@@ -62,6 +66,7 @@ const ResendVerification = () => {
             required
           />
 
+          {/* Submit button */}
           <Button
             text='Resend verification'
             type="submit"

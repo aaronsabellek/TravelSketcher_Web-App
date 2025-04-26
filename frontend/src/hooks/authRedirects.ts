@@ -19,7 +19,7 @@ export const useRedirectIfAuthenticated = (redirectTo: string = '/destination/ge
   };
 };
 
-// REdirect user to login page if he is not authenticated
+// Redirect user to login page if he is not authenticated
 export const useRedirectIfNotAuthenticated = (redirectTo: string = '/login') => {
   const { isLoggedIn, isLoading } = useAuth();
   const router = useRouter();

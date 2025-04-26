@@ -12,6 +12,7 @@ type InputFieldProps = {
   placeholder?: string;
 };
 
+// Main input field
 const InputField: React.FC<InputFieldProps> = ({
   label,
   type = 'text',
@@ -22,14 +23,18 @@ const InputField: React.FC<InputFieldProps> = ({
   required = false,
   placeholder = '',
 }) => {
-  // Berechnung der Klassen für den Rand
+
   const inputBorderClass = getInputBorderClass(value, errors);
 
   return (
     <div>
+
+      {/* Label */}
       <label className="block text-sm font-medium text-gray-700">
         {label} {required && <span className="text-red-500">*</span>}
       </label>
+
+      {/* Input field */}
       <input
         name={name}
         type={type}
@@ -39,6 +44,8 @@ const InputField: React.FC<InputFieldProps> = ({
         placeholder={placeholder}
         className={`mt-1 block w-full px-3 py-2 border focus:ring-1 focus:outline-none rounded-md shadow-sm bg-white ${inputBorderClass}`}
       />
+
+      {/* Error field */}
       {required && value && errors.length > 0 && (
         <div>
           {errors.map((error, idx) => (

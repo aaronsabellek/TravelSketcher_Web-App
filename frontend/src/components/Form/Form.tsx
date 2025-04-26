@@ -6,6 +6,7 @@ type FormProps = {
   className?: string;
 };
 
+// Standard form
 const Form: React.FC<FormProps> = ({ onSubmit, children, className = '' }) => {
   return (
     <form onSubmit={onSubmit} className={`space-y-4 max-w-md mx-auto ${className}`}>

@@ -5,6 +5,7 @@ interface InputDisplayProps {
   value: string;
 }
 
+// INput for display only
 const InputDisplay: React.FC<InputDisplayProps> = ({ label, value }) => {
   return (
     <div className="mb-4">

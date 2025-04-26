@@ -7,7 +7,7 @@ interface EntryPageProps {
   type: 'destination' | 'activity';
 }
 
-// Administers the formular to add or edit
+// Formular to add or edit an entry
 const EntryPage: React.FC<EntryPageProps> = ({ mode, type }) => {
   const { initialData, handleSubmit } = useEntryFormHandler(mode, type);
 

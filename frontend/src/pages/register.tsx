@@ -23,7 +23,7 @@ const Register = () => {
 
   const router = useRouter();
 
-  // Get errors
+  // Errors
   const usernameErrors = validateUsernameField(username);
   const emailErrors = validateEmailField(email);
   const passwordErrors = validatePasswordField(password);
@@ -39,6 +39,7 @@ const Register = () => {
   // Disable submit button
   const isDisabled = allErrors.length > 0;
 
+  // Handle submit
   const handleFormSubmit = async (e: React.FormEvent) => {
 
     e.preventDefault();
@@ -78,6 +79,7 @@ const Register = () => {
     <Container title="Register">
       <Form onSubmit={handleFormSubmit}>
 
+        {/* Username */}
         <InputField
           label="Username"
           type="text"
@@ -87,6 +89,7 @@ const Register = () => {
           required
         />
 
+        {/* Email */}
         <InputField
           label="Email"
           type="email"
@@ -96,6 +99,7 @@ const Register = () => {
           required
         />
 
+        {/* Password */}
         <InputField
           label="Password"
           type="password"
@@ -105,6 +109,7 @@ const Register = () => {
           required
         />
 
+        {/* City */}
         <InputField
           label="City"
           type="text"
@@ -113,6 +118,7 @@ const Register = () => {
           required
         />
 
+        {/* Country*/}
         <InputField
           label="Country"
           type="text"
@@ -120,6 +126,7 @@ const Register = () => {
           onChange={(e) => setCountry(e.target.value)}
         />
 
+        {/* Submit button */}
         <Button
           text="Register"
           type="submit"

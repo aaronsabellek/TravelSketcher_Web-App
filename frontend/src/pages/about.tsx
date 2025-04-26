@@ -15,6 +15,7 @@ const About = () => {
 
   const showButton = isAreaHovered;
 
+  // Load images
   useEffect(() => {
     const imageUrls = ['/travel-img-1.png', '/travel-img-2.png', '/travel-img-3.png'];
 
@@ -33,6 +34,7 @@ const About = () => {
 
   const allImagesLoaded = imagesLoaded.every(Boolean);
 
+  // Wait until authentication state is ready
   if (!isReady) return null;
 
   return (

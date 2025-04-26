@@ -11,6 +11,7 @@ import { useRedirectIfNotAuthenticated } from '@/hooks/authRedirects';
 import { BASE_URL } from '@/utils/config';
 import { UserProfile } from '@/types/models';
 
+// Show profile data of user
 const Profile: React.FC = () => {
   const { isReady } = useRedirectIfNotAuthenticated();
 
@@ -18,7 +19,6 @@ const Profile: React.FC = () => {
   const [loading, setLoading] = useState<boolean>(true);
   const router = useRouter();
 
-  // State for delete modal
   const [showDeleteModal, setShowDeleteModal] = useState(false);
 
 
@@ -52,6 +52,7 @@ const Profile: React.FC = () => {
   if (loading) return <div>Loading profile...</div>;
   if (!user) return <div>No user found.</div>;
 
+  // Wait until authentication state is ready
   if (!isReady) return null;
 
   // Show profile data
