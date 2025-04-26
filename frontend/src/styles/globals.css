@@ -11,11 +11,11 @@ html, body {
     overflow-x: hidden;
   }
 
-  p {
+  p, li, .grey {
     color:#505050;
   }
 
-  h1, h2, h3 {
+  h1, h2, h3, li {
     font-family: 'Roboto', sans-serif;
     font-weight: 500;
   }
@@ -23,6 +23,12 @@ html, body {
   h1 {
     font-size: 1.5rem;
     color:#505050;
+  }
+
+  .about {
+    font-size: 1.125rem;
+    line-height: 1.75rem;
+    margin-bottom: 1rem;
   }
 
 

@@ -54,13 +54,18 @@ const Navbar = () => {
   }
 
   return (
-    <nav className="bg-white">
+    <nav className="bg-white min-h-24">
       <div className="max-w-7xl mx-auto px-4 mb-2">
         <div className="flex flex-wrap justify-between items-center h-16">
 
           {/* Logo / Title */}
-          <div className="flex-shrink-0 text-gray-800 font-bold text-xl">
-            <Link href="/">TravelSketcher</Link>
+          <div className="flex-shrink-0 mt-2">
+            <Link href="/">
+              <img
+                src="/TravelSketcher_logo_cut.png"
+                className="h-20"
+              />
+            </Link>
           </div>
 
           {/* Burger-Icon for small screens */}
@@ -118,7 +123,7 @@ const Navbar = () => {
               animate="visible"
               exit="hidden"
               variants={menuVariants}
-              className="md:hidden overflow-hidden"
+              className="md:hidden overflow-hidden pt-5"
             >
               <div className="mt-2 space-y-2 text-gray-700 font-medium">
               {menuLinks.map(link => (

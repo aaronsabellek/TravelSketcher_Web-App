@@ -130,18 +130,31 @@ const About = () => {
       <div className="w-full my-10">
         <div className="max-w-5xl mx-auto px-4">
           <h1 className="text-3xl font-extrabold text-center mb-8">About This Project</h1>
-          <p className="text-lg mb-8">
-          Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat,
-          sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem
-          ipsum dolor sit amet. Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore
-          magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata
-          sanctus est Lorem ipsum dolor sit amet.
+
+          <p className="about">
+            <b>TravelSketcher</b> is your personal space to capture and organize your travel dreams — simply and beautifully.
           </p>
-          <p className="text-lg">
-          Duis autem vel eum iriure dolor in hendrerit in vulputate velit esse molestie consequat, vel illum dolore eu feugiat nulla facilisis at
-          vero eros et accumsan et iusto odio dignissim qui blandit praesent luptatum zzril delenit augue duis dolore te feugait nulla facilisi.
-          Lorem ipsum dolor sit amet, consectetuer adipiscing elit, sed diam nonummy nibh euismod tincidunt ut laoreet dolore magna aliquam erat volutpat.
+
+          <p className="about">
+            Instead of overwhelming you with offers and complex planning tools, TravelSketcher focuses on what truly matters: your destinations, your activities, and your memories.
           </p>
+
+          <p className="about">
+            Save your favorite places, plan activities, add notes, and tag important details — all in one clean and intuitive view.
+          </p>
+
+          <p className="about">
+            With stunning Unsplash images integrated into your plans, every trip you imagine feels vivid and inspiring even before you set foot on the road.
+          </p>
+
+          <p className="about">
+            TravelSketcher is about simplicity, creativity, and keeping your travel dreams close at hand.
+          </p>
+
+          <p className="about">
+            Start sketching your next adventure today.
+          </p>
+
         </div>
       </div>
     </div>
