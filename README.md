@@ -49,7 +49,7 @@ This is a web application that allows users to create, save, and manage travel d
      - Make sure MailHog is running before running backend tests.
 
    - **Unsplash API (for Image Search):**
-     - An Unsplash API key is required to retrieve images for travel destinations.
+     - An Unsplash API key is required to retrieve images for travel destinations and activities.
      - Create an account at [Unsplash Developers](https://unsplash.com/developers).
      - Register an application to obtain an **Access Key**.
      - Add this key to your `.env` file as `UNSPLASH_ACCESS_KEY`.
@@ -107,7 +107,7 @@ This is a web application that allows users to create, save, and manage travel d
   - `config.py` - Configuration
   - `errors.py` - Error handling
   - `models.py` - Database models
-- `/scripts` - Development scripts (e.g., `setup_dev_db.py`)
+- `/scripts` - Script to setup database with dummy data (`setup_dev_db.py`)
 - `/tests` - Pytest files
 - `run.py` - Backend entry point
 
@@ -128,7 +128,7 @@ This is a web application that allows users to create, save, and manage travel d
 
 - **User Management:** Registration, email confirmation, login, profile editing, and account deletion.
 - **Destinations and Activities:** Create, update, and manage destinations with associated activities.
-- **Email Notifications:** Emails for registration, password reset, and profile changes.
+- **Email Notifications:** Emails for registration, password reset, and email changes.
 
 ## Error Handling and Logging
 
