@@ -33,24 +33,37 @@ This is a web application that allows users to create, save, and manage travel d
      MAIL_USE_SSL=False
      MAIL_USERNAME=None
      MAIL_PASSWORD=None
-     MAIL_DEFAULT_SENDER=you_mail_adress
+     MAIL_DEFAULT_SENDER=you_email_adress
      UNSPLASH_ACCESS_KEY=your_unsplash_api_key
      ```
 
-3. **Setup Database (for Development):**
+3. **Mail Server Setup:**
+   - To enable user registration, password reset, and email change functionality, you need to set up a mail server.
+   - **MailHog** is a simple and effective tool to simulate the mail server during development.
+   - To install MailHog, follow these steps:
+     - Download MailHog from the [official repository](https://github.com/mailhog/MailHog) or install it via Homebrew (macOS) or using Docker.
+     - **For Docker:**
+       ```bash
+       docker run -p 1025:1025 -p 8025:8025 mailhog/mailhog
+       ```
+     - This will start MailHog on ports `1025` (SMTP) and `8025` (Web interface).
+     - You can access the MailHog web interface at `http://localhost:8025` to view the emails sent by the application.
+   - Ensure that MailHog is running before running the backend tests.
+
+4. **Setup Database (for Development):**
    - The database is set to SQLite by default for development. For production, you can switch to PostgreSQL.
    - To load dummy data (only for development):
      ```bash
      python scripts/setup_dev_db.py
      ```
 
-4. **Run the Backend Server:**
+5. **Run the Backend Server:**
    - To start the Flask server:
      ```bash
      python run.py
      ```
 
-5. **Run Tests:**
+6. **Run Tests:**
    - All backend tests are written using Pytest. To run the tests, use:
      ```bash
      pytest
@@ -71,10 +84,9 @@ This is a web application that allows users to create, save, and manage travel d
      ```
 
 2. **Set Environment Variables:**
-   - Create a `.env.local` file in the root directory and set the following variables:
+   - Create a `.env.local` file in the root directory and set the following variable:
      ```env
      NEXT_PUBLIC_API_BASE_URL=https://your_backend_url
-     NEXT_PUBLIC_UNSPLASH_API_KEY=your_unsplash_api_key
      ```
 
 3. **Start the Frontend Server:**
@@ -115,7 +127,7 @@ This is a web application that allows users to create, save, and manage travel d
 
 ### **Main Features of the Application:**
 - **User Registration and Login:** Users can register, confirm their email, and log in.
-- **Destinations and Activities:** Users can create and manage travel destinations. Activities can be can also be added to each destination and can be edited.
+- **Destinations and Activities:** Users can create and manage travel destinations. Activities can be added to each destination and can also be edited.
 - **Profile Management:** Users can edit their profile data and delete their account (password confirmation required).
 
 ## **Error Handling and Logging**
