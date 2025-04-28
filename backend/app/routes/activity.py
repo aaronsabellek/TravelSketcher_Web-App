@@ -1,12 +1,15 @@
+import re
 from flask import Blueprint, request, jsonify
 from flask_login import login_required
 
 from app.models import Destination, Activity
-from app.helpers.helpers import models_to_list, model_to_dict
+from app.helpers.helpers import model_to_dict, is_valid_url
 from app.helpers.helpers_entries import (
     check_existence_and_permission,
     create_entry,
+    get_paginated_entries,
     edit_entry,
+    update_entry_field,
     reorder_entries,
     delete_entry
 )
@@ -15,15 +18,14 @@ from app.helpers.helpers_entries import (
 activity_bp = Blueprint('activity', __name__, url_prefix='/activity')
 
 
-@activity_bp.route('/add', methods=['POST'])
+@activity_bp.route('/add/<string:destination_id>', methods=['POST'])
 @login_required
-def add_activity():
+def add_activity(destination_id):
     """Adds activity to database"""
 
     data = request.get_json() # Get data
 
     # Check if destination of activity exists and belongs to user
-    destination_id = data.get('destination_id')
     destination = check_existence_and_permission(Destination, destination_id)
     if isinstance(destination, tuple):
         return destination
@@ -35,25 +37,26 @@ def add_activity():
 @activity_bp.route('/get_all/<string:destination_id>', methods=['GET'])
 @login_required
 def get_activities(destination_id):
-    """Gets all destinations of user"""
+    """Gets all activities for a destination with pagination"""
 
-    # Check existence and permission of activity
+    # Check existence and permission of destination
     entry = check_existence_and_permission(Destination, destination_id)
     if isinstance(entry, tuple):
         return entry
 
-    # Set destination and activities
+    # Get destination by id
     destination = Destination.query.filter_by(id=destination_id).first()
-    activities = Activity.query.filter_by(destination_id=destination_id).all()
 
-    # Check if activities of destination are empty
-    if not activities:
-        return jsonify({'activities': [], 'message': f"Destination '{destination.title}' has no activities yet"}), 200
-
-    return jsonify({
-        'destination': destination.title,
-        'activities': models_to_list(activities)
-    })
+    return get_paginated_entries(
+        model=Activity,
+        filters={'destination_id': destination_id},
+        order_by=Activity.position,
+        model_key='activities',
+        extra_data={
+            'destination': destination.title,
+            'country': destination.country
+        }
+    )
 
 
 @activity_bp.route('/get/<string:activity_id>', methods=['GET'])
@@ -72,7 +75,7 @@ def get_activity(activity_id):
 @activity_bp.route('/edit/<string:activity_id>', methods=['POST'])
 @login_required
 def edit_activity(activity_id):
-    """Edits activity in database"""
+    """Edits activity"""
 
     data = request.get_json() # Get data
 
@@ -83,6 +86,54 @@ def edit_activity(activity_id):
 
     # Edit activity
     return edit_entry(Activity, activity_id, data)
+
+
+@activity_bp.route('/edit_link/<string:activity_id>', methods=['POST'])
+@login_required
+def edit_link(activity_id):
+    """Edit weblink of activity"""
+
+    # Get data
+    data = request.get_json()
+    web_link = data.get('web_link')
+
+    # Check if data is given
+    if web_link == '':
+        return jsonify({'error': 'Web link is required'}), 400
+
+    # Check if link has correct web link format
+    if not is_valid_url(web_link):
+        return jsonify({'error': 'Input is no web link format'}), 400
+
+    # Check existence and permission of activity
+    entry = check_existence_and_permission(Activity, activity_id)
+    if isinstance(entry, tuple):
+        return entry
+
+    # Update data
+    return update_entry_field(Activity, activity_id, 'web_link', web_link)
+
+
+@activity_bp.route('/edit_notes/<string:activity_id>', methods=['POST'])
+@login_required
+def edit_notes(activity_id):
+    """Edit notes of activity"""
+
+    # Get data
+    data = request.get_json()
+    free_text = data.get('free_text')
+
+    # Check if data is given
+    if free_text == '':
+        return jsonify({'error': 'Note text is required'}), 400
+
+    # Check existence and permission of activity
+    entry = check_existence_and_permission(Activity, activity_id)
+    if isinstance(entry, tuple):
+        return entry
+
+    # Update data
+    return update_entry_field(Activity, activity_id, 'free_text', free_text)
 
 
 @activity_bp.route('/reorder/<string:destination_id>', methods=['POST'])

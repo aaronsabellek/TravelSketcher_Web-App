@@ -13,6 +13,7 @@ from tests.test_data.destination_data import (
     add_destination,
     get_destination,
     edit_destination,
+    edit_note,
     reorder_destinations,
     delete_destination
 )
@@ -57,7 +58,6 @@ def test_get_all(setup_logged_in_user):
 
     # Check for errors in case of no destinations
     assert len(response_data['destinations']) == 0, f'Unexpected Error: Still destinations in db!'
-    assert response_data['message'] == 'No destinations found yet'
 
 
 @pytest.mark.parametrize('test_data', get_destination)
@@ -79,8 +79,21 @@ def test_edit(setup_logged_in_user, test_data):
 
     # Check for updates in db
     destination = Destination.query.filter_by(id=test_data['id']).first()
-    print(destination)
     assert destination.title == test_data['title'], f'Unexpedted Error: Destination not edited in db'
+
+
+@pytest.mark.parametrize('test_data', edit_note)
+def test_edit(setup_logged_in_user, test_data):
+    """Test: Edit note"""
+
+    # Use and validate route
+    response = request_and_validate(setup_logged_in_user, f'destination/edit_notes/{test_data['id']}', test_data)
+    if response.status_code not in [200, 201]:
+        return
+
+    # Check is note is edited in database
+    destination = Destination.query.filter_by(id=test_data['id']).first()
+    assert destination.free_text == test_data['free_text'], 'Destination is not updated correctly in database'
 
 
 @pytest.mark.parametrize('test_data', reorder_destinations)

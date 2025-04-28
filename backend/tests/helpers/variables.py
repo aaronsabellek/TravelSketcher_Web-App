@@ -15,10 +15,7 @@ username = user['username']
 email = user['email']
 password = user['password']
 city = user['city']
-longitude = user['longitude']
-latitude = user['latitude']
 country = user['country']
-currency = user['currency']
 is_email_verified = user['is_email_verified']
 
 # Variables for main user destinations

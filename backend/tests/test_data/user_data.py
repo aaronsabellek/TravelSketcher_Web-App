@@ -1,11 +1,9 @@
 from tests.helpers.dummy_data import dummy_data
 from tests.helpers.variables import (
+    password,
     email,
     city,
-    longitude,
-    latitude,
     country,
-    currency
 )
 
 # Variables for user tests
@@ -17,10 +15,7 @@ new_email= 'new_email@mail.com'
 updated_profile= {
     'username': 'new_username',
     'city': city,
-    'longitude': longitude,
-    'latitude': latitude,
     'country': country,
-    'currency': currency
 }
 
 # Test data to edit user profile
@@ -97,5 +92,13 @@ reset_password = [
 
     # Successfull test case
     {'new_password_1': new_password, 'new_password_2': new_password, 'expected_status': 200, 'expected_message': 'Password updated successfully!'}
+]
+
+delete_user = [
+    # Incorrect password
+    {'password': 'incorrect password', 'expected_status': 401, 'expected_message': 'Password incorrect'},
+
+    # Successfull test case
+    {'password': password, 'expected_status': 200, 'expected_message': 'User deleted successfully!'}
 ]
 

@@ -1,9 +1,9 @@
-from flask import jsonify
+from flask import jsonify, request
 from flask_login import logout_user, current_user
 
 from app import db
 from app.models import User, Destination, Activity
-from app.helpers.helpers import model_to_dict
+from app.helpers.helpers import model_to_dict, models_to_list
 
 
 def check_existence_and_permission(model, entry_id):
@@ -64,6 +64,31 @@ def create_entry(model, data, user_id=None, destination_id=None):
     return jsonify({'message': f'{model.__name__} added successfully!', model.__name__.lower(): model_to_dict(new_entry)}), 201
 
 
+def get_paginated_entries(model, filters=None, order_by=None, model_key=None, extra_data=None):
+    page = request.args.get('page', default=1, type=int)
+    per_page = request.args.get('per_page', default=12, type=int)
+
+    query = model.query
+    if filters:
+        query = query.filter_by(**filters)
+
+    if order_by:
+        query = query.order_by(order_by)
+
+    pagination = query.paginate(page=page, per_page=per_page, error_out=False)
+    items = pagination.items
+
+    response_data = {
+        model_key or model.__tablename__: models_to_list(items),
+        'has_more': pagination.has_next,
+    }
+
+    if extra_data:
+        response_data.update(extra_data)
+
+    return jsonify(response_data), 200
+
+
 def edit_entry(model, entry_id, data, allowed_fields=None):
     """Edits entry in database"""
 
@@ -90,6 +115,27 @@ def edit_entry(model, entry_id, data, allowed_fields=None):
     db.session.commit()
 
     return jsonify({'message': f'Updated {model.__name__} successfully!', model.__name__.lower(): model_to_dict(entry)}), 200
+
+
+def update_entry_field(model, entry_id, field_name, new_value):
+    """Updates a single field of an entry"""
+
+    # Check if instance exists in database
+    instance = model.query.filter_by(id=entry_id).first()
+    if not instance:
+        return jsonify({'error': f'{model.__name__} with ID {entry_id} not found'}), 404
+
+    # Check if field exists in model
+    if not hasattr(instance, field_name):
+        return jsonify({'error': f'Field {field_name} not found in {model.__name__}'}), 400
+
+    # Updpate data
+    setattr(instance, field_name, new_value)
+
+    # Commit changes in database
+    db.session.commit()
+
+    return jsonify({'message': f'Updated {model.__name__} successfully!'}), 200
 
 
 def reorder_entries(model, filter_by, new_order, entry_name):

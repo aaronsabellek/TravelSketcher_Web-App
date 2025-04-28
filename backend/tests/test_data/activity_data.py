@@ -18,17 +18,9 @@ new_activity = {
     'id': str(uuid.uuid4()),
     'title': 'Suomenlina Fortress',
     'country': 'Finland',
-    'duration': '3-6h',
-    'pricing': 'Free',
-    'status': 'Planned',
     'web_link': 'https://suomenlina.fi',
     'img_link': 'https://suomenlina.fi/img',
     'tags': 'Fortress,Military,Island',
-    'trip_duration': '0,5h',
-    'trip_pricing': '5 EUR',
-    'longitude': '24.59',
-    'latitude': '60.852',
-    'description': 'Old fortress in the Baltic Sea',
     'free_text': 'Combine with boat tour through the Archipelago',
     'destination_id': dest_main_id
 }
@@ -83,6 +75,34 @@ edit_activity = [
 
     # Successfull test case
     {**new_activity, 'id': act_main_id, 'expected_status': 200, 'expected_message': 'Updated Activity successfully!'}
+]
+
+# Test data to edit link
+edit_link = [
+    # Empty link
+    {'id': act_main_id, 'web_link': '', 'expected_status': 400, 'expected_message': 'Web link is required'},
+    # Weblink contains new line
+    {'id': act_main_id, 'web_link': 'Just a sentence', 'expected_status': 400, 'expected_message': 'Input is no web link format'},
+    # Activity belongs to another user
+    {'id': act_second_user_id, 'web_link': 'https://example.com', 'expected_status': 403, 'expected_message': 'Activity not permitted'},
+    # Activity does not exist
+    {'id': wrong_id, 'web_link': 'https://example.com', 'expected_status': 404, 'expected_message': 'Activity not found'},
+
+    # Successfull test case
+    {'id': act_main_id, 'web_link': 'https://example.com', 'expected_status': 200, 'expected_message': 'Updated Activity successfully!'}
+]
+
+# Test data to edit note
+edit_note = [
+    # Empty note
+    {'id': act_main_id, 'free_text': '', 'expected_status': 400, 'expected_message': 'Note text is required'},
+    # Activity belongs to another user
+    {'id': act_second_user_id, 'free_text': 'This is the note text', 'expected_status': 403, 'expected_message': 'Activity not permitted'},
+    # Activity does not exist
+    {'id': wrong_id, 'free_text': 'This is the note text', 'expected_status': 404, 'expected_message': 'Activity not found'},
+
+    # Successfull test case
+    {'id': act_main_id, 'free_text': 'This is the note text', 'expected_status': 200, 'expected_message': 'Updated Activity successfully!'}
 ]
 
 # Test data to reorder activities of specific destination

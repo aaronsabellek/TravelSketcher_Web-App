@@ -14,19 +14,7 @@ new_destination = {
     'title': 'Helsinki',
     'country': 'Finland',
     'img_link': 'https://example.com/helsinki.jpg',
-    'duration': '5 days',
     'tags': 'city, culture, nature',
-    'status': 'planned',
-    'time': 'summer',
-    'accomodation_link': 'https://example.com/helsinki-hotel',
-    'pricing': '1200',
-    'trip_pricing_flight': '300',
-    'trip_pricing_no_flight': '900',
-    'travel_duration_flight': '2h',
-    'travel_duration_no_flight': '20h',
-    'longitude': '24.941',
-    'latitude': '60.173',
-    'description': 'Experience the Nordic charm of Helsinki with its unique mix of modern architecture and historical sites.',
     'free_text': 'Don’t miss the Suomenlinna sea fortress and the traditional Finnish saunas!'
 }
 
@@ -65,6 +53,18 @@ edit_destination = [
 
     # Successfull test case
     {**new_destination, 'id': dest_main_id, 'expected_status': 200, 'expected_message': 'Updated Destination successfully!'}
+]
+
+edit_note = [
+    # Empty note
+    {'id': dest_main_id, 'free_text': '', 'expected_status': 400, 'expected_message': 'Note text is required'},
+    # Destination belongs to another user
+    {'id': dest_second_user_id, 'free_text': 'This is the note text', 'expected_status': 403, 'expected_message': 'Destination not permitted'},
+    # Destination does not exist
+    {'id': wrong_id, 'free_text': 'This is the note text', 'expected_status': 404, 'expected_message': 'Destination not found'},
+
+    # Successfull test case
+    {'id': dest_main_id, 'free_text': 'This is the note text', 'expected_status': 200, 'expected_message': 'Updated Destination successfully!'}
 ]
 
 # Test data to reorder destinations

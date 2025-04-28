@@ -25,11 +25,9 @@ def setup():
 
         # Create main user and secondary user
         main_user = create_user(db, user)
-        secondary_user = create_user(db, second_user)
 
         # Create destinations and activities for users
         create_destinations_and_activities(db, destinations, main_user)
-        create_destinations_and_activities(db, second_destinations, secondary_user)
 
         # Commit changes in databae
         db.session.commit()

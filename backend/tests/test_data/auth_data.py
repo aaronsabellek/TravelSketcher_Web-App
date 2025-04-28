@@ -33,14 +33,14 @@ registration_data = [
 # Test data for email verification
 verification_data = [
     # Email does not exist in db
-    {'email': 'wrong_email@test-com', 'expected_status': 404, 'expected_message': 'User not found!'},
+    {'email': 'wrong_email@test-com', 'expected_status': 302, 'location': f'error=notfound'},
     # User is already verified
-    {'email': email, 'is_email_verified': True, 'expected_status': 200, 'expected_message': 'E-Mail has already been confirmed!'},
+    {'email': email, 'is_email_verified': True, 'expected_status': 302, 'location': 'status=already_verified'},
     # Token is wrong
-    {'email': email, 'invalid_token': True, 'expected_status': 400, 'expected_message': 'Invalid or expired token!'},
+    {'email': email, 'invalid_token': True, 'expected_status': 302, 'location': 'error=invalid'},
 
     # Successfull test case
-    {'email': email, 'expected_status': 200, 'expected_message': 'E-Mail confirmed successfully!'}
+    {'email': email, 'expected_status': 302, 'location': 'status=success'}
 ]
 
 # Test data for resending verification mail

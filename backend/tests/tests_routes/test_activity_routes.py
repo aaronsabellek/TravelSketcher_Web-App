@@ -8,6 +8,8 @@ from tests.test_data.activity_data import (
     add_activity,
     get_all,
     get_activity,
+    edit_link,
+    edit_note,
     edit_activity,
     reorder_activities,
     delete_activity
@@ -19,7 +21,7 @@ def test_add(setup_logged_in_user, test_data):
     """Test: Add activity to database"""
 
     # Use and validate route
-    response = request_and_validate(setup_logged_in_user, 'activity/add', test_data)
+    response = request_and_validate(setup_logged_in_user, f'activity/add/{test_data['destination_id']}', test_data)
     if response.status_code not in [200, 201]:
         return
 
@@ -66,6 +68,34 @@ def test_edit_activity(setup_logged_in_user, test_data):
     # Check for updates in db
     activity = Activity.query.filter_by(id=test_data['id']).first()
     assert activity.title == test_data['title'], f'Unexpedted Error: Activity not edited in db'
+
+
+@pytest.mark.parametrize('test_data', edit_note)
+def test_edit(setup_logged_in_user, test_data):
+    """Test: Edit note"""
+
+    # Use and validate route
+    response = request_and_validate(setup_logged_in_user, f'activity/edit_notes/{test_data['id']}', test_data)
+    if response.status_code not in [200, 201]:
+        return
+
+    # Check is note is edited in database
+    activity = Activity.query.filter_by(id=test_data['id']).first()
+    assert activity.free_text == test_data['free_text'], 'Activitiy is not updated correctly in database'
+
+
+@pytest.mark.parametrize('test_data', edit_link)
+def test_edit(setup_logged_in_user, test_data):
+    """Test: Edit note"""
+
+    # Use and validate route
+    response = request_and_validate(setup_logged_in_user, f'activity/edit_link/{test_data['id']}', test_data)
+    if response.status_code not in [200, 201]:
+        return
+
+    # Check is note is edited in database
+    activity = Activity.query.filter_by(id=test_data['id']).first()
+    assert activity.web_link == test_data['web_link'], 'Activitiy is not updated correctly in database'
 
 
 @pytest.mark.parametrize('test_data', reorder_activities)

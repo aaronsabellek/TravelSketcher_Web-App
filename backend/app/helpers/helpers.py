@@ -1,6 +1,6 @@
 import re
 
-from flask import jsonify, current_app, render_template, url_for
+from flask import jsonify, current_app, url_for
 from flask_login import current_user
 from sqlalchemy import func, String, Text
 from flask_mail import Message
@@ -8,6 +8,9 @@ from werkzeug.security import generate_password_hash
 
 from app import db, mail
 from app.models import Destination
+
+# Set Frontend page
+frontend_url = 'http://localhost:3000'
 
 
 def model_to_dict(model):
@@ -41,6 +44,27 @@ def validate_password(password):
     return None
 
 
+def is_valid_url(url: str) -> bool:
+    """Checks if a given string is a valid URL, adds http if missing."""
+    url = url.strip()
+
+    # Automatically prepend 'http://' if missing
+    if not url.startswith(('http://', 'https://')):
+        url = 'http://' + url
+
+    # Regex to validate URL
+    url_regex = re.compile(
+        r'^(https?:\/\/)'
+        r'([\w.-]+\.[a-zA-Z]{2,})'
+        r'(:\d+)?'
+        r'(\/[\w./%-]*)*'
+        r'(\?[=&\w%-]*)?'
+        r'(#\w*)?$',
+        re.IGNORECASE
+    )
+    return re.match(url_regex, url) is not None
+
+
 def generate_token(email, salt):
     """Generates verification token"""
     serializer = current_app.config['SERIALIZER']
@@ -53,15 +77,19 @@ def confirm_token(token, salt, expiration=3600):
         serializer = current_app.config['SERIALIZER']
         email = serializer.loads(token, salt=salt, max_age=expiration)
         return email
-    except:
+    #except:
+        #return None
+    except Exception as e:
+        print("Token error:", e)
         return None
 
 
-def send_verification_email(user, salt):
+def send_verification_email(user, salt, bp, email=None):
     """Sends verification email to user"""
 
-    token = generate_token(user.email, salt=salt)
-    verify_url = url_for('auth.verify_email', token=token, _external=True)
+    target_email = email or user.email
+    token = generate_token(target_email, salt=salt)
+    verify_url = url_for(f'{bp}.verify_email', token=token, _external=True)
     subject = 'Please confirm your E-Mail'
     body_text = f"""Hello {user.username},
 
@@ -78,7 +106,7 @@ If you did not sign up, please ignore this email.
         <p>If you did not request this, please ignore this message.</p>
     '''
 
-    send_email(user.email, subject, body_text, body_html=body_html)
+    send_email(target_email, subject, body_text, body_html=body_html)
 
 
 def send_email(to_email, subject, body_text, body_html=None):

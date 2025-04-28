@@ -1,38 +1,46 @@
-from flask import Blueprint, request, jsonify
-from flask_login import login_required
+import requests
 
-from app.models import Destination, Activity
-from app.helpers.helpers import search_resources
+from flask import Blueprint, request, jsonify, current_app
 
 search_bp = Blueprint('search', __name__)
 
 
-@search_bp.route('/search', methods=['GET'])
-@login_required
-def search():
-    """Searches through strings in destinations and/or activities of user"""
+@search_bp.route('/search-images', methods=['GET'])
+def search_images():
+    """Searches for images in Unsplash"""
 
-    # Get query and type of entry
-    query = request.args.get('query')
-    type = request.args.get('type')
+    search_term = request.args.get('query')  # Get the search term from the query
+    page = request.args.get('page', default=1, type=int)
 
-    # Check if search query exists
-    if not query:
-        return jsonify({'error': 'Search query required'}), 400
+    if not search_term:
+        return jsonify({'error': 'No search term specified'}), 400
 
-    # Set types of models that can be searched through
-    types = ['destination', 'activity', 'both']
+    # Unsplash API URL
+    url = f"https://api.unsplash.com/search/photos?query={search_term}&page={page}&per_page=15"
 
-    # Set empty list for results
-    results_data = []
+    # Unsplash access key
+    access_key = current_app.config['UNSPLASH_ACCESS_KEY']
 
-    # Search through destinations
-    if type == 'destination' or type == 'both' or type not in types:
-        results_data.extend(search_resources(Destination, query))
+    # Unsplash request with access Key
+    response = requests.get(url, headers={'Authorization': f'Client-ID {access_key}'})
 
-    # Search through activities
-    if type == 'activity' or type == 'both' or type not in types:
-        results_data.extend(search_resources(Activity, query))
+    if response.status_code != 200:
+        return jsonify({'error': 'Fehler bei der Anfrage an Unsplash'}), 500
 
-    return jsonify(results=results_data), 200
+    # Extract relevant data
+    data = response.json()
+
+    results = []
+    for image in data.get('results', []):
+        urls = image.get('urls')
+        if not urls or 'small' not in urls:
+            continue
+
+        results.append({
+            'id': image.get('id', ''),
+            'url': urls['small'],
+            'alt_description': image.get('alt_description', 'No image description available')
+        })
+
+    return jsonify({'results': results})
 

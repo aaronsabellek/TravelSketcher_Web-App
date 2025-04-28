@@ -2,11 +2,13 @@ from flask import Blueprint, request, jsonify
 from flask_login import login_required, current_user
 
 from app.models import Destination
-from app.helpers.helpers import models_to_list, model_to_dict
+from app.helpers.helpers import model_to_dict
 from app.helpers.helpers_entries import (
     check_existence_and_permission,
     create_entry,
+    get_paginated_entries,
     edit_entry,
+    update_entry_field,
     reorder_entries,
     delete_entry
 )
@@ -29,14 +31,12 @@ def add_destination():
 def get_destinations():
     """Gets all destinations of user"""
 
-    # Get all destinations of user
-    destinations = Destination.query.filter_by(user_id=str(current_user.id)).all()
-
-    # Check if there are any destinations
-    if not destinations:
-        return jsonify({'destinations': [], 'message': 'No destinations found yet'}), 200
-
-    return jsonify({'destinations': models_to_list(destinations)}), 200
+    return get_paginated_entries(
+        model=Destination,
+        filters={'user_id': str(current_user.id)},
+        order_by=Destination.position,
+        model_key='destinations'
+    )
 
 
 @destination_bp.route('/get/<string:destination_id>', methods=['GET'])
@@ -66,6 +66,28 @@ def edit_destination(destination_id):
 
     # Edit destination
     return edit_entry(Destination, destination_id, data)
+
+
+@destination_bp.route('/edit_notes/<string:destination_id>', methods=['POST'])
+@login_required
+def edit_notes(destination_id):
+    """Edit notes of destination"""
+
+    # Get data
+    data = request.get_json()
+    free_text = data.get('free_text')
+
+    # Check if data is given
+    if free_text == '':
+        return jsonify({'error': 'Note text is required'}), 400
+
+    # Check existence and permission of destination
+    entry = check_existence_and_permission(Destination, destination_id)
+    if isinstance(entry, tuple):
+        return entry
+
+    # Update data
+    return update_entry_field(Destination, destination_id, 'free_text', free_text)
 
 
 @destination_bp.route('/reorder', methods=['POST'])

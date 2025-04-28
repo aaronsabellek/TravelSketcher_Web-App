@@ -5,6 +5,7 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from app import db, login_manager
 from app.models import User
 from app.helpers.helpers import (
+    frontend_url,
     is_valid_email,
     validate_password,
     confirm_token,
@@ -13,9 +14,6 @@ from app.helpers.helpers import (
 
 # Set blueprint
 auth_bp = Blueprint('auth', __name__)
-
-# Set Frontend page
-frontend_url = 'http://localhost:3000'
 
 
 @login_manager.user_loader
@@ -37,7 +35,7 @@ def register():
     data = request.get_json() # Get data
 
     # Check if all required fields are filled
-    required_fields = ['username', 'email', 'password', 'city', 'longitude', 'latitude', 'country', 'currency']
+    required_fields = ['username', 'email', 'password', 'city', 'country']
 
     for field in required_fields:
         if not data[field] or data[field] == '':
@@ -81,7 +79,7 @@ def register():
     db.session.commit()
 
     # Send verification email to user
-    send_verification_email(new_user, salt='account-verification')
+    send_verification_email(new_user, bp='auth', salt='account-verification')
 
     return jsonify({'message': 'Registration was successfull! A confirmation link has been sent.'}), 201
 
@@ -95,25 +93,21 @@ def verify_email(token):
 
     # Check if varification has worked
     if not email:
-        #return jsonify({'error': 'Invalid or expired token!'}), 400
         return redirect(f'{frontend_url}/verify_email/{token}?error=invalid')
 
     # Check if user with this email exists in db
     user = User.query.filter_by(email=email).first()
     if not user:
-        #return jsonify({'error': 'User not found!'}), 404
         return redirect(f'{frontend_url}/verify_email/{token}?error=notfound')
 
     # Check if email is already verified
     if user.is_email_verified == True:
-        #return jsonify({'message': 'E-Mail has already been confirmed!'}), 200
         return redirect(f'{frontend_url}/verify_email/{token}?status=already_verified')
 
     # Change verification status of user in db
     user.is_email_verified = True
     db.session.commit()
 
-    #return jsonify({'message': 'E-Mail confirmed successfully!'}), 200
     return redirect(f'{frontend_url}/verify_email/{token}?status=success')
 
 
@@ -134,7 +128,7 @@ def resend_verification():
         return jsonify({'message': 'E-Mail is already verified!'}), 200
 
     # Send new verification mail
-    send_verification_email(user, salt='account-verification')
+    send_verification_email(user, bp='auth', salt='account-verification')
     return jsonify({'message': 'New verification link has been sent!'}), 200
 
 
@@ -183,5 +177,6 @@ def logout():
     """Logout of user"""
 
     logout_user()
+
     return jsonify({'message': 'Logout successfull!'}), 200
 

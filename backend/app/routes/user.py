@@ -1,5 +1,6 @@
-from flask import Blueprint, request, jsonify
+from flask import Blueprint, request, jsonify, redirect
 from flask_login import login_required, current_user
+from werkzeug.security import check_password_hash
 
 from app import db
 from app.models import User
@@ -8,6 +9,7 @@ from app.helpers.helpers_entries import(
     delete_entry
 )
 from app.helpers.helpers import (
+    frontend_url,
     is_valid_email,
     generate_token,
     confirm_token,
@@ -20,7 +22,7 @@ from app.helpers.helpers import (
 user_bp = Blueprint('user', __name__, url_prefix='/user')
 
 # Set allowed fields for user display
-allowed_fields = ['username', 'city', 'longitude', 'latitude', 'country', 'currency']
+allowed_fields = ['username', 'email', 'city', 'longitude', 'latitude', 'country', 'currency']
 
 
 @user_bp.route('/profile', methods=['GET'])
@@ -81,37 +83,39 @@ def edit_email():
         return jsonify({'error': 'E-Mail is already taken!'}), 400
 
     # Safe new email temporarily
-    current_user.temp_email = new_email
+    current_user.temp_email = new_email.strip().lower()
     db.session.commit()
 
     # Send verification mail
-    send_verification_email(current_user, salt='email-confirmation')
+    send_verification_email(current_user, salt='email-confirmation', bp='user', email=new_email)
 
     return jsonify({'message': 'Verification e-mail has been sent.'}), 200
 
 
 @user_bp.route('/verify_email/<token>', methods=['GET'])
 def verify_email(token):
-    """Verifies the veridication email for new email of user"""
+    """Verifies the verification email for new email of user"""
 
     # Confirm token
     new_email = confirm_token(token, salt='email-confirmation')
+    if new_email:
+        new_email = new_email.strip().lower()
 
     # Check if token is valid
     if not new_email:
-        return jsonify({'error': 'Invalid or expired token'}), 400
+        return redirect(f'{frontend_url}/verify_email/{token}?error=invalid')
 
     # Check user in db
     user = User.query.filter_by(temp_email=new_email).first()
     if not user:
-        return jsonify({'error': 'Request to edit email not found'}), 404
+        return redirect(f'{frontend_url}/verify_email/{token}?error=notfound')
 
     # Edit user email in db
     user.email = new_email
     user.temp_email = None
     db.session.commit()
 
-    return jsonify({'message': 'Email verification successful!'}), 200
+    return redirect(f'{frontend_url}/verify_email/{token}?status=success')
 
 
 @user_bp.route('/edit_password', methods=['POST'])
@@ -190,12 +194,22 @@ def reset_password(token):
     return update_password(user, new_password_1, new_password_2)
 
 
-@user_bp.route('/delete', methods=['DELETE'])
+@user_bp.route('/delete', methods=['POST'])
 @login_required
 def delete_profile():
     """Deletes profile from database"""
 
+    # Get data
+    data = request.get_json()
+    password = data.get('password')
+
+    # Get current user
+    user = User.query.filter_by(id=current_user.id).first()
+
+    # Check if password is correct
+    if not user or not check_password_hash(user.password, password):
+        return jsonify({'error': 'Password incorrect'}), 401
+
     # Delete user
-    user_id = current_user.id
-    return delete_entry(User, user_id)
+    return delete_entry(User, user.id)
 

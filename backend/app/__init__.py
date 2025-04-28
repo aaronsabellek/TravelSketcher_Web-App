@@ -106,7 +106,7 @@ def create_app(config_class=None):
         current_app.logger.info(f'New request: {request.method} {request.url}')
 
     # Initialize the URLSafeTimedSerializer
-    app.config['SERIALIZER'] = URLSafeTimedSerializer(app.secret_key)
+    app.config['SERIALIZER'] = URLSafeTimedSerializer(app.config['SECRET_KEY'])
 
     # Bind SQLAlchemy database object to the app
     db.init_app(app)
@@ -122,7 +122,7 @@ def create_app(config_class=None):
     mail.init_app(app)
 
     # Enable Cross-Origin Resource Sharing (CORS)
-    CORS(app, supports_credentials=True, origins=['http://localhost:3000'])
+    CORS(app, supports_credentials=True, origins=app.config['CORS_ORIGINS'])
 
     ### 6. Maintenance mode and error handling ###
 

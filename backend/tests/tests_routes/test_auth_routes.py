@@ -58,14 +58,14 @@ def test_verifify_email(setup_database, test_data):
     # Create test token
     token = create_test_token(test_data, 'account-verification', email=email)
 
-    # Use and validate route
-    response = request_and_validate(client=setup_database, endpoint=f'verify_email/{token}', test_data=test_data, method='GET')
-    if response.status_code not in [200, 201]:
-        return
+    # Check for correct redirects
+    response = setup_database.get(f'/verify_email/{token}')
+    assert response.status_code == 302, f'Error: Statuscode expected: 302, but got: {response.status_code}.'
+    assert test_data['location'] in response.location, f'Error: Expected in location: {test_data['location']}, but got: {response.location}.'
 
     # If email has not been already confirmed before, check if it is confirmed now
-    if not 'E-Mail confirmed successfully!' in response.text:
-        assert user.is_email_verified == True, f'Error: User still not verified in database! Status: {response.status_code}, Text: {response.text}'
+    if test_data['location'] == 'status=success':
+        assert user.is_email_verified == True, f'Error: User still not verified in database! Status: {response.status_code}, location: {response.location}'
 
 
 @pytest.mark.parametrize('test_data', resend_verification_data)

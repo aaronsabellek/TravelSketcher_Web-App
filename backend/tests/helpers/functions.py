@@ -120,10 +120,7 @@ def create_user(db, user_data):
         email=user_data['email'],
         password=hashed_password,
         city=user_data['city'],
-        longitude=user_data['longitude'],
-        latitude=user_data['latitude'],
         country=user_data['country'],
-        currency=user_data['currency'],
         is_email_verified=user_data['is_email_verified']
     )
     db.session.add(user)
@@ -140,6 +137,8 @@ def create_destinations_and_activities(db, destinations_data, user):
             title=dest_data['title'],
             country=dest_data['country'],
             position=dest_data['position'],
+            tags=dest_data['tags'],
+            img_link=dest_data['img_link'],
             user_id=user.id
         )
         db.session.add(destination)
@@ -149,8 +148,8 @@ def create_destinations_and_activities(db, destinations_data, user):
             activity = Activity(
                 id=act_data['id'],
                 title=act_data['title'],
-                country=act_data['country'],
                 position=act_data['position'],
+                img_link=act_data['img_link'],
                 destination_id=destination.id
             )
             db.session.add(activity)

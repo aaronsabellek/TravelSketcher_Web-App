@@ -33,6 +33,9 @@ class Config:
     MAIL_USE_TLS = False
     MAIL_USE_SSL = False
 
+    # Unsplash access key for images
+    UNSPLASH_ACCESS_KEY = os.getenv('UNSPLASH_ACCESS_KEY')
+
 
 class DevelopmentConfig(Config):
     """Flask configuration class for development"""
@@ -42,6 +45,7 @@ class DevelopmentConfig(Config):
     SESSION_COOKIE_SECURE = False
     LOG_LEVEL = 'DEBUG'
     MAIL_SUPPRESS_SEND = False
+    CORS_ORIGINS = ["http://localhost:3000"]
 
     # Initialize local development database with SQLAlchemy
     DATABASE_URI_DEV = os.getenv('DATABASE_URI_DEV')
@@ -60,6 +64,7 @@ class TestingConfig(Config):
     SESSION_COOKIE_SECURE = False
     WTF_CSRF_ENABLED = False
     MAIL_SUPPRESS_SEND = False
+    CORS_ORIGINS = ["http://localhost:3000"]
 
     # Initialize memory database from SQLite
     SQLALCHEMY_DATABASE_URI = 'sqlite:///:memory:'
@@ -73,6 +78,8 @@ class ProductionConfig(Config):
     SESSION_COOKIE_SECURE = True
     WTF_CSRF_ENABLED = True
     LOG_LEVEL = 'WARNING'
+
+    CORS_ORIGINS = ["https://production-domain.de"]
 
     # Initialize production database
     SQLALCHEMY_DATABASE_URI = os.getenv('DATABASE_URI_PROD')

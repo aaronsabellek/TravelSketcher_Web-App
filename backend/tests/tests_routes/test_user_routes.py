@@ -18,7 +18,8 @@ from tests.test_data.user_data import (
     reset_email,
     edit_password,
     request_password_reset,
-    reset_password
+    reset_password,
+    delete_user
 )
 
 
@@ -32,7 +33,7 @@ def test_profile(setup_logged_in_user):
 
     # Check for (un-)expected fields
     response_data = response.json
-    assert 'latitude' in response_data, f'Latitude should be shown'
+    assert 'city' in response_data, f'Latitude should be shown'
     assert 'password' not in response_data, f'Password should not be shown!'
     assert 'is_email_verified' not in response_data, f'Verification status should not be shown'
 
@@ -145,16 +146,16 @@ def test_reset_password(setup_database, test_data):
     assert check_password_hash(user.password, test_data['new_password_1']), 'Password was not correctly hashed and saved in the database'
 
 
-def test_delete(setup_database):
+@pytest.mark.parametrize('test_data', delete_user)
+def test_delete(setup_database, test_data):
     """Test: Delete user from database"""
 
     client = login(setup_database) # Login
 
     # Delete current user
-    delete_url = f'{url}/user/delete'
-    response = client.delete(delete_url)
-    assert response.status_code == 200, f'Error: Deletion of user failed! Status: {response.status_code}, Text: {response.text}'
-    assert response.json['message'] == 'User deleted successfully!', f'Error: Unecpected message. Status: {response.status_code}, Text: {response.text}'
+    response = request_and_validate(client, 'user/delete', test_data)
+    if response.status_code not in [200, 201]:
+        return
 
     # Check for user in db
     user = User.query.filter_by(username=username).first()
