@@ -32,17 +32,9 @@ const WebLinkModal = <T extends { id: string; web_link?: string }>({
 
   const currentLink = items.find((i) => i.id === linkForId)?.web_link || '';
   const [saving, setSaving] = useState(false);
-  const [errors, setErrors] = useState<string[]>([]);
 
+  // Errors
   const urlErrors = validateWebLinkField(webLink);
-
-  // Edit mode: handleChange
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value;
-    setWebLink(value);
-    setErrors(validateWebLinkField(value));
-  };
-
   const isDisabled = urlErrors.length > 0 || saving;
 
   // Saving link
