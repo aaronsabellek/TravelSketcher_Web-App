@@ -36,3 +36,17 @@ export function validatePasswordRules(password: string): string | null {
 export const validatePasswordsMatch = (pw1: string, pw2: string): string | null =>
   pw1 === pw2 ? null : 'Oasswods do not match.';
 
+// Validate URL format
+export const validateUrlFormat = (url: string): string | null => {
+  url = url.trim();
+
+  // Auto-add http:// if missing
+  if (!/^https?:\/\//i.test(url)) {
+    url = 'http://' + url;
+  }
+
+  // Regex to validate URL
+  const urlRegex = /^(https?:\/\/)([\w.-]+\.[a-zA-Z]{2,})(:\d+)?(\/[\w./%-]*)*(\?[=&\w%-]*)?(#\w*)?$/i;
+
+  return urlRegex.test(url) ? null : 'Invalid URL format.';
+};

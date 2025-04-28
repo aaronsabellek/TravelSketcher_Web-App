@@ -4,6 +4,7 @@ import {
   validateEmailFormat,
   validatePasswordRules,
   validatePasswordsMatch,
+  validateUrlFormat,
 } from './formValidators';
 
 // Validates input field for errors
@@ -40,3 +41,7 @@ export const validateCityField = (city: string) =>
 // Validate title
 export const validateTitleField = (title: string) =>
   validateField(title, [validateNotEmpty]);
+
+// Validate web link
+export const validateWebLinkField = (webLink: string) =>
+  validateField(webLink, [validateNotEmpty, validateUrlFormat]);

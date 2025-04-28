@@ -2,7 +2,9 @@ import React, { useState } from 'react';
 import { toast } from 'sonner';
 
 import { BASE_URL } from '@/utils/config';
+import { validateWebLinkField } from '@/utils/formValidations';
 import Button from '../Buttons/Button';
+import InputField from '../Form/InputField';
 import ModalCancelButton from '@/components/Buttons/ModalCancelButton'
 
 interface WebLinkModalProps<T> {
@@ -30,12 +32,31 @@ const WebLinkModal = <T extends { id: string; web_link?: string }>({
 
   const currentLink = items.find((i) => i.id === linkForId)?.web_link || '';
   const [saving, setSaving] = useState(false);
+  const [errors, setErrors] = useState<string[]>([]);
+
+  const urlErrors = validateWebLinkField(webLink);
+
+  // Edit mode: handleChange
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    setWebLink(value);
+    setErrors(validateWebLinkField(value));
+  };
+
+  const isDisabled = urlErrors.length > 0 || saving;
 
   // Saving link
   const handleSave = async () => {
+
     if (!linkForId) return;
 
+    if (urlErrors.length > 0) {
+      urlErrors.forEach((err) => toast.error(err));
+      return;
+    }
+
     setSaving(true);
+
     try {
       const res = await fetch(`${BASE_URL}/activity/edit_link/${linkForId}`, {
         method: 'POST',
@@ -44,7 +65,7 @@ const WebLinkModal = <T extends { id: string; web_link?: string }>({
         body: JSON.stringify({ web_link: webLink }),
       });
 
-      if (!res.ok) throw new Error('Fehler beim Speichern');
+      if (!res.ok) throw new Error('Error saving');
 
       setItems((prev) =>
         prev.map((i) =>
@@ -52,11 +73,11 @@ const WebLinkModal = <T extends { id: string; web_link?: string }>({
         )
       );
 
-      toast.success('Link gespeichert!');
+      toast.success('Link saved!');
       setEditingLink(false);
     } catch (err) {
       console.error(err);
-      toast.error('Fehler beim Speichern');
+      toast.error('Error saving');
     } finally {
       setSaving(false);
     }
@@ -65,7 +86,7 @@ const WebLinkModal = <T extends { id: string; web_link?: string }>({
   return (
     <div className="fixed inset-0 flex items-center justify-center bg-black/30 z-50" data-ignore-click>
       <div className="bg-white p-6 rounded-lg shadow-xl w-[90%] max-w-md relative">
-        <h2 className="text-lg font-semibold mb-4">Web-Link zur Aktivität</h2>
+        <h2 className="text-lg font-semibold mb-4">Web-link for activity</h2>
 
         {/* Show mode */}
         {!editingLink ? (
@@ -96,11 +117,14 @@ const WebLinkModal = <T extends { id: string; web_link?: string }>({
         ) : (
           <>
             {/* Edit mode */}
-            <input
+            <InputField
+              label="URL"
+              type="text"
               value={webLink}
               onChange={(e) => setWebLink(e.target.value)}
               placeholder="https://example.com"
-              className="w-full p-2 border rounded text-sm"
+              errors={urlErrors}
+              required
             />
 
             <div className="flex justify-end space-x-4 mt-4">
@@ -117,7 +141,7 @@ const WebLinkModal = <T extends { id: string; web_link?: string }>({
               <Button
                 text={saving ? 'Saving...' : 'Save'}
                 type="submit"
-                isDisabled={saving}
+                isDisabled={isDisabled}
                 onClick={handleSave}
               />
 
