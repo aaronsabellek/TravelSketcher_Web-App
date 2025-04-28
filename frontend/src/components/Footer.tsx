@@ -5,6 +5,8 @@ const Footer = () => {
       <div className="max-w-7xl mx-auto px-4 py-6 text-sm text-gray-600 flex justify-between">
         <p>&copy; {new Date().getFullYear()} TravelSketcher</p>
         <div className="space-x-4">
+
+          {/* Privacy Policy */}
           <a
             href="/privacy_policy"
             className="hover:underline cursor-pointer"
@@ -12,12 +14,14 @@ const Footer = () => {
             Privacy policy
           </a>
 
+          {/* Terms and conditions */}
           <a
             href="terms_and_conditions"
             className="hover:underline cursor-pointer"
           >
             Terms and conditions
           </a>
+
         </div>
       </div>
     </footer>

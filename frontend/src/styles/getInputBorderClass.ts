@@ -1,3 +1,4 @@
+
 // Sets border color of input fields dependent on error status
 export const getInputBorderClass = (value: string, errors: string[]): string => {
 

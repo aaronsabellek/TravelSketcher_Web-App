@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { toast } from 'sonner';
 
 import InputField from '@/components/Form/InputField';
-import Button from '@/components/Buttons/Button';
+import FormSubmitButton from '@/components/Buttons/FormSubmitButton';
 import CancelButton from '@/components/Buttons/CancelButton';
 import Form from '@/components/Form/Form';
 import Container from '@/components/Container';
@@ -150,7 +150,7 @@ export default function EditUserProfile() {
         {/* Link: Edit email */}
         <div>
           <Link href="/user/edit_email">
-            <button className="text-blue-600 hover:underline text-sm cursor-pointer">
+            <button className="paragraph_link text-sm">
               Edit Email
             </button>
           </Link>
@@ -159,16 +159,15 @@ export default function EditUserProfile() {
         {/* Link: Edit password */}
         <div>
           <Link href="/user/edit_password">
-            <button className="text-blue-600 hover:underline text-sm cursor-pointer">
+            <button className="paragraph_link text-sm">
               Edit Password
             </button>
           </Link>
         </div>
 
         {/* Submit button */}
-        <Button
+        <FormSubmitButton
           text={saving ? 'Saving...' : 'Save changes'}
-          type="submit"
           isDisabled={isDisabled}
         />
 

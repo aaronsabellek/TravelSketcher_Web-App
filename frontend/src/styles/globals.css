@@ -31,6 +31,33 @@ html, body {
     margin-bottom: 1rem;
   }
 
+  /* Class for logos in EntryCard */
+  .logo {
+    height: calc(var(--spacing) * 7);
+    margin-right: 0px;
+  }
+
+  .logo:hover {
+    transform: scale(1.15);
+  }
+
+  /* Class for paragraphs in forms/Container */
+  .form-paragraph {
+    margin-top: calc(var(--spacing) * 4);
+    font-size: var(--text-sm);
+    line-height: var(--text-sm--line-height);
+    text-align: center;
+  }
+
+  .paragraph_link {
+    color: var(--color-blue-600);
+    cursor: pointer;
+  }
+
+  .paragraph_link:hover {
+    text-decoration-line: underline;
+  }
+
 
 
 

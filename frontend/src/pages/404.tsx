@@ -1,6 +1,6 @@
 import { useEffect } from 'react';
 import { useRouter } from 'next/router';
-import { toast } from 'sonner'; // Oder eine andere Toast-Bibliothek, die du verwendest
+import { toast } from 'sonner';
 
 // 404 page
 const Custom404 = () => {

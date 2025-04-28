@@ -64,6 +64,7 @@ const TagsInput: React.FC<TagsInputProps> = ({
           </span>
         ))}
       </div>
+
     </div>
   );
 };

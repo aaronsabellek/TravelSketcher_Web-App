@@ -36,7 +36,7 @@ const AddOrReorderButton: React.FC<Props> = ({
                 : 'opacity-50'
             }`}
           >
-            💾 Save
+            Save
           </button>
         </motion.div>
       ) : (
@@ -50,13 +50,16 @@ const AddOrReorderButton: React.FC<Props> = ({
           transition={{ duration: 0.3 }}
           className="flex justify-center mt-4"
         >
+
           <button
             onClick={handleAddClick}
             className="transition-opacity opacity-70 hover:opacity-100 hover:scale-115 duration-300 cursor-pointer"
           >
             <img src="/plus_icon.png" alt="Add Destination" className="w-12 h-12" />
           </button>
+
         </motion.div>
+
       )}
     </AnimatePresence>
   );

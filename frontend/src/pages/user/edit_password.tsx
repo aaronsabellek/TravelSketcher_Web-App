@@ -1,11 +1,10 @@
 import { useState } from 'react';
 import { useRouter } from 'next/router';
-import Link from 'next/link';
 import { toast } from 'sonner';
 
 import Container from '@/components/Container';
 import InputField from '@/components/Form/InputField';
-import Button from '@/components/Buttons/Button';
+import FormSubmitButton from '@/components/Buttons/FormSubmitButton';
 import CancelButton from '@/components/Buttons/CancelButton';
 import Form from '@/components/Form/Form';
 import { BASE_URL } from '@/utils/config';
@@ -97,9 +96,8 @@ const EditPassword = () => {
         />
 
         {/* Submit button */}
-        <Button
+        <FormSubmitButton
           text={saving ? 'Saving...' : 'Edit password'}
-          type="submit"
           isDisabled={isDisabled}
         />
 

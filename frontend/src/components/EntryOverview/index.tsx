@@ -105,7 +105,7 @@ const EntryOverviewPage = <T extends Destination | Activity>({
       <div className="flex justify-between mb-3">
         <button
           onClick={toggleReorderMode}
-          className="px-3 py-1 text-xl cursor-pointer transition-all duration-300 ease-in-out transform active:scale-95 hover:scale-115"
+          className="px-3 py-1 cursor-pointer transition-all duration-300 ease-in-out transform active:scale-95 hover:scale-115"
         >
           <img src="/change_icon.png" className="h-7" />
         </button>

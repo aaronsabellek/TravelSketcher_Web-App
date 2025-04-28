@@ -1,19 +1,10 @@
 import React from 'react';
-import { getInputBorderClass } from '@/styles/getInputBorderClass'; // Importiere die Funktion
 
-type InputFieldProps = {
-  label: string;
-  type?: string;
-  value: string;
-  onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
-  name?: string;
-  errors?: string[];
-  required?: boolean;
-  placeholder?: string;
-};
+import { getInputBorderClass } from '@/styles/getInputBorderClass';
+import { Field } from '@/types/models'
 
 // Main input field
-const InputField: React.FC<InputFieldProps> = ({
+const InputField: React.FC<Field> = ({
   label,
   type = 'text',
   value,

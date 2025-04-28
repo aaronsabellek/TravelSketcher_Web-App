@@ -102,6 +102,7 @@ const NoteModal = <T extends { id: string; free_text?: string }>({
             </div>
 
             <div className="flex justify-end mt-6">
+
               {/* Close button */}
               <ModalCancelButton onClose={() => setNoteForId(null)} />
 
@@ -130,7 +131,7 @@ const NoteModal = <T extends { id: string; free_text?: string }>({
               {/* Cancel button */}
               <ModalCancelButton
                 onClose={() => {
-                  setEditingNote(false);
+                  setNoteForId(null);
                   setNoteText(currentNote);
                 }}
               />

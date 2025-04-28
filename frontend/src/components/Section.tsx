@@ -1,11 +1,9 @@
-import React from "react";
+import React from 'react';
 
-interface SectionProps {
-  title: string;
-  children: React.ReactNode;
-}
+import { Block } from '@/types/models'
 
-export default function Section({ title, children }: SectionProps) {
+// Text section for footer pages
+export default function Section({ title, children }: Block) {
   return (
     <section className="mb-8">
       <h2 className="text-2xl font-semibold mb-4 grey">{title}</h2>

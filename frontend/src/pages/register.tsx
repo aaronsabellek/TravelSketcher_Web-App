@@ -1,9 +1,10 @@
 import { useState } from 'react';
 import { useRouter } from 'next/router';
+import Link from 'next/link';
 import { toast } from 'sonner';
 
 import InputField from '@/components/Form/InputField';
-import Button from '@/components/Buttons/Button';
+import FormSubmitButton from '@/components/Buttons/FormSubmitButton';
 import Container from '@/components/Container';
 import Form from '@/components/Form/Form';
 import { useRedirectIfAuthenticated } from '@/hooks/authRedirects';
@@ -127,11 +128,20 @@ const Register = () => {
         />
 
         {/* Submit button */}
-        <Button
+        <FormSubmitButton
           text="Register"
-          type="submit"
           isDisabled={isDisabled}
         />
+
+        {/* Links */}
+        <p className="form-paragraph">
+          No verification email received?{' '}
+          <Link href="/resend_verification">
+            <span className="paragraph_link">
+              Send here again
+            </span>
+          </Link>
+        </p>
 
       </Form>
     </Container>

@@ -4,10 +4,8 @@ import { toast } from 'sonner';
 import { BASE_URL } from '@/utils/config';
 import { useAuth } from '@/contexts/AuthContext';
 import InputField from '@/components/Form/InputField';
-import Button from '@/components/Buttons/Button';
+import DeleteButton from '@/components/Buttons/DeleteButton';
 import ModalCancelButton from './Buttons/ModalCancelButton';
-import { validatePasswordField } from '@/utils/formValidations';
-
 
 interface Props {
   isOpen: boolean;
@@ -22,8 +20,7 @@ const DeleteAccountModal: React.FC<Props> = ({ isOpen, onClose, onDeleted }) => 
   const [deleting, setDeleting] = useState(false);
 
   // Errors
-  const passwordErrors = validatePasswordField(password);
-  const isDisabled = passwordErrors.length > 0 || deleting;
+  const isDisabled = password.trim() === '' || deleting;
 
   const { setIsLoggedIn } = useAuth();
 
@@ -31,11 +28,6 @@ const DeleteAccountModal: React.FC<Props> = ({ isOpen, onClose, onDeleted }) => 
 
   // Handle delition of user account
   const handleDelete = async () => {
-
-    if (passwordErrors.length > 0) {
-      passwordErrors.forEach((err) => toast.error(err));
-      return;
-    }
 
     setDeleting(true);
 
@@ -99,7 +91,7 @@ const DeleteAccountModal: React.FC<Props> = ({ isOpen, onClose, onDeleted }) => 
           <ModalCancelButton onClose={onClose} />
 
           {/* Delete button */}
-          <Button
+          <DeleteButton
             text={deleting ? 'Deleting...' : 'Delete'}
             isDisabled={isDisabled}
             onClick={handleDelete}

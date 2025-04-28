@@ -1,7 +1,7 @@
 import React from 'react';
 
 import ModalCancelButton from '../Buttons/ModalCancelButton';
-import Button from '../Buttons/Button';
+import DeleteButton from '../Buttons/DeleteButton';
 
 interface DeleteConfirmModalProps {
   isOpen: boolean;
@@ -52,10 +52,10 @@ const DeleteConfirmModal: React.FC<DeleteConfirmModalProps> = ({
           <ModalCancelButton onClose={onClose} />
 
           {/* Delete Button */}
-          <Button
+          <DeleteButton
             text={deleting ? 'Deleting...' : 'Delete'}
-            isDisabled={deleting} // Button is disabled while deleting
-            onClick={onDelete} // onClick triggers the deletion
+            isDisabled={deleting}
+            onClick={onDelete}
           />
 
         </div>

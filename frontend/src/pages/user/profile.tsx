@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { toast } from 'sonner';
 
 import Container from '@/components/Container';
-import Button from '@/components/Buttons/Button';
+import FormSubmitButton from '@/components/Buttons/FormSubmitButton';
 import InputDisplay from '@/components/Form/InputDisplay';
 import DeleteAccountModal from '@/components/DeleteAccountModal';
 import { useRedirectIfNotAuthenticated } from '@/hooks/authRedirects';
@@ -75,9 +75,8 @@ const Profile: React.FC = () => {
 
           {/* Buttons */}
           <Link href="/user/edit">
-            <Button
+            <FormSubmitButton
               text="Edit profile"
-              type="button"
               isDisabled={false}
             />
           </Link>

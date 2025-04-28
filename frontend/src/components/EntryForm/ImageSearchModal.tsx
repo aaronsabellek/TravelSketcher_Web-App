@@ -60,49 +60,51 @@ const ImageSearchModal: React.FC<ImageSearchModalProps> = ({
             exit={{ opacity: 0 }}
             transition={{ duration: 0.5, ease: 'easeInOut' }}
           >
-          <h2 className="text-lg font-semibold mb-4">Choose an image</h2>
+            <h2 className="text-lg font-semibold mb-4">Choose an image</h2>
 
-          {isSearching && <p>Searching...</p>}
+            {isSearching && <p>Searching...</p>}
 
-          <div
-              className="grid grid-cols-3 gap-4 max-h-96 overflow-y-auto"
-              onScroll={handleScroll}
-              ref={scrollContainerRef}
-          >
+            <div
+                className="grid grid-cols-3 gap-4 max-h-96 overflow-y-auto"
+                onScroll={handleScroll}
+                ref={scrollContainerRef}
+            >
 
-            {/* Image */}
-            {imageResults.map((img) => (
-              <div
-                key={img.id}
-                className={`relative cursor-pointer rounded-md overflow-hidden border-2 ${
-                  tempSelectedImageUrl === img.url
-                  ? 'border-blue-500'
-                  : 'border-transparent'
-                }`}
-                onClick={() => handleImageSelect(img.url)}
-              >
-                <div className="aspect-[16/12] w-full">
-                  <img
-                    src={img.url}
-                    alt={img.alt_description || 'Bild'}
-                    className="object-cover w-full h-full"
-                  />
+              {/* Image */}
+              {imageResults.map((img) => (
+                <div
+                  key={img.id}
+                  className={`relative cursor-pointer rounded-md overflow-hidden border-2 ${
+                    tempSelectedImageUrl === img.url
+                    ? 'border-blue-500'
+                    : 'border-transparent'
+                  }`}
+                  onClick={() => handleImageSelect(img.url)}
+                >
+                  <div className="aspect-[16/12] w-full">
+                    <img
+                      src={img.url}
+                      alt={img.alt_description || 'Bild'}
+                      className="object-cover w-full h-full"
+                    />
+                  </div>
                 </div>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
 
-          <div className="mt-6 flex justify-end gap-2">
-            {/* Cancel Button */}
-            <ModalCancelButton onClose={closeModal} />
+            <div className="mt-6 flex justify-end gap-2">
 
-            {/* Select button */}
-            <Button
-              text="Select"
-              type="button"
-              isDisabled={!tempSelectedImageUrl}
-              onClick={handleConfirmSelection}
-            />
+              {/* Cancel Button */}
+              <ModalCancelButton onClose={closeModal} />
+
+              {/* Select button */}
+              <Button
+                text="Select"
+                type="button"
+                isDisabled={!tempSelectedImageUrl}
+                onClick={handleConfirmSelection}
+              />
+
             </div>
           </motion.div>
         </div>

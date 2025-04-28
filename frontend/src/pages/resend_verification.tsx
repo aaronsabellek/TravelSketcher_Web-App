@@ -3,7 +3,7 @@ import { toast } from 'sonner';
 
 import Container from '@/components/Container';
 import InputField from '@/components/Form/InputField';
-import Button from '@/components/Buttons/Button';
+import Button from '@/components/Buttons/FormSubmitButton';
 import { useRedirectIfAuthenticated } from '@/hooks/authRedirects';
 import { validateEmailField } from '@/utils/formValidations';
 import { BASE_URL } from '@/utils/config';

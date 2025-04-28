@@ -1,3 +1,5 @@
+import { ReactNode } from 'react';
+
 export interface Destination {
     id: string;
     img_link: string;
@@ -29,7 +31,35 @@ export interface UserProfile {
 }
 
 export interface UnsplashImage {
-id: string;
-url: string;
-alt_description: string;
+    id: string;
+    url: string;
+    alt_description: string;
 }
+
+export interface Block {
+    title: string;
+    children: ReactNode;
+}
+
+export interface Field {
+    label: string;
+    value: string;
+    type?: string;
+    onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+    name?: string;
+    errors?: string[];
+    required?: boolean;
+    placeholder?: string;
+}
+
+export interface ButtonProps {
+    children?: React.ReactNode;
+    text?: string;
+    onClick?: () => void;
+    type?: 'button' | 'submit' | 'reset';
+    isDisabled?: boolean;
+    className?: string;
+    onClose?: () => void;
+    href?: string;
+  }
+

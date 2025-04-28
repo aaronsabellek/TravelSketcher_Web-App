@@ -1,12 +1,9 @@
 import Link from 'next/link';
 
-type CancelButtonProps = {
-  href: string;
-  className?: string;
-};
+import { ButtonProps } from '@/types/models';
 
 // Main button used for canceling an action and go to another page
-const CancelButton: React.FC<CancelButtonProps> = ({ href, className = '' }) => {
+const CancelButton: React.FC<ButtonProps> = ({ href = '', className = '' }) => {
   return (
     <div className={`flex justify-center ${className}`}>
       <Link href={href}>

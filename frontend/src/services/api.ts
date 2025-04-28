@@ -4,6 +4,7 @@ interface LoginResponse {
   message: string;
 }
 
+// Login
 export async function login(identifier: string, password: string): Promise<LoginResponse> {
   const res = await fetch(`${BASE_URL}/login`, {
     method: 'POST',

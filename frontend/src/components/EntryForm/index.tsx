@@ -4,9 +4,10 @@ import { toast } from 'sonner';
 import ImageSearchModal from './ImageSearchModal';
 import TagsInput from './TagsInput';
 import Form from '../Form/Form';
+import Button from '../Buttons/Button';
 import CancelButton from '../Buttons/CancelButton';
 import InputField from '@/components/Form/InputField';
-import Button from '@/components/Buttons/Button';
+import FormSubmitButton from '@/components/Buttons/FormSubmitButton';
 import { useImageSearch } from '@/hooks/useImageSearch';
 import { useEntryFormState } from '@/hooks/useEntryFormState';
 import { validateTitleField } from '@/utils/formValidations';
@@ -18,7 +19,6 @@ interface EntryFormProps {
   initialData?: {
     title?: string;
     country?: string; // destination only
-    status?: 'planned' | 'done';
     tags?: string[];
     img_link?: string;
   };
@@ -159,18 +159,13 @@ const EntryForm: React.FC<EntryFormProps> = ({ type, onSubmit, initialData, subm
               className="flex-1 px-3 py-2 border border-gray-300 rounded-md shadow-sm bg-white"
           />
 
-          <button
+          <Button
+            text="SearchImage"
             type="button"
             onClick={searchImages}
-            disabled={!imageSearchTerm.trim()}
-            className={`py-2 px-4 bg-blue-500 text-white rounded-md transition cursor-pointer ${
-                imageSearchTerm.trim()
-                  ? 'hover:bg-blue-600'
-                  : 'opacity-50 cursor-not-allowed'
-              }`}
-          >
-            Search Image
-          </button>
+            isDisabled={!imageSearchTerm.trim()}
+          />
+
         </div>
       </div>
 
@@ -208,9 +203,8 @@ const EntryForm: React.FC<EntryFormProps> = ({ type, onSubmit, initialData, subm
       />
 
       {/* Submit Button */}
-      <Button
+      <FormSubmitButton
         text={isSaving ? 'Saving...' : submitLabel}
-        type="submit"
         isDisabled={isDisabled}
       />
 

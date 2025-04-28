@@ -4,7 +4,7 @@ import { toast } from 'sonner';
 
 import Container from '@/components/Container';
 import InputField from '@/components/Form/InputField';
-import Button from '@/components/Buttons/Button';
+import FormSubmitButton from '@/components/Buttons/FormSubmitButton';
 import Form from '@/components/Form/Form';
 import { useRedirectIfNotAuthenticated } from '@/hooks/authRedirects';
 import { BASE_URL } from '@/utils/config';
@@ -99,9 +99,8 @@ const ResetPassword = () => {
         />
 
         {/* Submit button */}
-        <Button
+        <FormSubmitButton
           text={saving ? 'Saving...' : 'Edit password'}
-          type="submit"
           isDisabled={isDisabled}
         />
 

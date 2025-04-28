@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { useAuth } from '@/contexts/AuthContext';
 import { useClickOutside } from '@/hooks/useClickOutside';
 import Button from './Buttons/Button';
+import FormSubmitButton from './Buttons/FormSubmitButton';
 
 const Navbar = () => {
 
@@ -69,7 +70,7 @@ const Navbar = () => {
           </div>
 
           {/* Burger-Icon for small screens */}
-          <div className="md:hidden">
+          <div className="sm:hidden">
             <motion.button
               ref={buttonRef}
               onClick={toggleMenu}
@@ -88,7 +89,7 @@ const Navbar = () => {
           </div>
 
           {/* Navigation for desktop screens */}
-          <div className="hidden md:flex flex items-center space-x-6 text-gray-700 font-medium">
+          <div className="hidden sm:flex flex items-center space-x-6 text-gray-700 font-medium">
             {(isLoggedIn ? loggedInLinks : loggedOutLinks).map((link) => (
               <Link key={link.href} href={link.href} className="hover:underline">
                 {link.label}
@@ -139,14 +140,14 @@ const Navbar = () => {
 
                 {!isLoggedIn ? (
                   <Link href="/login">
-                    <Button
+                    <FormSubmitButton
                       text="Login"
                       type="button"
                       onClick={handleLinkClick}
                     />
                   </Link>
                 ) : (
-                  <Button
+                  <FormSubmitButton
                     text="Logout"
                     onClick={() => {
                       logout();
@@ -159,6 +160,7 @@ const Navbar = () => {
             </motion.div>
           )}
         </AnimatePresence>
+
       </div>
     </nav>
   );

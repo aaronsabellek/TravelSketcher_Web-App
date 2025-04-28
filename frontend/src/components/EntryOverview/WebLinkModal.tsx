@@ -84,11 +84,13 @@ const WebLinkModal = <T extends { id: string; web_link?: string }>({
             )}
 
             <div className="flex justify-end mt-6">
+
               {/* Close button */}
               <ModalCancelButton onClose={() => setLinkForId(null)} />
 
               {/* Edit button */}
               <Button text="Edit" onClick={() => setEditingLink(true)} />
+
             </div>
           </>
         ) : (
@@ -106,7 +108,7 @@ const WebLinkModal = <T extends { id: string; web_link?: string }>({
               {/* Cancel button */}
               <ModalCancelButton
                 onClose={() => {
-                  setEditingLink(false);
+                  setLinkForId(null);
                   setWebLink(currentLink);
                 }}
               />

@@ -165,17 +165,19 @@ const EntryCard = <T extends Destination | Activity>({
                   {/* Edit button */}
                   <button
                     onClick={() => onEdit(data.id)}
-                    className="block w-full text-left px-4 py-2 hover:bg-gray-100 cursor-pointer"
+                    className="flex items-center gap-2 w-full text-left px-4 py-2 hover:bg-gray-100 cursor-pointer"
                   >
-                    ✏️ Edit
+                    <img src='/edit_icon.png' className='h-4' />
+                    Edit
                   </button>
 
                   {/* Delete button */}
                   <button
                     onClick={() => onDelete(data.id)}
-                    className="block w-full text-left px-4 py-2 hover:bg-gray-100 text-red-600 cursor-pointer"
+                    className="flex items-center gap-2 w-full text-left px-4 py-2 hover:bg-gray-100 cursor-pointer text-red-600"
                   >
-                    🗑️ Delete
+                    <img src='/delete_icon.png' className='h-4' />
+                    Delete
                   </button>
 
                 </motion.div>
@@ -239,7 +241,7 @@ const EntryCard = <T extends Destination | Activity>({
                   }
                   className="text-blue-500 hover:text-blue-700 cursor-pointer"
                 >
-                  <img src="/rome2rio_icon.png" className="h-7 hover:scale-115" />
+                  <img src="/rome2rio_icon.png" className="logo" />
                 </button>
 
               )}
@@ -252,7 +254,7 @@ const EntryCard = <T extends Destination | Activity>({
                   }
                   className="text-blue-500 relative right-2 hover:text-blue-700 cursor-pointer"
                 >
-                  <img src="/booking_icon.png" className="h-7 hover:scale-115" />
+                  <img src="/booking_icon.png" className="logo" />
                 </button>
               )}
 
@@ -264,7 +266,7 @@ const EntryCard = <T extends Destination | Activity>({
                 >
                   <img
                     src="/link_icon.png"
-                    className={`h-6 hover:scale-110 ${(data as any).web_link ? '' : 'opacity-50'}`}
+                    className={`logo ${(data as any).web_link ? '' : 'opacity-50'}`}
                   />
                 </button>
               )}
@@ -280,7 +282,7 @@ const EntryCard = <T extends Destination | Activity>({
                 }
                 className="text-blue-500 relative right-2 hover:text-blue-700 cursor-pointer"
               >
-                <img src="/google_icon.png" className="h-7 hover:scale-115" />
+                <img src="/google_icon.png" className="logo" />
               </button>
 
             </div>
@@ -294,7 +296,7 @@ const EntryCard = <T extends Destination | Activity>({
                 }}
                 className="text-green-500 h-7 hover:text-green-700 justify-end"
               >
-                <img src="/notes_icon.png" alt="Notizen" className="h-7 hover:scale-115 cursor-pointer" />
+                <img src="/notes_icon.png" alt="Notizen" className="logo cursor-pointer" />
               </button>
             </div>
 

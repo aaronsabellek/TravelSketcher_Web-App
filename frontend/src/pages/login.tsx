@@ -3,7 +3,7 @@ import Link from 'next/link';
 import { toast } from 'sonner';
 
 import InputField from '@/components/Form/InputField';
-import Button from '@/components/Buttons/Button';
+import FormSubmitButton from '@/components/Buttons/FormSubmitButton';
 import Form from '@/components/Form/Form';
 import { useAuth } from '@/contexts/AuthContext';
 import { useRedirectIfAuthenticated } from '@/hooks/authRedirects';
@@ -63,6 +63,7 @@ const Login = () => {
     <Container title="Login">
       <Form onSubmit={handleSubmit}>
 
+          {/* Identifier */}
           <InputField
             label="Username or email"
             type="text"
@@ -71,6 +72,7 @@ const Login = () => {
             required
           />
 
+          {/* Password */}
           <InputField
             label="Password"
             type="password"
@@ -79,29 +81,31 @@ const Login = () => {
             required
           />
 
-        <Button
+        {/* Submit button */}
+        <FormSubmitButton
           text="Login"
-          type="submit"
           isDisabled={isDisabled}
         />
 
       </Form>
 
-      <p className="mt-4 text-sm text-center">
+      {/* Links */}
+      <p className="form-paragraph">
         Forgot password?{' '}
         <Link href="/user/forgot_password">
-          <span className="text-blue-600 hover:underline cursor-pointer">Reset here</span>
+          <span className="paragraph_link">Reset password here</span>
         </Link>
       </p>
 
-      <p className="mt-4 text-sm text-center">
+      <p className="form-paragraph">
         No verification email received?{' '}
         <Link href="/resend_verification">
-          <span className="text-blue-600 hover:underline cursor-pointer">
+          <span className="paragraph_link">
             Send here again
           </span>
         </Link>
       </p>
+
     </Container>
   );
 };

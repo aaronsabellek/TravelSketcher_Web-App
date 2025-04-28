@@ -52,6 +52,8 @@ const About = () => {
           <div className="pointer-events-auto transition-opacity duration-500 flex flex-col items-center justify-center text-center">
             <AnimatePresence mode="wait">
               {showButton ? (
+
+                // when user hovers
                 <motion.div
                   key="with-button"
                   initial={{ opacity: 0 }}
@@ -74,6 +76,8 @@ const About = () => {
                   </Link>
                 </motion.div>
               ) : (
+
+                // when user does not hover
                 <motion.h2
                   key="without-button"
                   initial={{ opacity: 0 }}

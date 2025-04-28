@@ -1,3 +1,4 @@
+
 // Validate if field is not empty
 export const validateNotEmpty = (value: string): string | null =>
   value.trim() === '' ? 'This field must not be empty.' : null;

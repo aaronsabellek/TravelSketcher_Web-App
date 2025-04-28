@@ -3,7 +3,7 @@ import { useRouter } from 'next/router';
 import { toast } from 'sonner';
 
 import InputField from '@/components/Form/InputField';
-import Button from '@/components/Buttons/Button';
+import FormSubmitButton from '@/components/Buttons/FormSubmitButton';
 import CancelButton from '@/components/Buttons/CancelButton';
 import InputDisplay from '@/components/Form/InputDisplay';
 import Form from '@/components/Form/Form';
@@ -102,9 +102,8 @@ const EditEmailPage: React.FC = () => {
         />
 
         {/* Button submit */}
-        <Button
+        <FormSubmitButton
           text={saving ? 'Sending...' : 'Edit email'}
-          type="submit"
           isDisabled={isDisabled}
         />
 
