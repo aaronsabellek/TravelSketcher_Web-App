@@ -3,7 +3,7 @@ import os
 from dotenv import load_dotenv
 
 # Load data from .env file
-load_dotenv()
+#load_dotenv()
 
 
 class Config:
