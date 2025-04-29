@@ -29,7 +29,7 @@ login_manager = LoginManager()
 mail = Mail()
 
 
-def create_app(config_class=ProductionConfig):
+def create_app(config_class=None):
     """App Factory: Creates and configures Flask-App"""
 
     ### 1. Initialize Flask App ###
