@@ -11,8 +11,7 @@ from app.models import Destination
 
 # Set Frontend page
 #frontend_url = "http://localhost:3000"
-app = Flask(__name__)
-frontend_url = app.config['CORS_ORIGINS']
+frontend_url = current_app.config['CORS_ORIGINS'][0]
 
 
 def model_to_dict(model):
