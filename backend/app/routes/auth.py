@@ -1,4 +1,4 @@
-from flask import Blueprint, jsonify, request, jsonify, redirect
+from flask import Blueprint, jsonify, request, jsonify, redirect, current_app
 from flask_login import login_required, current_user, login_user, logout_user
 from werkzeug.security import generate_password_hash, check_password_hash
 
@@ -93,22 +93,22 @@ def verify_email(token):
 
     # Check if varification has worked
     if not email:
-        return redirect(f'{frontend_url}/verify_email/{token}?error=invalid')
+        return redirect(f'{current_app.config['CORS_ORIGINS']}/verify_email/{token}?error=invalid')
 
     # Check if user with this email exists in db
     user = User.query.filter_by(email=email).first()
     if not user:
-        return redirect(f'{frontend_url}/verify_email/{token}?error=notfound')
+        return redirect(f'{current_app.config['CORS_ORIGINS']}/verify_email/{token}?error=notfound')
 
     # Check if email is already verified
     if user.is_email_verified == True:
-        return redirect(f'{frontend_url}/verify_email/{token}?status=already_verified')
+        return redirect(f'{current_app.config['CORS_ORIGINS']}/verify_email/{token}?status=already_verified')
 
     # Change verification status of user in db
     user.is_email_verified = True
     db.session.commit()
 
-    return redirect(f'{frontend_url}/verify_email/{token}?status=success')
+    return redirect(f'{current_app.config['CORS_ORIGINS']}/verify_email/{token}?status=success')
 
 
 @auth_bp.route('/resend_verification', methods=['POST'])

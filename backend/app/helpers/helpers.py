@@ -10,7 +10,7 @@ from app import db, mail
 from app.models import Destination
 
 # Set Frontend page
-frontend_url = current_app.config['CORS_ORIGINS']
+frontend_url = "http://localhost:3000"
 
 
 def model_to_dict(model):
