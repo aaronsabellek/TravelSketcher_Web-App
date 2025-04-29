@@ -1,6 +1,6 @@
 import re
 
-from flask import jsonify, current_app, url_for
+from flask import Flask, jsonify, current_app, url_for
 from flask_login import current_user
 from sqlalchemy import func, String, Text
 from flask_mail import Message
@@ -10,7 +10,9 @@ from app import db, mail
 from app.models import Destination
 
 # Set Frontend page
-frontend_url = "http://localhost:3000"
+#frontend_url = "http://localhost:3000"
+app = Flask(__name__)
+frontend_url = app.config['CORS_ORIGINS']
 
 
 def model_to_dict(model):
