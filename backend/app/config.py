@@ -77,7 +77,7 @@ class ProductionConfig(Config):
     WTF_CSRF_ENABLED = True
     LOG_LEVEL = 'WARNING'
 
-    CORS_ORIGINS = ["https://travelsketcher-website.onrender.com"]
+    CORS_ORIGINS = ["https://travelsketcher.onrender.com"]
 
     # Initialize production database
     SQLALCHEMY_DATABASE_URI = os.getenv('DATABASE_URI_PROD')
