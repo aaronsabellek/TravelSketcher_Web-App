@@ -11,3 +11,5 @@ logs/
 notes.txt
 
 *.log*
+
+*.ini

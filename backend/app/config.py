@@ -83,8 +83,8 @@ class ProductionConfig(Config):
 
     # Initialize production database
     SQLALCHEMY_DATABASE_URI = os.getenv('DATABASE_URI_PROD')
-    #if not SQLALCHEMY_DATABASE_URI:
-    #    raise ValueError('DATABASE_URI not set in .env')
+    if not SQLALCHEMY_DATABASE_URI:
+        raise ValueError('DATABASE_URI not set in .env')
 
     # Initialize production mail server
     MAIL_SERVER = os.getenv('MAIL_SERVER')

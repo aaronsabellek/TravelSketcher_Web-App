@@ -33,7 +33,7 @@ class Destination(db.Model):
     img_link = db.Column(db.String(200), nullable=True)
     tags = db.Column(db.String(100), nullable=True)
     position = db.Column(db.Integer, nullable=False)
-    free_text = db.Column(db.Text(1000), nullable=True)
+    free_text = db.Column(db.String(1000), nullable=True)
 
     # Relationships to user and activities
     user_id = db.Column(db.String(36), db.ForeignKey('user.id', ondelete='CASCADE'), nullable=False)
@@ -53,7 +53,7 @@ class Activity(db.Model):
     web_link = db.Column(db.String(200), nullable=True)
     img_link = db.Column(db.String(200), nullable=True)
     tags = db.Column(db.String(200), nullable=True)
-    free_text = db.Column(db.Text(1000), nullable=True)
+    free_text = db.Column(db.String(1000), nullable=True)
 
     # Relationship to destination
     destination_id = db.Column(db.String(36), db.ForeignKey('destination.id', ondelete='CASCADE'), nullable=False)
