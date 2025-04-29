@@ -39,7 +39,7 @@ def create_app(config_class=None):
     ### 2. Load environment variables and configuration ###
 
     # Load data from .env
-    #load_dotenv()
+    load_dotenv()
 
     # Load Flask environment and configuration class
     if config_class is None:

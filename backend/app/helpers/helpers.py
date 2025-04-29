@@ -6,11 +6,11 @@ from sqlalchemy import func, String, Text
 from flask_mail import Message
 from werkzeug.security import generate_password_hash
 
-from app import db, mail
+from app import app, db, mail
 from app.models import Destination
 
 # Set Frontend page
-frontend_url = 'http://localhost:3000'
+frontend_url = app.config['CORS_ORIGINS']
 
 
 def model_to_dict(model):

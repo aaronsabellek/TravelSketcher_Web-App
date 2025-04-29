@@ -12,7 +12,7 @@ class User(UserMixin, db.Model):
     username = db.Column(db.String(20), unique=True, nullable=False)
     email = db.Column(db.String(50), unique=True, nullable=False)
     temp_email = db.Column(db.String(50), unique=True, nullable=True)
-    password = db.Column(db.String(50), nullable=False)
+    password = db.Column(db.String(150), nullable=False)
     city = db.Column(db.String(20), nullable=False)
     country = db.Column(db.String(20), nullable=False)
     is_email_verified = db.Column(db.Boolean, default=False)
