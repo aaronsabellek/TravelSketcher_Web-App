@@ -274,17 +274,15 @@ const EntryCard = <T extends Destination | Activity>({
 
               {/* google icon for destinations and activities */}
               <button
-                onClick={() =>
-                  {type === 'destination' ? (
-                    window.open(
-                      isDestination(data)
-                        ? `https://www.google.com/search?q=${data.title} ${data.country}`
-                        : `https://www.google.com/search?q=${data.title}`,
-                      '_blank'
+                onClick={() => (
+
+                  window.open(
+                    isDestination(data)
+                      ? `https://www.google.com/search?q=${data.title} in ${data.country}`
+                      : `https://www.google.com/search?q=${data.title}`,
+                    '_blank'
                     )
-                  ) : (
-                    window.open(`https://www.google.com/search?q=${data.title}`, '_blank')
-                  )}
+                  )
                 }
                 className="text-blue-500 relative right-2 hover:text-blue-700 cursor-pointer"
               >

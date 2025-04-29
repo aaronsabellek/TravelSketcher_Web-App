@@ -54,6 +54,7 @@ const DeleteAccountModal: React.FC<Props> = ({ isOpen, onClose, onDeleted }) => 
       setIsLoggedIn(false);
       onDeleted();
     } catch (err) {
+      console.log(err)
       toast.error('Deleting account failed');
     } finally {
       setDeleting(false);
