@@ -49,10 +49,8 @@ class DevelopmentConfig(Config):
 
     # Initialize local development database with SQLAlchemy
     DATABASE_URI_DEV = os.getenv('DATABASE_URI_DEV')
-    if DATABASE_URI_DEV is None:
-        raise ValueError('DATABASE_URI_DEV is not set in the .env file.')
-    absolute_db_path = os.path.abspath(DATABASE_URI_DEV)
-    #SQLALCHEMY_DATABASE_URI = f'sqlite:///{absolute_db_path}'
+    #if DATABASE_URI_DEV is None:
+    #    raise ValueError('DATABASE_URI_DEV is not set in the .env file.')
     SQLALCHEMY_DATABASE_URI = os.getenv('DATABASE_URI_DEV')
 
 
