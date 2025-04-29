@@ -11,10 +11,12 @@ import FormSubmitButton from '@/components/Buttons/FormSubmitButton';
 import { useImageSearch } from '@/hooks/useImageSearch';
 import { useEntryFormState } from '@/hooks/useEntryFormState';
 import { validateTitleField } from '@/utils/formValidations';
+import { EntryFormData } from '@/types/models';
+
 
 interface EntryFormProps {
   type: 'destination' | 'activity';
-  onSubmit: (data: any) => Promise<void>;
+  onSubmit: (data: EntryFormData) => Promise<void>;
   submitLabel: string;
   initialData?: {
     title?: string;
@@ -39,7 +41,7 @@ const EntryForm: React.FC<EntryFormProps> = ({ type, onSubmit, initialData, subm
     selectedImageUrl,
     setSelectedImageUrl,
     removeTag,
-  } = useEntryFormState({ type, initialData, onSubmit });
+  } = useEntryFormState({ initialData });
 
   const {
     updateTitle,

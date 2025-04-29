@@ -59,6 +59,7 @@ export default function EditUserProfile() {
           country: data.country || '',
         });
       } catch (err) {
+        console.log(err)
         toast.error('Profile could not be loaded.');
       } finally {
         setLoading(false);
@@ -101,6 +102,7 @@ export default function EditUserProfile() {
       router.push('/user/profile');
 
     } catch (err) {
+      console.log(err)
       toast.error('Edition failed.');
     } finally {
       setSaving(false);

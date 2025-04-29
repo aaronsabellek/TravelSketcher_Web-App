@@ -39,6 +39,7 @@ const Profile: React.FC = () => {
           setUser(data);
         }
       } catch (err) {
+        console.log(err)
         toast.error('Server error or no response received.');
       } finally {
         setLoading(false);

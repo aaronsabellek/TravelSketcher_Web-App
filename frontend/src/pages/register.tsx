@@ -70,6 +70,7 @@ const Register = () => {
         toast.error(result.error || 'Something went wrong.');
       }
     } catch (err) {
+      console.log(err)
       toast.error('An error occurred while sending the request.');
     }
   };

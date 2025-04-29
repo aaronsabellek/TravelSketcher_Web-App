@@ -4,10 +4,10 @@ import { toast } from 'sonner';
 
 import { BASE_URL } from '@/utils/config';
 
-export type EntryFormData = {
+export type EntryFormHandlerData = {
   title?: string;
   country?: string;
-  tags?: string[];
+  tags?: string;
   img_link?: string;
   destination_id?: string;
 };
@@ -21,7 +21,7 @@ export function useEntryFormHandler(
   const router = useRouter();
   const rawId = router.query.id as string | undefined;
 
-  const [initialData, setInitialData] = useState<EntryFormData | null>(null);
+  const [initialData, setInitialData] = useState<EntryFormHandlerData | null>(null);
   const [destinationId, setDestinationId] = useState<string | null>(null);
 
   // Fetch entry data
@@ -99,7 +99,7 @@ export function useEntryFormHandler(
   };
 
   // Submit
-  const handleSubmit = async (formData: EntryFormData) => {
+  const handleSubmit = async (formData: EntryFormHandlerData) => {
     if (!router.isReady) {
       toast.error('Router is not ready yet.');
       return;

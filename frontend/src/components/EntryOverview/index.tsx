@@ -178,7 +178,8 @@ const EntryOverviewPage = <T extends Destination | Activity>({
             setItems(items.filter((item) => item.id !== confirmDeleteId));
             setConfirmDeleteId(null);
           } catch (err) {
-            alert('Löschen fehlgeschlagen.');
+            console.error(err);
+            toast.error('Löschen fehlgeschlagen.');
           } finally {
             setDeleting(false);
           }

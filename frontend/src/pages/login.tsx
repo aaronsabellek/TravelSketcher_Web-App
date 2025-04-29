@@ -48,6 +48,7 @@ const Login = () => {
       login(userData);
 
     } catch (err) {
+      console.log(err)
       toast.error('An error occurred during login.');
     }
   };

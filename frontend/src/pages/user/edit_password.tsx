@@ -58,8 +58,9 @@ const EditPassword = () => {
       toast.success('Password edited successfully!');
       router.push('/user/profile');
 
-    } catch (err: any) {
-      toast.error(err.message || 'An unexpected error occurred.');
+    } catch (err) {
+      console.log(err)
+      toast.error('An unexpected error occurred.');
     } finally {
       setSaving(false)
     }

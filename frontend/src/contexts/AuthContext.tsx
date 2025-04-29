@@ -67,6 +67,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       });
       toast.success('Erfolgreich ausgeloggt.');
     } catch (err) {
+      console.log(err)
       toast.error('Logout fehlgeschlagen.');
     } finally {
       setUser(null);

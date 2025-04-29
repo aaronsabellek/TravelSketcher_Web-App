@@ -60,8 +60,9 @@ const ResetPassword = () => {
       toast.success('Password changed successfully. You will be redirected...');
       setTimeout(() => router.push('/login'), 2500);
 
-    } catch (err: any) {
-      toast.error(err.message || 'An unexpected error occurred.');
+    } catch (err) {
+      console.log(err)
+      toast.error('An unexpected error occurred.');
     } finally {
       setSaving(false)
     }

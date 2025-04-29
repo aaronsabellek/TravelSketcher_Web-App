@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/router';
+import Link from 'next/link';
 
 // Verify emai of user with token
 const EmailVerificationPage = () => {
@@ -7,7 +8,7 @@ const EmailVerificationPage = () => {
 
   const [message, setMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [loading,] = useState(true);
 
   useEffect(() => {
     const { status, error } = router.query;
@@ -32,7 +33,7 @@ const EmailVerificationPage = () => {
       {error && <p style={{ color: 'red' }}>{error}</p>}
       {!loading && (
         <p style={{ marginTop: '1rem' }}>
-          You will be redirected immediately. <a href="/login">Or click here</a>.
+          You will be redirected immediately. <Link href="/login">Or click here</Link>.
         </p>
       )}
     </div>

@@ -28,10 +28,12 @@ const WebLinkModal = <T extends { id: string; web_link?: string }>({
   linkForId,
   setLinkForId,
 }: WebLinkModalProps<T>) => {
+
+  const [saving, setSaving] = useState(false);
+
   if (!linkForId) return null;
 
   const currentLink = items.find((i) => i.id === linkForId)?.web_link || '';
-  const [saving, setSaving] = useState(false);
 
   // Errors
   const urlErrors = validateWebLinkField(webLink);

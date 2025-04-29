@@ -38,6 +38,7 @@ const EditEmailPage: React.FC = () => {
         const data = await res.json();
         setCurrentEmail(data.email);
       } catch (err) {
+        console.log(err)
         toast.error('Error loading profile.');
       }
     };
@@ -74,8 +75,9 @@ const EditEmailPage: React.FC = () => {
       toast.success('Confirmation email has been sent.');
       router.push('/user/profile');
 
-    } catch (err: any) {
-      toast.error(err.message);
+    } catch (err) {
+      console.log(err)
+      toast.error('Error editing email');
     } finally {
       setSaving(false);
     }

@@ -1,19 +1,17 @@
 import { useEffect, useState } from 'react';
 
 interface UseEntryFormStateProps {
-  type: 'destination' | 'activity';
   initialData?: {
     title?: string;
     country?: string;
     status?: 'planned' | 'done';
-    tags?: string[];
+    tags?: string | string[];
     img_link?: string;
   };
-  onSubmit: (data: any) => Promise<void>;
 }
 
 // Hooks for EntryForm
-export function useEntryFormState({ type, initialData, onSubmit }: UseEntryFormStateProps) {
+export function useEntryFormState({ initialData }: UseEntryFormStateProps) {
 
   const [title, setTitle] = useState('');
   const [country, setCountry] = useState('');
@@ -34,7 +32,11 @@ export function useEntryFormState({ type, initialData, onSubmit }: UseEntryFormS
     if (title) setTitle(title);
     if (country) setCountry(country);
     if (status) setStatus(status);
-    if (tags) setTagsArray(tags);
+
+    if (tags) {
+      setTagsArray(typeof tags === 'string' ? tags.split(',').map((tag) => tag.trim()) : tags);
+    }
+
     if (img_link) setSelectedImageUrl(img_link);
   }, [initialData]);
 

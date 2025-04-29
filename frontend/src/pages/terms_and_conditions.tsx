@@ -33,7 +33,7 @@ export default function TermsAndConditionsPage() {
 
       <Section title="Desclaimer">
         <ul className="list-disc list-inside space-y-2">
-          <li>The service is provided "as is"</li>
+        <li>The service is provided &quot;as is&quot;</li>
           <li>We are not responsible for any data loss or damages</li>
         </ul>
       </Section>

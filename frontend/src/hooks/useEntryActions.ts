@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useRouter } from 'next/router';
+import { toast } from 'sonner';
 
 import { BASE_URL } from '@/utils/config';
 import { Destination, Activity } from '@/types/models';
@@ -16,7 +17,7 @@ export function useEntryActions<T extends Item>(
   const router = useRouter();
 
   // Open/close menu
-  const [menuOpenFor, setMenuOpenFor] = useState<string | null>(null);
+  const [, setMenuOpenFor] = useState<string | null>(null);
 
   // Push to edit entry
   const handleEdit = (id: string) => {
@@ -36,7 +37,7 @@ export function useEntryActions<T extends Item>(
   const [noteForId, setNoteForId] = useState<string | null>(null);
   const [noteText, setNoteText] = useState('');
   const [editingNote, setEditingNote] = useState(false);
-  const [savingNote, setSavingNote] = useState(false);
+  const [,setSavingNote] = useState(false);
 
   // Open note
   const openNote = (id: string) => {
@@ -71,7 +72,8 @@ export function useEntryActions<T extends Item>(
       );
       setNoteForId(null);
     } catch (err) {
-      alert('Fehler beim Speichern der Notiz.');
+      console.log(err)
+      toast.error('Fehler beim Speichern der Notiz.');
     } finally {
       setSavingNote(false);
     }

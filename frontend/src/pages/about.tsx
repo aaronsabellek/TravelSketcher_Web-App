@@ -10,7 +10,7 @@ const About = () => {
 
   const [isAreaHovered, setIsAreaHovered] = useState(false);
   const [hoveredImageIndex, setHoveredImageIndex] = useState<number | null>(null);
-  const [isButtonHovered, setIsButtonHovered] = useState(false);
+  const [, setIsButtonHovered] = useState(false);
   const [imagesLoaded, setImagesLoaded] = useState([false, false, false]);
 
   const showButton = isAreaHovered;

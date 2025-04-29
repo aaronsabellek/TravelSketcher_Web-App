@@ -14,7 +14,7 @@ const ResendVerification = () => {
   const { isReady } = useRedirectIfAuthenticated();
 
   const [email, setEmail] = useState('');
-  const [loading, setLoading] = useState(false);
+  const [, setLoading] = useState(false);
 
   // Errors
   const emailErrors = validateEmailField(email);
@@ -43,8 +43,9 @@ const ResendVerification = () => {
       } else {
         toast.success(data.message || 'Verification email has been sent successfully.');
       }
-      } catch (err: any) {
-        toast.error(err.message || 'An error occurred. Please try again later.');
+      } catch (err) {
+        console.log(err)
+        toast.error('An error occurred. Please try again later.');
         setLoading(false)
       }
     };

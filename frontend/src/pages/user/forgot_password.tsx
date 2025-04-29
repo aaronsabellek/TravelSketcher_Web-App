@@ -46,8 +46,9 @@ const ForgotPassword = () => {
       }
 
       toast.success(data.message);
-    } catch (err: any) {
-      toast.error(err)
+    } catch (err) {
+      console.log(err)
+      toast.error('Error reseting password')
     } finally {
       setLoading(false);
     }

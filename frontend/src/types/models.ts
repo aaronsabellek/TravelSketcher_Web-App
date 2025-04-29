@@ -63,3 +63,10 @@ export interface ButtonProps {
     href?: string;
   }
 
+  export interface EntryFormData {
+    title: string;
+    country?: string;
+    img_link?: string;
+    tags: string;
+  };
+

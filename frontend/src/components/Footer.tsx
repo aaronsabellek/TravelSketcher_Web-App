@@ -1,3 +1,5 @@
+import Link from "next/link";
+
 // Footer of website
 const Footer = () => {
   return (
@@ -7,20 +9,20 @@ const Footer = () => {
         <div className="space-x-4">
 
           {/* Privacy Policy */}
-          <a
+          <Link
             href="/privacy_policy"
             className="hover:underline cursor-pointer"
           >
             Privacy policy
-          </a>
+          </Link>
 
           {/* Terms and conditions */}
-          <a
+          <Link
             href="terms_and_conditions"
             className="hover:underline cursor-pointer"
           >
             Terms and conditions
-          </a>
+          </Link>
 
         </div>
       </div>

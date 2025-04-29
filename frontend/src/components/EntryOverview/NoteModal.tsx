@@ -30,11 +30,11 @@ const NoteModal = <T extends { id: string; free_text?: string }>({
   setNoteForId,
   items,
   setItems,
-  textField = 'free_text',
 }: NoteModalProps<T>) => {
-  if (!noteForId) return null;
 
   const [savingNote, setSavingNote] = useState(false);
+
+  if (!noteForId) return null;
 
   // Save note
   const handleSaveNote = async () => {

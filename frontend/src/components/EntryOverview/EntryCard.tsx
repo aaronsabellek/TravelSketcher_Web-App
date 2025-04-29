@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 
 import { Destination, Activity } from '@/types/models';
 import { useClickOutside } from '@/hooks/useClickOutside';
+import { isActivity, isDestination } from '@/utils/TypeGuards';
 
 interface Props<T> {
   data: T;
@@ -259,14 +260,14 @@ const EntryCard = <T extends Destination | Activity>({
               )}
 
               {/* link icon for activities */}
-              {type === 'activity' && (
+              {isActivity(data) && (
                 <button
-                  onClick={() => onLinkClick?.(data.id, (data as any).web_link)}
-                  className={`cursor-pointer ${(data as any).web_link ? 'text-blue-500' : 'text-gray-400'}`}
+                  onClick={() => onLinkClick?.(data.id, (data).web_link)}
+                  className={`cursor-pointer ${(data).web_link ? 'text-blue-500' : 'text-gray-400'}`}
                 >
                   <img
                     src="/link_icon.png"
-                    className={`logo ${(data as any).web_link ? '' : 'opacity-50'}`}
+                    className={`logo ${(data).web_link ? '' : 'opacity-50'}`}
                   />
                 </button>
               )}
@@ -275,7 +276,12 @@ const EntryCard = <T extends Destination | Activity>({
               <button
                 onClick={() =>
                   {type === 'destination' ? (
-                    window.open(`https://www.google.com/search?q=${data.title} ${(data as Destination).country}`, '_blank')
+                    window.open(
+                      isDestination(data)
+                        ? `https://www.google.com/search?q=${data.title} ${data.country}`
+                        : `https://www.google.com/search?q=${data.title}`,
+                      '_blank'
+                    )
                   ) : (
                     window.open(`https://www.google.com/search?q=${data.title}`, '_blank')
                   )}

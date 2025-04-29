@@ -11,12 +11,19 @@ interface EntryPageProps {
 const EntryPage: React.FC<EntryPageProps> = ({ mode, type }) => {
   const { initialData, handleSubmit } = useEntryFormHandler(mode, type);
 
+  const formattedInitialData = initialData
+  ? {
+      ...initialData,
+      tags: initialData.tags ? initialData.tags.split(',').map(tag => tag.trim()) : [], // tags als Array
+    }
+  : undefined;
+
   return (
     <Container title={mode === 'add' ? `Add ${type}` : `Edit ${type}`}>
       <EntryForm
         type={type}
         onSubmit={handleSubmit}
-        initialData={initialData || undefined}
+        initialData={formattedInitialData}
         submitLabel={mode === 'add' ? `Add ${type}` : `Edit ${type}`}
       />
     </Container>
