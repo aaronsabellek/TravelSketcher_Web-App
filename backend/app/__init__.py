@@ -29,7 +29,7 @@ login_manager = LoginManager()
 mail = Mail()
 
 
-def create_app(config_class=None):
+def create_app(config_class=ProductionConfig):
     """App Factory: Creates and configures Flask-App"""
 
     ### 1. Initialize Flask App ###
@@ -39,7 +39,7 @@ def create_app(config_class=None):
     ### 2. Load environment variables and configuration ###
 
     # Load data from .env
-    #load_dotenv()
+    load_dotenv()
 
     # Load Flask environment and configuration class
     if config_class is None:
