@@ -139,6 +139,7 @@ def create_destinations_and_activities(db, destinations_data, user):
             position=dest_data['position'],
             tags=dest_data['tags'],
             img_link=dest_data['img_link'],
+            free_text=dest_data['free_text'],
             user_id=user.id
         )
         db.session.add(destination)
@@ -150,6 +151,7 @@ def create_destinations_and_activities(db, destinations_data, user):
                 title=act_data['title'],
                 position=act_data['position'],
                 img_link=act_data['img_link'],
+                web_link=act_data['web_link'],
                 destination_id=destination.id
             )
             db.session.add(activity)
