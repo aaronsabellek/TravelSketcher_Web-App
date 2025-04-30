@@ -1,11 +1,9 @@
 from app import create_app, db
-from app.config import DevelopmentConfig
+from app.config import DevelopmentConfig, TestingConfig, ProductionConfig
 from tests.helpers.functions import create_user, create_destinations_and_activities
 from tests.helpers.variables import (
     user,
-    second_user,
     destinations,
-    second_destinations
 )
 
 app = create_app(DevelopmentConfig)
