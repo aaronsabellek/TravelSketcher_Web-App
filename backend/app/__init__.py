@@ -89,14 +89,6 @@ def create_app(config_class=None):
 
     ### 4. Security and HTTPS configuration ###
 
-    # Set cookie handling
-    if env == 'production':
-        app.config['SESSION_COOKIE_SAMESITE'] = 'None'
-        app.config['SESSION_COOKIE_SECURE'] = True
-    else:
-        app.config['SESSION_COOKIE_SAMESITE'] = 'Lax'
-        app.config['SESSION_COOKIE_SECURE'] = False
-
     # Allow error reports when DEBUG == True
     app.config['PROPAGATE_EXCEPTIONS'] = app.config['DEBUG']
 
