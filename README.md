@@ -138,7 +138,6 @@ This is a full-stack web application that allows users to create and manage trav
 
 ## License
 
-```license
 Copyright (c) 2025 Aaron Sabellek
 
 This project is licensed under the Creative Commons Attribution-NonCommercial 4.0 International License (CC BY-NC 4.0).
@@ -155,5 +154,4 @@ The full license text is available at:
 https://creativecommons.org/licenses/by-nc/4.0/
 
 If you want to use this project commercially, please contact the author for permission.
-```
 
