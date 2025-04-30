@@ -94,20 +94,20 @@ const Login = () => {
 
       {/* Links */}
       <p className="form-paragraph relative top-1">
-          Forgot password?{' '}
-          <Link href="/user/forgot_password">
-            <span className="paragraph_link">Reset password here</span>
-          </Link>
-        </p>
+        Forgot password?{' '}
+        <Link href="/user/forgot_password">
+          <span className="paragraph_link">Reset password here</span>
+        </Link>
+      </p>
 
-        <p className="form-paragraph">
-          No verification email received?{' '}
-          <Link href="/resend_verification">
-            <span className="paragraph_link">
-              Send here again
-            </span>
-          </Link>
-        </p>
+      <p className="form-paragraph">
+        No verification email received?{' '}
+        <Link href="/resend_verification">
+          <span className="paragraph_link">
+            Send here again
+          </span>
+        </Link>
+      </p>
 
     </Container>
   );

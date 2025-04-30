@@ -145,13 +145,13 @@ const Register = () => {
 
       {/* Link */}
       <p className="form-paragraph -mt-2">
-          No verification email received?{' '}
-          <Link href="/resend_verification">
-            <span className="paragraph_link">
-              Send here again
-            </span>
-          </Link>
-        </p>
+        No verification email received?{' '}
+        <Link href="/resend_verification">
+          <span className="paragraph_link">
+            Send here again
+          </span>
+        </Link>
+      </p>
 
     </Container>
   );

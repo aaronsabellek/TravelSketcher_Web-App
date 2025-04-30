@@ -221,6 +221,15 @@ const EntryOverviewPage = <T extends Destination | Activity>({
         </div>
       )}
 
+      {/* Info */}
+      <p className="form-paragraph pt-1">
+        {type === 'destination' ? (
+          'Click on a destination image or title to access the corresponding activities'
+        ) : (
+          'If you set a link for an activity, you can reach it by clicking the image or the title'
+        )}
+      </p>
+
     </div>
   );
 };
