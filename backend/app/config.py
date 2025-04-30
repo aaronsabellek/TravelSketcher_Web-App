@@ -26,6 +26,8 @@ class Config:
 
     # Cookie Management
     SESSION_COOKIE_HTTPONLY = True
+    #SESSION_COOKIE_SAMESITE= 'Lax'
+    #SESSION_COOKIE_SECURE= False
 
     # Initlialize mailserver data from MailHog for testing
     MAIL_SERVER = 'localhost'
@@ -49,10 +51,6 @@ class DevelopmentConfig(Config):
     MAIL_SUPPRESS_SEND = False
     CORS_ORIGINS = ["http://localhost:3000"]
 
-    # Cookie Management
-    SESSION_COOKIE_SAMESITE= 'Lax'
-    SESSION_COOKIE_SECURE= False
-
     # Initialize local development database with SQLAlchemy
     DATABASE_URI_DEV = os.getenv('DATABASE_URI_DEV')
 
@@ -69,10 +67,6 @@ class TestingConfig(Config):
     WTF_CSRF_ENABLED = False
     MAIL_SUPPRESS_SEND = False
     CORS_ORIGINS = ["http://localhost:3000"]
-
-    # Cookie Management
-    SESSION_COOKIE_SAMESITE= 'Lax'
-    SESSION_COOKIE_SECURE= False
 
     # Initialize memory database from SQLite
     SQLALCHEMY_DATABASE_URI = 'sqlite:///:memory:'
