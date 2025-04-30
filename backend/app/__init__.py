@@ -85,8 +85,8 @@ def create_app(config_class=ProductionConfig):
         app.logger.addHandler(console_handler)
 
     ### 4. Security and HTTPS configuration ###
-    app.config['SESSION_COOKIE_SAMESITE'] = 'None'
-    app.config['SESSION_COOKIE_SECURE'] = True
+    app.config['SESSION_COOKIE_SAMESITE'] = os.getenv('SESSION_COOKIE_SAMESITE')
+    app.config['SESSION_COOKIE_SECURE'] = os.getenv('SESSION_COOKIE_SECURE')
 
     # Allow error reports when DEBUG == True
     app.config['PROPAGATE_EXCEPTIONS'] = app.config['DEBUG']
