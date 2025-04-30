@@ -5,7 +5,7 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from app import db, login_manager
 from app.models import User
 from app.helpers.helpers import (
-    frontend_url,
+    get_frontend_url,
     is_valid_email,
     validate_password,
     confirm_token,
@@ -87,6 +87,8 @@ def register():
 @auth_bp.route('/verify_email/<token>', methods=['GET'])
 def verify_email(token):
     """Verifies the token from verification email"""
+
+    frontend_url = get_frontend_url()
 
     # Verify email
     email = confirm_token(token, salt='account-verification')

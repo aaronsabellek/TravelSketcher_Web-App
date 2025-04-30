@@ -78,7 +78,7 @@ def edit_notes(destination_id):
     free_text = data.get('free_text')
 
     # Check if data is given
-    if free_text == '':
+    if free_text is None:
         return jsonify({'error': 'Note text is required'}), 400
 
     # Check existence and permission of destination

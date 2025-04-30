@@ -9,7 +9,7 @@ from app.helpers.helpers_entries import(
     delete_entry
 )
 from app.helpers.helpers import (
-    frontend_url,
+    get_frontend_url,
     is_valid_email,
     generate_token,
     confirm_token,
@@ -22,7 +22,7 @@ from app.helpers.helpers import (
 user_bp = Blueprint('user', __name__, url_prefix='/user')
 
 # Set allowed fields for user display
-allowed_fields = ['username', 'email', 'city', 'longitude', 'latitude', 'country', 'currency']
+allowed_fields = ['username', 'email', 'city', 'country']
 
 
 @user_bp.route('/profile', methods=['GET'])
@@ -96,6 +96,8 @@ def edit_email():
 def verify_email(token):
     """Verifies the verification email for new email of user"""
 
+    frontend_url = get_frontend_url()
+
     # Confirm token
     new_email = confirm_token(token, salt='email-confirmation')
     if new_email:
@@ -133,9 +135,15 @@ def edit_password():
 
     # Send confirmation mail after successful password update
     if status_code == 200:
-        subject = 'Confirmation: Your password has been changed'
-        body = "Hello,\n\n Your password has been changed successfully. If you didn't change the password by yourself, please contact us immediately.\n\nBest regards,\nYour Support-Team"
-        send_email(current_user.email, subject, body)
+        try:
+            subject = 'Confirmation: Your password has been changed'
+            body = "Hello,\n\n Your password has been changed successfully. If you didn't change the password by yourself, please contact us immediately.\n\nBest regards,\nYour Support-Team"
+            send_email(current_user.email, subject, body)
+        except Exception as e:
+            return jsonify({
+                'message': 'Password changed successfully.',
+                'warning': 'However, the confirmation email could not be sent. Please check your email address.'
+            }), 200
 
     return response, status_code
 
@@ -143,6 +151,9 @@ def edit_password():
 @user_bp.route('/request_password_reset', methods=['POST'])
 def request_password_reset():
     """Requests password reset if password has been forgotten"""
+
+    # Get frontend url
+    frontend_url = get_frontend_url()
 
     # Get email
     data = request.get_json()
@@ -159,12 +170,16 @@ def request_password_reset():
 
     # Generate token
     token = generate_token(email, salt='reset-password')
-    reset_url = f'/user/reset_token/{token}'
+    reset_url = f'{frontend_url}/user/reset_password/{token}'
 
     # Send reset mail
     subject = 'Reset password'
-    body = f'Click the link to reset your password: {reset_url}'
-    send_email(email, subject, body)
+    body_text = f'Click the link to reset your password: {reset_url}'
+    body_html = f'''
+        <p>Click the link below to reset your password:</p>
+        <p><a href="{reset_url}">{reset_url}</a></p>
+    '''
+    send_email(email, subject, body_text, body_html=body_html)
 
     return jsonify({'message': 'A reset link has been sent.'}), 200
 

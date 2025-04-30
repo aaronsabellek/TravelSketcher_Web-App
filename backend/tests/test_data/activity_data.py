@@ -80,7 +80,7 @@ edit_activity = [
 # Test data to edit link
 edit_link = [
     # Empty link
-    {'id': act_main_id, 'web_link': '', 'expected_status': 400, 'expected_message': 'Web link is required'},
+    {'id': act_main_id, 'expected_status': 400, 'expected_message': 'Web link is required'},
     # Weblink contains new line
     {'id': act_main_id, 'web_link': 'Just a sentence', 'expected_status': 400, 'expected_message': 'Input is no web link format'},
     # Activity belongs to another user
@@ -95,7 +95,7 @@ edit_link = [
 # Test data to edit note
 edit_note = [
     # Empty note
-    {'id': act_main_id, 'free_text': '', 'expected_status': 400, 'expected_message': 'Note text is required'},
+    {'id': act_main_id, 'expected_status': 400, 'expected_message': 'Note text is required'},
     # Activity belongs to another user
     {'id': act_second_user_id, 'free_text': 'This is the note text', 'expected_status': 403, 'expected_message': 'Activity not permitted'},
     # Activity does not exist

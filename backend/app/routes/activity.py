@@ -98,7 +98,7 @@ def edit_link(activity_id):
     web_link = data.get('web_link')
 
     # Check if data is given
-    if web_link == '':
+    if web_link is None:
         return jsonify({'error': 'Web link is required'}), 400
 
     # Check if link has correct web link format
@@ -124,7 +124,7 @@ def edit_notes(activity_id):
     free_text = data.get('free_text')
 
     # Check if data is given
-    if free_text == '':
+    if free_text is None:
         return jsonify({'error': 'Note text is required'}), 400
 
     # Check existence and permission of activity

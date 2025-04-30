@@ -56,8 +56,8 @@ edit_destination = [
 ]
 
 edit_note = [
-    # Empty note
-    {'id': dest_main_id, 'free_text': '', 'expected_status': 400, 'expected_message': 'Note text is required'},
+    # No note
+    {'id': dest_main_id, 'expected_status': 400, 'expected_message': 'Note text is required'},
     # Destination belongs to another user
     {'id': dest_second_user_id, 'free_text': 'This is the note text', 'expected_status': 403, 'expected_message': 'Destination not permitted'},
     # Destination does not exist

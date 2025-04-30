@@ -49,20 +49,10 @@ class DevelopmentConfig(Config):
 
     # Initialize local development database with SQLAlchemy
     DATABASE_URI_DEV = os.getenv('DATABASE_URI_DEV')
+
     #if DATABASE_URI_DEV is None:
     #    raise ValueError('DATABASE_URI_DEV is not set in the .env file.')
     SQLALCHEMY_DATABASE_URI = os.getenv('DATABASE_URI_DEV')
-
-    MAIL_SERVER = os.getenv('MAIL_SERVER')
-    MAIL_PORT = os.getenv('MAIL_PORT')
-    MAIL_USERNAME = os.getenv('MAIL_USERNAME')
-    MAIL_PASSWORD = os.getenv('MAIL_PASSWORD')
-    MAIL_DEFAULT_SENDER = os.getenv('MAIL_DEFAULT_SENDER')
-    MAIL_USE_TLS = os.getenv('MAIL_USE_TLS', 'True').lower() == 'true'
-    MAIL_USE_SSL = os.getenv('MAIL_USE_SSL', 'False').lower() == 'true'
-
-    if not all([MAIL_SERVER, MAIL_PORT, MAIL_USERNAME, MAIL_PASSWORD, MAIL_DEFAULT_SENDER]):
-        raise ValueError('Production mail configuration incomplete.')
 
 
 class TestingConfig(Config):
