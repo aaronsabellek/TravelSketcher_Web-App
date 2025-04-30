@@ -14,10 +14,10 @@ const EmailVerificationPage = () => {
     const { status, error } = router.query;
 
     if (status === 'success') {
-      setMessage('Your email has been successfully confirmed!');
+      setMessage('Your email has been successfully confirmed! Redirecting..');
       setTimeout(() => router.push('/login'), 4000);
     } else if (status === 'already_verified') {
-      setMessage('Your email was already confirmed.');
+      setMessage('Your email was already confirmed. Redirecting..');
       setTimeout(() => router.push('/login'), 4000);
     } else if (error === 'invalid') {
       setError('Invalid or expired confirmation link.');
