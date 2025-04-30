@@ -85,7 +85,7 @@ def create_app(config_class=ProductionConfig):
         app.logger.addHandler(console_handler)
 
     ### 4. Security and HTTPS configuration ###
-    if app.config.get('ENV') == 'production':
+    if os.getenv('FLASK_ENV') == 'production':
         app.config['SESSION_COOKIE_SAMESITE'] = 'None'
         app.config['SESSION_COOKIE_SECURE'] = True
     else:
