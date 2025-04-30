@@ -1,7 +1,7 @@
 
 # TravelSketcher - Web Application
 
-This is a full-stack web application that allows users to create and manage travel destinations and their associated activities. Users can register, log in, and add and edit their own travel destinations and activities. Additionally, they can edit their profile and delete it if needed.
+This is a full-stack web application that allows users to create and manage travel destinations and associated activities. Users can register, log in, and then add and edit their own travel destinations and activities. Additionally, they can edit their profile and delete it if needed.
 
 ## Technologies
 
@@ -56,7 +56,7 @@ This is a full-stack web application that allows users to create and manage trav
 
 4. **Database Setup:**
    - The default development database uses SQLite. For production, you can switch to PostgreSQL.
-   - To populate dummy data for testing:
+   - To populate the development or production database with dummy data:
      ```bash
      python scripts/setup_db.py
      ```
@@ -136,20 +136,20 @@ This is a full-stack web application that allows users to create and manage trav
 - The backend uses Python's `logging` module for error tracking.
 - Error responses are displayed on the frontend.
 
-## Licence
+## License
 
-```licence
+```license
 Copyright (c) 2025 Aaron Sabellek
 
 This project is licensed under the Creative Commons Attribution-NonCommercial 4.0 International License (CC BY-NC 4.0).
 
 You are free to:
-- Share — copy and redistribute the material in any medium or format
-- Adapt — remix, transform, and build upon the material
+- **Share** — copy and redistribute the material in any medium or format
+- **Adapt** — remix, transform, and build upon the material
 
 Under the following terms:
-- Attribution — You must give appropriate credit, provide a link to the license, and indicate if changes were made.
-- NonCommercial — You may not use the material for commercial purposes.
+- **Attribution** — You must give appropriate credit, provide a link to the license, and indicate if changes were made.
+- **NonCommercial** — You may not use the material for commercial purposes.
 
 The full license text is available at:
 https://creativecommons.org/licenses/by-nc/4.0/
