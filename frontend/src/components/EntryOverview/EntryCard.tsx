@@ -298,7 +298,7 @@ const EntryCard = <T extends Destination | Activity>({
                   e.stopPropagation();
                   onNote(data.id);
                 }}
-                className="text-green-500 h-7 hover:text-green-700 justify-end"
+                className={`text-green-500 h-7 hover:text-green-700 justify-end logo ${(data).free_text ? '' : 'opacity-50'}`}
               >
                 <img src="/notes_icon.png" alt="Notizen" className="logo cursor-pointer" />
               </button>

@@ -224,9 +224,17 @@ const EntryOverviewPage = <T extends Destination | Activity>({
       {/* Info */}
       <p className="form-paragraph pt-1">
         {type === 'destination' ? (
-          'Click on a destination image or title to access the corresponding activities'
+          'Click on a Destination image or title to access the corresponding Activities.'
         ) : (
-          'If you set a link for an activity, you can reach it by clicking the image or the title'
+          'If you set a link for an activity, you can reach it by clicking the image or the title.'
+        )}
+      </p>
+
+      <p className="form-paragraph -mb-4 relative bottom-3">
+        {type === 'destination' ? (
+          'Click on a Destination (not the linked parts) to expand its tags if there are any.'
+        ) : (
+          'Click on an Activity (not the linked parts) to expand its tags if there are any.'
         )}
       </p>
 
