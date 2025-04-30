@@ -165,7 +165,7 @@ const EntryForm: React.FC<EntryFormProps> = ({ type, onSubmit, initialData, subm
           />
 
           <Button
-            text="SearchImage"
+            text="Search Image"
             type="button"
             onClick={searchImages}
             isDisabled={!imageSearchTerm.trim()}

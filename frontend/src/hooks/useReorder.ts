@@ -78,6 +78,8 @@ export const useReorder = <T extends Destination | Activity>(
 
       toast.success('Order saved successfully!');
       setSavedOrder([...items]);
+      setIsReorderMode(false);
+
     } catch (err) {
       console.error('Error saving:', err);
       toast.error('An error occurred while saving.');
