@@ -1,7 +1,7 @@
 
 # TravelSketcher - Web Application
 
-This is a web application that allows users to create, save, and manage travel destinations and their associated activities. Users can register, log in, and add and edit their own travel destinations and activities. Additionally, they can edit their profile and delete it if needed.
+This is a full-stack web application that allows users to create and manage travel destinations and their associated activities. Users can register, log in, and add and edit their own travel destinations and activities. Additionally, they can edit their profile and delete it if needed.
 
 ## Technologies
 
@@ -107,9 +107,10 @@ This is a web application that allows users to create, save, and manage travel d
   - `config.py` - Configuration
   - `errors.py` - Error handling
   - `models.py` - Database models
-- `/scripts` - Script to setup database with dummy data (`setup_dev_db.py`)
+- `/scripts` - Script to setup database with dummy data
 - `/tests` - Pytest files
-- `run.py` - Backend entry point
+- `wsgi.py` - Backend entry point for production
+- `run.py` - Backend entry point for development and testing
 
 ### Frontend (Next.js)
 
@@ -127,7 +128,7 @@ This is a web application that allows users to create, save, and manage travel d
 ## Features
 
 - **User Management:** Registration, email confirmation, login, profile editing, and account deletion.
-- **Destinations and Activities:** Create, edit, and reorder destinations with associated activities.
+- **Destinations and Activities:** Create, edit, and reorder destinations and their associated activities.
 - **Email Notifications:** Emails for registration, password reset, and email changes.
 
 ## Error Handling and Logging
@@ -135,30 +136,24 @@ This is a web application that allows users to create, save, and manage travel d
 - The backend uses Python's `logging` module for error tracking.
 - Error responses are displayed on the frontend.
 
-## License
+## Licence
 
-The code in this project is licensed under the MIT License.
-
-```text
-MIT License
-
+```licence
 Copyright (c) 2025 Aaron Sabellek
 
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
+This project is licensed under the Creative Commons Attribution-NonCommercial 4.0 International License (CC BY-NC 4.0).
 
-The above copyright notice and this permission notice shall be included in
-all copies or substantial portions of the Software.
+You are free to:
+- Share — copy and redistribute the material in any medium or format
+- Adapt — remix, transform, and build upon the material
 
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-THE SOFTWARE.
+Under the following terms:
+- Attribution — You must give appropriate credit, provide a link to the license, and indicate if changes were made.
+- NonCommercial — You may not use the material for commercial purposes.
+
+The full license text is available at:
+https://creativecommons.org/licenses/by-nc/4.0/
+
+If you want to use this project commercially, please contact the author for permission.
 ```
+
