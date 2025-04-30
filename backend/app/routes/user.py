@@ -135,10 +135,22 @@ def edit_password():
 
     # Send confirmation mail after successful password update
     if status_code == 200:
+
         try:
             subject = 'Confirmation: Your password has been changed'
-            body = "Hello,\n\n Your password has been changed successfully. If you didn't change the password by yourself, please contact us immediately.\n\nBest regards,\nYour Support-Team"
-            send_email(current_user.email, subject, body)
+            body_text = "Hello,\n\n Your password has been changed successfully. If you didn't change the password by yourself, please contact us immediately.\n\nBest regards,\nYour Support-Team"
+            body_html = body_html = """
+                <html>
+                    <body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333;">
+                        <p>Hello,</p>
+                        <p>Your password has been changed successfully.</p>
+                        <p>If you didn't change the password yourself, please contact us immediately.</p>
+                        <p>Best regards,<br>Your Support-Team</p>
+                    </body>
+                </html>
+            """
+            send_email(current_user.email, subject, body_text, body_html=body_html)
+
         except Exception as e:
             return jsonify({
                 'message': 'Password changed successfully.',
