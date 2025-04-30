@@ -81,11 +81,11 @@ class ProductionConfig(Config):
     LOG_LEVEL = 'WARNING'
 
     # Cookie Management
-    SESSION_COOKIE_SECURE = True
     SESSION_COOKIE_SAMESITE = 'None'
+    SESSION_COOKIE_SECURE = True
 
     # CORS
-    CORS_ORIGINS = ["https://travelsketcher.onrender.com"]
+    CORS_ORIGINS = ['https://travelsketcher.onrender.com']
 
     # Initialize production database
     SQLALCHEMY_DATABASE_URI = os.getenv('DATABASE_URI_PROD')

@@ -29,7 +29,7 @@ login_manager = LoginManager()
 mail = Mail()
 
 
-def create_app(config_class=None):
+def create_app(config_class=ProductionConfig):
     """App Factory: Creates and configures Flask-App"""
 
     ### 1. Initialize Flask App ###
@@ -85,13 +85,15 @@ def create_app(config_class=None):
         app.logger.addHandler(console_handler)
 
     ### 4. Security and HTTPS configuration ###
+    app.config['SESSION_COOKIE_SAMESITE'] = 'None'
+    app.config['SESSION_COOKIE_SECURE'] = True
 
     # Allow error reports when DEBUG == True
     app.config['PROPAGATE_EXCEPTIONS'] = app.config['DEBUG']
 
     # Force use of HTTPS in production
-    if os.getenv('FLASK_ENV') == 'production':
-        Talisman(app, force_https=True)
+    if app.config.get('ENV') == 'production':
+        Talisman(app, force_https=True, content_security_policy=None)
 
     ### 5. Initialize Flask extensions ###
 
