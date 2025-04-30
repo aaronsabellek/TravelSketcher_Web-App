@@ -58,7 +58,7 @@ This is a web application that allows users to create, save, and manage travel d
    - The default development database uses SQLite. For production, you can switch to PostgreSQL.
    - To populate dummy data for testing:
      ```bash
-     python scripts/setup_dev_db.py
+     python scripts/setup_db.py
      ```
 
 5. **Run the Backend Server:**
@@ -127,7 +127,7 @@ This is a web application that allows users to create, save, and manage travel d
 ## Features
 
 - **User Management:** Registration, email confirmation, login, profile editing, and account deletion.
-- **Destinations and Activities:** Create, update, and manage destinations with associated activities.
+- **Destinations and Activities:** Create, edit, and reorder destinations with associated activities.
 - **Email Notifications:** Emails for registration, password reset, and email changes.
 
 ## Error Handling and Logging
