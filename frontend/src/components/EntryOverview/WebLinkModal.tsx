@@ -120,7 +120,7 @@ const WebLinkModal = <T extends { id: string; web_link?: string }>({
               label="URL"
               type="text"
               value={webLink}
-              maxLength={200}
+              maxLength={500}
               onChange={(e) => setWebLink(e.target.value)}
               placeholder="https://example.com"
               errors={urlErrors}

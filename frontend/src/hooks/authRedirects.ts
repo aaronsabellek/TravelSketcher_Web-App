@@ -25,7 +25,7 @@ export const useRedirectIfNotAuthenticated = (redirectTo: string = '/login') => 
   const router = useRouter();
 
   useEffect(() => {
-    console.log('Redirect Check:', { isLoading, isLoggedIn });
+
     if (!isLoading && !isLoggedIn) {
       router.replace(redirectTo);
     }
