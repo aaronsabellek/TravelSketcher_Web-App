@@ -29,7 +29,7 @@ login_manager = LoginManager()
 mail = Mail()
 
 
-def create_app(config_class=ProductionConfig):
+def create_app(config_class=None):
     """App Factory: Creates and configures Flask-App"""
 
     ### 1. Initialize Flask App ###
@@ -42,8 +42,10 @@ def create_app(config_class=ProductionConfig):
     load_dotenv()
 
     # Load Flask environment and configuration class
+    env = os.getenv('FLASK_ENV', 'development') # standard mode
+
     if config_class is None:
-        env = os.getenv('FLASK_ENV', 'development') # standard mode
+
         if env == 'production':
             app.config.from_object(ProductionConfig)
         elif env == 'testing':
@@ -85,7 +87,9 @@ def create_app(config_class=ProductionConfig):
         app.logger.addHandler(console_handler)
 
     ### 4. Security and HTTPS configuration ###
-    if os.getenv('FLASK_ENV') == 'production':
+
+    # Set cookie handling
+    if env == 'production':
         app.config['SESSION_COOKIE_SAMESITE'] = 'None'
         app.config['SESSION_COOKIE_SECURE'] = True
     else:
