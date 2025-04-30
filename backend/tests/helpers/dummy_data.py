@@ -28,7 +28,7 @@ dummy_data = {
             'position': 1,
             'tags': 'Eiffel Tower,Art & Museums,Romance,2h Flight',
             'img_link': 'https://images.unsplash.com/photo-1502602898657-3e91760cbb34?q=80&w=1173&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
-            'free_text': 'This is a note',
+            'free_text': '',
             'activities': [
                 {'id': str(uuid.uuid4()),'title': 'Visit the Eiffel Tower', 'country': 'France', 'img_link': 'https://images.unsplash.com/photo-1492136344046-866c85e0bf04?q=80&w=1164&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D', 'position': 1},
                 {'id': str(uuid.uuid4()),'title': 'Explore the Louvre Museum', 'country': 'France', 'img_link': 'https://images.unsplash.com/photo-1567942585146-33d62b775db0?q=80&w=1009&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D', 'position': 2},
@@ -44,7 +44,7 @@ dummy_data = {
             'position': 2,
             'tags': 'Skyline,Broadway,Central Park,9h flight',
             'img_link': 'https://images.unsplash.com/photo-1485871981521-5b1fd3805eee?q=80&w=1170&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
-            'free_text': 'This is a note',
+            'free_text': '',
             'activities': [
                 {'id': str(uuid.uuid4()),'title': 'Walk through Central Park', 'country': 'USA', 'img_link': 'https://images.unsplash.com/photo-1568515387631-8b650bbcdb90?q=80&w=1170&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D', 'position': 1},
                 {'id': str(uuid.uuid4()),'title': 'Visit the Statue of Liberty', 'country': 'USA', 'img_link': 'https://images.unsplash.com/photo-1485738422979-f5c462d49f74?q=80&w=1199&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D', 'position': 2}
@@ -57,7 +57,7 @@ dummy_data = {
             'position': 3,
             'tags': 'Anime & Manga,Sushi,Mount Fuji,Temples & Shrines,15h flight',
             'img_link': 'https://plus.unsplash.com/premium_photo-1661914240950-b0124f20a5c1?q=80&w=1170&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
-            'free_text': 'This is a note',
+            'free_text': '',
             'activities': []
         }
     ],
