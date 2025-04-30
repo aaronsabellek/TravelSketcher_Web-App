@@ -26,8 +26,8 @@ class Config:
 
     # Cookie Management
     SESSION_COOKIE_HTTPONLY = True
-    SESSION_COOKIE_SAMESITE= 'Lax'
-    SESSION_COOKIE_SECURE= False
+    #SESSION_COOKIE_SAMESITE= 'Lax'
+    #SESSION_COOKIE_SECURE= False
 
     # Initlialize mailserver data from MailHog for testing
     MAIL_SERVER = 'localhost'
@@ -81,8 +81,8 @@ class ProductionConfig(Config):
     LOG_LEVEL = 'WARNING'
 
     # Cookie Management
-    SESSION_COOKIE_SAMESITE = 'None'
-    SESSION_COOKIE_SECURE = True
+    #SESSION_COOKIE_SAMESITE = 'None'
+    #SESSION_COOKIE_SECURE = True
 
     # CORS
     CORS_ORIGINS = ['https://travelsketcher.onrender.com']
