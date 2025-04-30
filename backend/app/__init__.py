@@ -63,7 +63,7 @@ def create_app(config_class=None):
         os.makedirs(log_dir)
 
     # Logging INFO to console in development mode
-    if os.getenv('FLASK_ENV') == 'development':
+    if env == 'development':
         handler = logging.StreamHandler()
         handler.setLevel(logging.INFO)
         formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
@@ -71,7 +71,7 @@ def create_app(config_class=None):
         app.logger.addHandler(handler)
 
     # Logging WARNING to rotating files and console in production mode
-    elif os.getenv('FLASK_ENV') == 'production':
+    elif env == 'production':
         handler = RotatingFileHandler(
             os.path.join(log_dir, 'app.log'),
             maxBytes=10240,
