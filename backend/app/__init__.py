@@ -93,11 +93,6 @@ def create_app(config_class=None):
     if os.getenv('FLASK_ENV') == 'production':
         Talisman(app, force_https=True)
 
-    # Secure cookies for sessions in production
-    app.config['REMEMBER_COOKIE_SECURE'] = True
-    app.config['SESSION_COOKIE_HTTPONLY'] = True
-    app.config['SESSION_COOKIE_SAMESITE'] = 'None'
-
     ### 5. Initialize Flask extensions ###
 
     # Log incoming requests with method and URL before processing
