@@ -24,6 +24,10 @@ class Config:
     # Initialize SQLAlchemy track modifications
     SQLALCHEMY_TRACK_MODIFICATIONS = False
 
+    # Cookie Management
+    SESSION_COOKIE_SAMESITE= 'Lax'
+    SESSION_COOKIE_SECURE= False
+
     # Initlialize mailserver data from MailHog for testing
     MAIL_SERVER = 'localhost'
     MAIL_PORT = 1025
@@ -42,7 +46,6 @@ class DevelopmentConfig(Config):
 
     DEBUG = True
     TESTING = False
-    SESSION_COOKIE_SECURE = False
     LOG_LEVEL = 'DEBUG'
     MAIL_SUPPRESS_SEND = False
     CORS_ORIGINS = ["http://localhost:3000"]
@@ -60,7 +63,6 @@ class TestingConfig(Config):
 
     DEBUG = False
     TESTING = True
-    SESSION_COOKIE_SECURE = False
     WTF_CSRF_ENABLED = False
     MAIL_SUPPRESS_SEND = False
     CORS_ORIGINS = ["http://localhost:3000"]
@@ -74,10 +76,14 @@ class ProductionConfig(Config):
 
     DEBUG = False
     TESTING = False
-    SESSION_COOKIE_SECURE = True
     WTF_CSRF_ENABLED = True
     LOG_LEVEL = 'WARNING'
 
+    # Cookie Management
+    SESSION_COOKIE_SECURE = True
+    SESSION_COOKIE_SAMESITE = 'None'
+
+    # CORS
     CORS_ORIGINS = ["https://travelsketcher.onrender.com"]
 
     # Initialize production database

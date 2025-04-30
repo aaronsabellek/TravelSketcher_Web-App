@@ -96,7 +96,7 @@ def create_app(config_class=None):
     # Secure cookies for sessions in production
     app.config['REMEMBER_COOKIE_SECURE'] = True
     app.config['SESSION_COOKIE_HTTPONLY'] = True
-    app.config['SESSION_COOKIE_SAMESITE'] = 'Lax'
+    app.config['SESSION_COOKIE_SAMESITE'] = 'None'
 
     ### 5. Initialize Flask extensions ###
 
