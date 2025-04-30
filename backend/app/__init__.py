@@ -52,6 +52,7 @@ def create_app(config_class=None):
             app.config.from_object(TestingConfig)
         else:
             app.config.from_object(DevelopmentConfig)
+
     else:
         app.config.from_object(config_class)
 

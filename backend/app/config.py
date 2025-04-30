@@ -78,6 +78,9 @@ class ProductionConfig(Config):
     WTF_CSRF_ENABLED = True
     LOG_LEVEL = 'WARNING'
 
+    SESSION_COOKIE_SAMESITE = 'None'
+    SESSION_COOKIE_SECURE = True
+
     # CORS
     CORS_ORIGINS = ['https://travelsketcher.onrender.com']
 
