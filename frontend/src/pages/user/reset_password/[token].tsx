@@ -6,7 +6,7 @@ import Container from '@/components/Container';
 import InputField from '@/components/Form/InputField';
 import FormSubmitButton from '@/components/Buttons/FormSubmitButton';
 import Form from '@/components/Form/Form';
-import { useRedirectIfNotAuthenticated } from '@/hooks/authRedirects';
+import { useRedirectIfAuthenticated } from '@/hooks/authRedirects';
 import { BASE_URL } from '@/utils/config';
 import { validatePasswordField, validatePasswordMatchField } from '@/utils/formValidations';
 
@@ -15,7 +15,7 @@ import { validatePasswordField, validatePasswordMatchField } from '@/utils/formV
 const ResetPassword = () => {
 
   // Redirect user if he is not logged in
-  const { isReady } = useRedirectIfNotAuthenticated();
+  const { isReady } = useRedirectIfAuthenticated();
 
   const [password1, setPassword1] = useState('');
   const [password2, setPassword2] = useState('');
@@ -52,9 +52,11 @@ const ResetPassword = () => {
         body: JSON.stringify({ new_password_1: password1, new_password_2: password2 }),
       });
 
+      const data = await res.json();
+
       if (!res.ok) {
-        const data = await res.json();
-        throw new Error(data.error || 'Error resetting password.');
+        toast.error(data.error || 'Error resetting password.');
+        return
       }
 
       toast.success('Password changed successfully. You will be redirected...');
@@ -72,7 +74,7 @@ const ResetPassword = () => {
   if (!isReady) return null;
 
   return (
-    <Container title="Neues Passwort setzen">
+    <Container title="Set new password">
 
       <Form onSubmit={handleSubmit}>
 
@@ -84,6 +86,7 @@ const ResetPassword = () => {
             label="New password"
             type="password"
             value={password1}
+            maxLength={50}
             onChange={(e) => setPassword1(e.target.value)}
             errors={passwordErrors}
             required
@@ -94,6 +97,7 @@ const ResetPassword = () => {
             label="Confirm password"
             type="password"
             value={password2}
+            maxLength={50}
             onChange={(e) => setPassword2(e.target.value)}
             errors={passwordMatchError}
             required

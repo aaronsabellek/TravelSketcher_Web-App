@@ -49,7 +49,12 @@ const NoteModal = <T extends { id: string; free_text?: string }>({
         body: JSON.stringify({ free_text: noteText }),
       });
 
-      if (!response.ok) throw new Error('Fehler beim Speichern der Notiz');
+      const data = await response.json();
+
+      if (!response.ok) {
+        toast.error(data.error || 'Error saving.');
+        return
+      }
 
       setItems((prev) =>
         prev.map((d) =>
@@ -57,11 +62,11 @@ const NoteModal = <T extends { id: string; free_text?: string }>({
         )
       );
 
-      toast.success('Notiz gespeichert!');
+      toast.success('Note saved!');
       setEditingNote(false);
     } catch (err) {
       console.error(err);
-      toast.error('Speichern fehlgeschlagen.');
+      toast.error('Save failed.');
     } finally {
       setSavingNote(false);
     }
@@ -80,8 +85,12 @@ const NoteModal = <T extends { id: string; free_text?: string }>({
           <>
             <div className="whitespace-pre-wrap text-sm text-gray-800 overflow-y-auto max-h-64">
 
-              {/* Show links as links */}
-              {noteText
+            {/* If there is no note yet */}
+            {noteText.trim() === '' ? (
+              <p className="text-gray-500 italic">No note yet.</p>
+            ) : (
+              // Note: URLs as links
+              noteText
                 .split(/(\s+)/)
                 .map((part, i) =>
                   part.match(/^https?:\/\/\S+$/) ? (
@@ -97,7 +106,8 @@ const NoteModal = <T extends { id: string; free_text?: string }>({
                   ) : (
                     part
                   )
-                )}
+                )
+              )}
 
             </div>
 

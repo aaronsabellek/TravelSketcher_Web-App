@@ -66,9 +66,11 @@ const Register = () => {
         setTimeout(() => {
           router.push('/login');
         }, 2000);
+
       } else {
         toast.error(result.error || 'Something went wrong.');
       }
+
     } catch (err) {
       console.log(err)
       toast.error('An error occurred while sending the request.');
@@ -86,6 +88,7 @@ const Register = () => {
           label="Username"
           type="text"
           value={username}
+          maxLength={20}
           onChange={(e) => setUsername(e.target.value)}
           errors={usernameErrors}
           required
@@ -96,6 +99,7 @@ const Register = () => {
           label="Email"
           type="email"
           value={email}
+          maxLength={50}
           onChange={(e) => setEmail(e.target.value)}
           errors={emailErrors}
           required
@@ -106,6 +110,7 @@ const Register = () => {
           label="Password"
           type="password"
           value={password}
+          maxLength={50}
           onChange={(e) => setPassword(e.target.value)}
           errors={passwordErrors}
           required
@@ -116,6 +121,7 @@ const Register = () => {
           label="City"
           type="text"
           value={city}
+          maxLength={50}
           onChange={(e) => setCity(e.target.value)}
           required
         />
@@ -125,6 +131,7 @@ const Register = () => {
           label="Country"
           type="text"
           value={country}
+          maxLength={50}
           onChange={(e) => setCountry(e.target.value)}
         />
 
@@ -134,8 +141,10 @@ const Register = () => {
           isDisabled={isDisabled}
         />
 
-        {/* Links */}
-        <p className="form-paragraph">
+      </Form>
+
+      {/* Link */}
+      <p className="form-paragraph -mt-2">
           No verification email received?{' '}
           <Link href="/resend_verification">
             <span className="paragraph_link">
@@ -144,7 +153,6 @@ const Register = () => {
           </Link>
         </p>
 
-      </Form>
     </Container>
   );
 };

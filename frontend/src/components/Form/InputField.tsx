@@ -13,6 +13,7 @@ const InputField: React.FC<Field> = ({
   errors = [],
   required = false,
   placeholder = '',
+  maxLength,
 }) => {
 
   const inputBorderClass = getInputBorderClass(value, errors);
@@ -33,6 +34,7 @@ const InputField: React.FC<Field> = ({
         onChange={onChange}
         required={required}
         placeholder={placeholder}
+        maxLength={maxLength}
         className={`mt-1 block w-full px-3 py-2 border focus:ring-1 focus:outline-none rounded-md shadow-sm bg-white ${inputBorderClass}`}
       />
 

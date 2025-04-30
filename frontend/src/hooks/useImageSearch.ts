@@ -66,10 +66,13 @@ export const useImageSearch = () => {
     setIsSearching(true);
     setCurrentPage(1);
     try {
+
       const response = await fetch(`${BASE_URL}/search-images?query=${encodeURIComponent(imageSearchTerm)}&page=1`);
       const data = await response.json();
+
       setImageResults(data.results);
       setIsModalOpen(true);
+
     } catch (err) {
       console.error('Image search error:', err);
     } finally {
@@ -92,6 +95,7 @@ export const useImageSearch = () => {
         setImageResults((prev) => [...prev, ...data.results]);
         setCurrentPage((p) => p + 1);
       }
+
     } finally {
       setLoadingMore(false);
     }

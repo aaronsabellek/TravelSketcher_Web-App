@@ -18,7 +18,7 @@ const Custom404 = () => {
 
   return (
     <div className="flex justify-center items-center h-screen">
-      <p className="text-center text-xl">Page not found. You will be redirected to the homepage.</p>
+      <p className="text-center text-xl">404</p>
     </div>
   );
 };

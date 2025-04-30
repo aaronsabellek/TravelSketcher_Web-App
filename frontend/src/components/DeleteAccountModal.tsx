@@ -39,9 +39,11 @@ const DeleteAccountModal: React.FC<Props> = ({ isOpen, onClose, onDeleted }) => 
         body: JSON.stringify({ password }),
       });
 
+      const data = await res.json();
+
       if (!res.ok) {
-        const errorData = await res.json();
-        throw new Error(errorData.error || 'Error while deleting');
+        toast.error(data.error || 'Error while deleting.');
+        return
       }
 
       toast.success('Deleted account successfully');
@@ -53,6 +55,7 @@ const DeleteAccountModal: React.FC<Props> = ({ isOpen, onClose, onDeleted }) => 
 
       setIsLoggedIn(false);
       onDeleted();
+
     } catch (err) {
       console.log(err)
       toast.error('Deleting account failed');
@@ -82,6 +85,7 @@ const DeleteAccountModal: React.FC<Props> = ({ isOpen, onClose, onDeleted }) => 
           label="Password"
           type="password"
           value={password}
+          maxLength={50}
           onChange={(e) => setPassword(e.target.value)}
           required
         />

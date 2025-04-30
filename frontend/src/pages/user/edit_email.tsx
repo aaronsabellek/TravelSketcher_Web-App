@@ -69,7 +69,8 @@ const EditEmailPage: React.FC = () => {
       const data = await res.json();
 
       if (!res.ok) {
-        throw new Error(data.error || 'Unknown error');
+        toast.error(data.error || 'Unknown error.');
+        return
       }
 
       toast.success('Confirmation email has been sent.');
@@ -98,6 +99,7 @@ const EditEmailPage: React.FC = () => {
           label="New Email"
           type="email"
           value={email}
+          maxLength={50}
           onChange={(e) => setEmail(e.target.value)}
           errors={emailErrors}
           required

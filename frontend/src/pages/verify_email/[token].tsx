@@ -14,15 +14,15 @@ const EmailVerificationPage = () => {
     const { status, error } = router.query;
 
     if (status === 'success') {
-      setMessage('Deine E-Mail wurde erfolgreich bestätigt!');
+      setMessage('Your email has been successfully confirmed!');
       setTimeout(() => router.push('/login'), 4000);
     } else if (status === 'already_verified') {
-      setMessage('Deine E-Mail war bereits bestätigt.');
+      setMessage('Your email was already confirmed.');
       setTimeout(() => router.push('/login'), 4000);
     } else if (error === 'invalid') {
-      setError('Ungültiger oder abgelaufener Bestätigungslink.');
+      setError('Invalid or expired confirmation link.');
     } else if (error === 'notfound') {
-      setError('Kein Benutzer mit dieser E-Mail gefunden.');
+      setError('No user found with this email.');
     }
   }, [router.query]);
 

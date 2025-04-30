@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useRouter } from 'next/router';
 import { toast } from 'sonner';
 
 import Container from '@/components/Container';
@@ -16,6 +17,8 @@ const ForgotPassword = () => {
 
   const [email, setEmail] = useState('');
   const [loading, setLoading] = useState(false);
+
+  const router = useRouter();
 
   // Errors
   const emailErrors = validateEmailField(email);
@@ -42,13 +45,18 @@ const ForgotPassword = () => {
       const data = await res.json();
 
       if (!res.ok) {
-        throw new Error(data.error || 'Error requesting link.');
+        toast.error(data.error || 'Error requesting link.');
+        return
       }
 
-      toast.success(data.message);
+      toast.success(data.message || 'Email to reset password has been sent');
+      setTimeout(() => {
+        router.push('/login');
+      }, 2000);
+
     } catch (err) {
       console.log(err)
-      toast.error('Error reseting password')
+      toast.error('An error occurred while sending the request.')
     } finally {
       setLoading(false);
     }
@@ -63,9 +71,10 @@ const ForgotPassword = () => {
 
         {/* Email input */}
         <InputField
-          label="New Email"
+          label="Email for password reset"
           type="email"
           value={email}
+          maxLength={50}
           onChange={(e) => setEmail(e.target.value)}
           errors={emailErrors}
           required

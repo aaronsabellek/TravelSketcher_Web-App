@@ -38,14 +38,14 @@ const Login = () => {
         credentials: 'include',
       });
 
+      const data = await response.json();
+
       if (!response.ok) {
-        const data = await response.json();
         toast.error(data.error || 'Login failed');
         return;
       }
 
-      const userData = await response.json();
-      login(userData);
+      login(data);
 
     } catch (err) {
       console.log(err)
@@ -68,6 +68,7 @@ const Login = () => {
           <InputField
             label="Username or email"
             type="text"
+            maxLength={50}
             value={identifier}
             onChange={(e) => setIdentifier(e.target.value)}
             required
@@ -77,6 +78,7 @@ const Login = () => {
           <InputField
             label="Password"
             type="password"
+            maxLength={50}
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             required
@@ -91,21 +93,21 @@ const Login = () => {
       </Form>
 
       {/* Links */}
-      <p className="form-paragraph">
-        Forgot password?{' '}
-        <Link href="/user/forgot_password">
-          <span className="paragraph_link">Reset password here</span>
-        </Link>
-      </p>
+      <p className="form-paragraph relative top-1">
+          Forgot password?{' '}
+          <Link href="/user/forgot_password">
+            <span className="paragraph_link">Reset password here</span>
+          </Link>
+        </p>
 
-      <p className="form-paragraph">
-        No verification email received?{' '}
-        <Link href="/resend_verification">
-          <span className="paragraph_link">
-            Send here again
-          </span>
-        </Link>
-      </p>
+        <p className="form-paragraph">
+          No verification email received?{' '}
+          <Link href="/resend_verification">
+            <span className="paragraph_link">
+              Send here again
+            </span>
+          </Link>
+        </p>
 
     </Container>
   );

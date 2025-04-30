@@ -95,7 +95,7 @@ const About = () => {
 
         {/* Image Gallery */}
         {allImagesLoaded ? (
-          <div className="flex justify-between -mx-3 max-h-100 mt-3 sm:max-h-full sm:mt-0">
+          <div className="flex justify-between -mx-3 max-h-100 mt-3 sm:max-h-full sm:mt-0 bg-gray-300">
             {[1, 2, 3].map((num, index) => {
               const isHovered = hoveredImageIndex === index;
               const brightness =

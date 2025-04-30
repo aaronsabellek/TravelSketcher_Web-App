@@ -26,7 +26,7 @@ export const useUserCity = () => {
           throw new Error('City not present');
         }
       } catch (err) {
-        console.error('Error loading city:', err);
+        console.error(err);
         setErrorCity('City could not be loaded');
       } finally {
         setLoadingCity(false);

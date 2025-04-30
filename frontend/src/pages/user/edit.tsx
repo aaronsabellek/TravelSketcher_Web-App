@@ -93,9 +93,11 @@ export default function EditUserProfile() {
         body: JSON.stringify(userData),
       });
 
+      const data = await res.json();
+
       if (!res.ok) {
-        const data = await res.json();
-        throw new Error(data.error || 'Error saving.');
+        toast.error(data.error || 'Error saving.');
+        return
       }
 
       toast.success('Profile edited successfully.')
@@ -103,7 +105,7 @@ export default function EditUserProfile() {
 
     } catch (err) {
       console.log(err)
-      toast.error('Edition failed.');
+      toast.error('An unexpected error occurred.');
     } finally {
       setSaving(false);
     }
@@ -124,6 +126,7 @@ export default function EditUserProfile() {
           label="Username"
           value={userData.username}
           onChange={handleChange}
+          maxLength={50}
           errors={usernameErrors}
           required
         />
@@ -134,6 +137,7 @@ export default function EditUserProfile() {
           label="City"
           value={userData.city}
           onChange={handleChange}
+          maxLength={50}
           errors={cityErrors}
           required
         />
@@ -142,6 +146,7 @@ export default function EditUserProfile() {
         <InputField
           name="country"
           label="Country"
+          maxLength={50}
           value={userData.country ?? ''}
           onChange={handleChange}
         />

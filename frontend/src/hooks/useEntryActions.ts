@@ -70,7 +70,9 @@ export function useEntryActions<T extends Item>(
       setItems((prev) =>
         prev.map((d) => (d.id === noteForId ? { ...d, free_text: noteText } : d))
       );
+
       setNoteForId(null);
+
     } catch (err) {
       console.log(err)
       toast.error('Fehler beim Speichern der Notiz.');

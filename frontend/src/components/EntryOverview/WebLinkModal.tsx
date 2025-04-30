@@ -59,7 +59,12 @@ const WebLinkModal = <T extends { id: string; web_link?: string }>({
         body: JSON.stringify({ web_link: webLink }),
       });
 
-      if (!res.ok) throw new Error('Error saving');
+      const data = await res.json();
+
+      if (!res.ok) {
+        toast.error(data.error || 'Error saving.');
+        return
+      }
 
       setItems((prev) =>
         prev.map((i) =>
@@ -115,6 +120,7 @@ const WebLinkModal = <T extends { id: string; web_link?: string }>({
               label="URL"
               type="text"
               value={webLink}
+              maxLength={200}
               onChange={(e) => setWebLink(e.target.value)}
               placeholder="https://example.com"
               errors={urlErrors}

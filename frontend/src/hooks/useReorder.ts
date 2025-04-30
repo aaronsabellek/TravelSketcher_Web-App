@@ -69,7 +69,12 @@ export const useReorder = <T extends Destination | Activity>(
         body: JSON.stringify({ new_order: orderedIds }),
       });
 
-      if (!response.ok) throw new Error('Error saving the order');
+      const data = await response.json();
+
+      if (!response.ok) {
+        toast.error(data.error || 'Error saving new order.');
+        return
+      }
 
       toast.success('Order saved successfully!');
       setSavedOrder([...items]);

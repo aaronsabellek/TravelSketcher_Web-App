@@ -50,12 +50,19 @@ const EditPassword = () => {
         body: JSON.stringify({ new_password_1: password1, new_password_2: password2 }),
       });
 
+      const data = await res.json();
+
       if (!res.ok) {
-        const data = await res.json();
-        throw new Error(data.error || 'Error editing password.');
+        toast.error(data.error || 'Error editing password.');
+        return
       }
 
-      toast.success('Password edited successfully!');
+      if (data.warning) {
+        toast.warning(`Password edited successfully! ${data.warning}`);
+      } else {
+        toast.success('Password edited successfully!');
+      }
+
       router.push('/user/profile');
 
     } catch (err) {
@@ -81,6 +88,7 @@ const EditPassword = () => {
             label="New password"
             type="password"
             value={password1}
+            maxLength={50}
             onChange={(e) => setPassword1(e.target.value)}
             errors={passwordErrors}
             required
@@ -91,6 +99,7 @@ const EditPassword = () => {
             label="Confirm password"
             type="password"
             value={password2}
+            maxLength={50}
             onChange={(e) => setPassword2(e.target.value)}
             errors={passwordMatchError}
             required

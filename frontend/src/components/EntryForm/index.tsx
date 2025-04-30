@@ -120,6 +120,7 @@ const EntryForm: React.FC<EntryFormProps> = ({ type, onSubmit, initialData, subm
         value={title}
         placeholder="Paris, New York, Tokyo, ..."
         onChange={(e) => setTitle(e.target.value)}
+        maxLength={50}
         required
       />
 
@@ -129,6 +130,7 @@ const EntryForm: React.FC<EntryFormProps> = ({ type, onSubmit, initialData, subm
           label="Country"
           type="text"
           value={country}
+          maxLength={50}
           onChange={(e) => setCountry(e.target.value)}
         />
       )}
@@ -154,6 +156,7 @@ const EntryForm: React.FC<EntryFormProps> = ({ type, onSubmit, initialData, subm
           <input
               type="text"
               value={imageSearchTerm}
+              maxLength={50}
               onChange={(e) => {
                   setImageSearchTerm(e.target.value);
                   setHasManuallyEditedSearch(true);

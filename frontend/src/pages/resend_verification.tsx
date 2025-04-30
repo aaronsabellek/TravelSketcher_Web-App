@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useRouter } from 'next/router';
 import { toast } from 'sonner';
 
 import Container from '@/components/Container';
@@ -12,6 +13,8 @@ const ResendVerification = () => {
 
   // Redirect if user is authenticated
   const { isReady } = useRedirectIfAuthenticated();
+
+  const router = useRouter();
 
   const [email, setEmail] = useState('');
   const [, setLoading] = useState(false);
@@ -41,8 +44,13 @@ const ResendVerification = () => {
       if (!response.ok) {
         toast.error(data.error || 'An error occurred while resending the verification email.');
       } else {
+
         toast.success(data.message || 'Verification email has been sent successfully.');
+        setTimeout(() => {
+          router.push('/login');
+        }, 2000);
       }
+
       } catch (err) {
         console.log(err)
         toast.error('An error occurred. Please try again later.');
@@ -62,6 +70,7 @@ const ResendVerification = () => {
             label="Email"
             type="email"
             value={email}
+            maxLength={50}
             onChange={(e) => setEmail(e.target.value)}
             errors={emailErrors}
             required

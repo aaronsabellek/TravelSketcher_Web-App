@@ -50,6 +50,7 @@ export interface Field {
     errors?: string[];
     required?: boolean;
     placeholder?: string;
+    maxLength?: number;
 }
 
 export interface ButtonProps {

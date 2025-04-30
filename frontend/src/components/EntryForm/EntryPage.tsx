@@ -9,12 +9,19 @@ interface EntryPageProps {
 
 // Formular to add or edit an entry
 const EntryPage: React.FC<EntryPageProps> = ({ mode, type }) => {
+
   const { initialData, handleSubmit } = useEntryFormHandler(mode, type);
 
+  // Check if tags are a string or already an array
   const formattedInitialData = initialData
   ? {
       ...initialData,
-      tags: initialData.tags ? initialData.tags.split(',').map(tag => tag.trim()) : [], // tags als Array
+      tags:
+        Array.isArray(initialData.tags)
+          ? initialData.tags
+          : typeof initialData.tags === 'string'
+            ? initialData.tags.split(',').map((tag) => tag.trim())
+            : [],
     }
   : undefined;
 

@@ -65,10 +65,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         method: 'POST',
         credentials: 'include',
       });
-      toast.success('Erfolgreich ausgeloggt.');
+      toast.success('Logout successfully.');
     } catch (err) {
       console.log(err)
-      toast.error('Logout fehlgeschlagen.');
+      toast.error('Logout failed.');
     } finally {
       setUser(null);
       setIsLoggedIn(false);

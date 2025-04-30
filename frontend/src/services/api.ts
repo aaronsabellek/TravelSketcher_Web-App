@@ -1,4 +1,5 @@
 import { BASE_URL } from '@/utils/config';
+import { toast } from 'sonner';
 
 interface LoginResponse {
   message: string;
@@ -18,7 +19,11 @@ export async function login(identifier: string, password: string): Promise<Login
     }),
   });
 
-  if (!res.ok) throw new Error('Login failed');
+  if (!res.ok) {
+    const data = await res.json();
+    toast.error(data.error || 'Login failed');
+    throw new Error(data.error);
+  }
 
   return await res.json();
 }
