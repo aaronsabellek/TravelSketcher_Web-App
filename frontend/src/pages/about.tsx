@@ -17,7 +17,7 @@ const About = () => {
 
   // Load images
   useEffect(() => {
-    const imageUrls = ['/travel-img-1.png', '/travel-img-2.png', '/travel-img-3.png'];
+    const imageUrls = ['/travel-img-1.jpg', '/travel-img-2.jpg', '/travel-img-3.jpg'];
 
     imageUrls.forEach((url, index) => {
       const img = new Image();
@@ -116,7 +116,7 @@ const About = () => {
                       transition-all duration-500 w-full h-[500px]
                     `}
                     style={{
-                      backgroundImage: `url(/travel-img-${num}.png)`,
+                      backgroundImage: `url(/travel-img-${num}.jpg)`,
                     }}
                   />
                 </div>
