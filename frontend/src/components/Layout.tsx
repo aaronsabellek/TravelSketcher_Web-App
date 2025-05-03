@@ -9,7 +9,7 @@ const Layout = ({ children }: { children: ReactNode }) => {
       <div>
         <Navbar />
           <main className="max-w-6xl mx-auto px-3">
-            <Toaster position="top-right" />
+            <Toaster position="bottom-right" />
             {children}
           </main>
         <Footer />
