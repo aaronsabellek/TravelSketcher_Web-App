@@ -6,7 +6,7 @@ from tests.helpers.variables import (
     destinations,
 )
 
-app = create_app(ProductionConfig)
+app = create_app(DevelopmentConfig)
 
 
 def setup():
