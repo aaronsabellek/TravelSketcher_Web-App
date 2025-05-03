@@ -230,14 +230,6 @@ const EntryOverviewPage = <T extends Destination | Activity>({
         )}
       </p>
 
-      <p className="form-paragraph -mb-4 relative bottom-3">
-        {type === 'destination' ? (
-          'Click on a Destination (not the linked parts) to expand its tags if there are any.'
-        ) : (
-          'Click on an Activity (not the linked parts) to expand its tags if there are any.'
-        )}
-      </p>
-
     </div>
   );
 };
