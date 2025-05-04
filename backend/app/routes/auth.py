@@ -16,16 +16,22 @@ from app.helpers.helpers import (
 auth_bp = Blueprint('auth', __name__)
 
 
-@login_manager.user_loader
-def load_user(user_id):
-    """Get user from database"""
-    return User.query.get(user_id)
-
-
 @auth_bp.route('/')
 def home():
     """Return homepage"""
     return 'Backend is active!'
+
+
+@auth_bp.route('/healthz')
+def health_check():
+    """Health check"""
+    return jsonify(status='ok'), 200
+
+
+@login_manager.user_loader
+def load_user(user_id):
+    """Get user from database"""
+    return User.query.get(user_id)
 
 
 @auth_bp.route('/register', methods=['POST'])
