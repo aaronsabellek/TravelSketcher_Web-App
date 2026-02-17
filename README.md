@@ -1,5 +1,5 @@
 
-# TravelSketcher - Web Application
+# TravelSketcher - Web Application (currently offline)
 
 This is a full-stack web application that allows users to create and manage travel destinations and associated activities. Users can register, log in, and then add and edit their own travel destinations and activities. Additionally, they can edit their profile and delete it if needed.
 
